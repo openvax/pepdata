@@ -1,22 +1,20 @@
 import numpy as np
 import pandas as pd
 
-def load_csv(filename = 'data/tcell_compact.csv',
-             assay_group=None,
-             unique_sequences = True,
-             noisy_labels = 'majority', # 'majority', 'percent', 'negative', 'positive'
-             human = True,
-             hla_type = None, # 1, 2, or None for neither
-             hla_type1 = False,  # deprecated, kept for old scripts
-             exclude_hla_a2 = False,
-             only_hla_a2 = False,
-             peptide_length = None,
-             nrows = None,
-             min_count = 0,
-             key_by_allele = False,
-             return_dataframe = False,
-             verbose = True):
-
+def load_dataframe(
+        filename = 'data/tcell_compact.csv',
+        human = True,
+        mhc_class = None, # 1, 2, or None for both
+        hla_type = None, # regex pattern i.e. '(HLA-A2)|(HLA-A\*02)'
+        exclude_hla_type = None, # regex pattern i.e. '(HLA-A2)|(HLA-A\*02)'
+        peptide_length = None,
+        assay_group=None,
+        nrows = None,
+        verbose= True):
+    """
+    Load an IEDB csv into a pandas dataframe and filter using the
+    criteria given as function arguments
+    """
     df = pd.read_csv(filename, skipinitialspace=True, nrows = nrows)
     mhc = df['MHC Allele Name']
 
@@ -27,51 +25,58 @@ def load_csv(filename = 'data/tcell_compact.csv',
     #  'HLA-Class I,allele undetermined'
     #  or
     #  'Class I,allele undetermined'
-    class_1_mhc_mask = mhc.str.contains('Class I,|HLA-[A-C]([0-9]|\*)', na=False).astype('bool')
-    class_2_mhc_mask = mhc.str.contains("Class II,|HLA-D(P|M|O|Q|R)", na=False).astype('bool')
+    mhc1_pattern = 'Class I,|HLA-[A-C]([0-9]|\*)'
+    mhc1_mask = mhc.str.contains(mhc1_pattern, na=False).astype('bool')
 
-    if verbose:
-        print "Class I MHC Entries", class_1_mhc_mask.sum()
-        print "Class II MHC Entries", class_2_mhc_mask.sum()
+    mhc2_pattern = "Class II,|HLA-D(P|M|O|Q|R)"
+    mhc2_mask = mhc.str.contains(mhc2_pattern, na=False).astype('bool')
 
     # just in case any of the results were from mice or other species,
     # restrict to humans
-    human_mask = df['Host Organism Name'].str.startswith('Homo sapiens', na=False).astype('bool') | df["MHC Allele Name"].str.startswith("HLA", na=False).astype('bool')
+    organism = df['Host Organism Name']
+    human_organism_mask = \
+        organism.str.startswith('Homo sapiens', na=False).astype('bool')
+    human_hla_mask = mhc.str.startswith("HLA", na=False).astype('bool')
+    human_mask = human_organism_mask | human_hla_mask
 
     if verbose:
         print "Human entries", human_mask.sum()
-        print "Human Class I MHCs", (human_mask & class_1_mhc_mask).sum()
-        print "Human Class II MHCs", (human_mask & class_2_mhc_mask).sum()
+        print "Class I MHC Entries", mhc1_mask.sum()
+        print "Class II MHC Entries", mhc2_mask.sum()
+        print "Human Class I MHCs", (human_mask & mhc1_mask).sum()
+        print "Human Class II MHCs", (human_mask & mhc2_mask).sum()
 
-    null_epitope_seq = df['Epitope Linear Sequence'].isnull()
+    epitopes = df['Epitope Linear Sequence'].str.upper()
+    null_epitope_seq = epitopes.isnull()
+
+    bad_amino_acids = 'U|X|J|B|Z'
+    # if have rare or unknown amino acids, drop the sequence
+    bad_epitope_seq = \
+        epitopes.str.contains(bad_amino_acids, na=False).astype('bool')
+
     if verbose:
         print "Dropping %d null sequences" % null_epitope_seq.sum()
-
-    # if have rare or unknown amino acids, drop the sequence
-    bad_epitope_seq = df['Epitope Linear Sequence'].str.contains('u|x|j|b|z|U|X|J|B|Z', na=False).astype('bool')
-    if verbose:
         print "Dropping %d bad sequences" % bad_epitope_seq.sum()
+
     has_epitope_seq = ~(bad_epitope_seq | null_epitope_seq)
 
     mask = has_epitope_seq
+
     if human:
         mask &= human_mask
-    if hla_type1 or hla_type == 1:
-        mask &= class_1_mhc_mask
-    if hla_type == 2:
-        mask &= class_2_mhc_mask
+    if mhc_class == 1:
+        mask &= mhc1_mask
+    if mhc_class == 2:
+        mask &= mhc2_mask
 
     if assay_group:
         mask &= df['Assay Group'] == assay_group
 
-    hla_a2_mask = (mhc == 'HLA-A2') | mhc.str.startswith('HLA-A\*02', na=False)
-    if exclude_hla_a2:
-        mask &= ~hla_a2_mask
+    if hla_type:
+        mask &= mhc.str.contains(hla_type, na=False)
 
-    if only_hla_a2:
-        mask &= hla_a2_mask
-
-    epitopes = df['Epitope Linear Sequence'].str.upper()
+    if exclude_hla_type:
+        mask &= ~mhc.str.contains(exclude_hla_type, na=False)
 
     if peptide_length:
         assert peptide_length > 0
@@ -81,13 +86,31 @@ def load_csv(filename = 'data/tcell_compact.csv',
         print "Filtered sequences epitope sequences", mask.sum()
 
     df = df[mask]
+    return df
 
-    if return_dataframe:
-        return df
+def group_epitopes(
+        df,
+        unique_sequences = True,
+        noisy_labels = 'majority', # 'majority', 'percent', 'negative', 'positive'
+        min_count = 0,
+        group_by_allele = False,
+        verbose = True):
+    """
+    Given a dataframe of epitopes and qualitative measures,
+    group the epitope strings (optionally also grouping by allele),
+    and combine the response using the mechanism specified by the argument 'noisy_labels':
+        - majority = Split into two sets, epitope is Positive if majority of its results are Positive
+        - negative = epitope is Negative if any result is Negative
+        - positive = epitope is Positive if any result is Positive
+        - percent = instead of returning two sets, return a value in [0,1] indicating the percentage of positive results
+    """
+    measure = df['Qualitative Measure']
+    pos_mask = measure.str.startswith('Positive').astype('bool')
 
-    pos_mask = df['Qualitative Measure'].str.startswith('Positive').astype('bool')
+    mhc = df['MHC Allele Name']
+    epitopes = df['Epitope Linear Sequence'].str.upper()
 
-    if key_by_allele:
+    if group_by_allele:
         groups = pos_mask.groupby([epitopes, mhc])
     else:
         groups = pos_mask.groupby(epitopes)
@@ -138,69 +161,103 @@ def load_csv(filename = 'data/tcell_compact.csv',
         neg = [epitope for epitope in neg if epitope not in neg_set]
         return pos, neg
 
-def load_tcell(assay_group=None,
-               hla_type = None, # 1, 2, or None for neither
-               peptide_length = None,
-               nrows = None,
-               min_count = 0,
-               key_by_allele = False,
-               return_dataframe = False,
-               verbose = True):
-    return load_csv('data/tcell_compact.csv',
-                    assay_group = assay_group,
-                    noisy_labels = 'percent',
-                    hla_type = hla_type,
-                    peptide_length = peptide_length,
-                    nrows = nrows,
-                    min_count = min_count,
-                    key_by_allele = key_by_allele,
-                    return_dataframe = return_dataframe,
-                    verbose = verbose)
 
-def load_mhc(assay_group=None,
-             hla_type = None, # 1, 2, or None for neither
-             peptide_length = None,
-             nrows = None,
-             min_count = 0,
-             key_by_allele = False,
-             return_dataframe = False,
-             verbose = True):
-    return load_csv('data/elution_compact.csv',
-                    assay_group = assay_group,
-                    noisy_labels = 'percent',
-                    hla_type = hla_type,
-                    peptide_length = peptide_length,
-                    nrows = nrows,
-                    min_count = min_count,
-                    key_by_allele = key_by_allele,
-                    return_dataframe = return_dataframe,
-                    verbose = verbose)
+def load_tcell_prct(
+        mhc_class = None, # 1, 2, or None for neither
+        hla_type = None,
+        exclude_hla_type = None,
+        peptide_length = None,
+        min_count = 0,
+        assay_group=None,
+        nrows = None,
+        group_by_allele = False,
+        verbose= True):
 
-def load_tcell_vs_mhc(assay_group=None,
-                      hla_type = None, # 1, 2, or None for neither
-                      peptide_length = None,
-                      nrows = None,
-                      min_count = 0,
-                      key_by_allele = False,
-                      verbose= True):
-    mhc = load_mhc(assay_group=assay_group,
-                       hla_type = hla_type,
-                       peptide_length = peptide_length,
-                       nrows = nrows,
-                       min_count = min_count,
-                       key_by_allele = key_by_allele,
-                       verbose = verbose)
-    tcell = load_tcell(assay_group=assay_group,
-                       hla_type = hla_type,
-                       peptide_length = peptide_length,
-                       nrows = nrows,
-                       min_count = min_count,
-                       key_by_allele = key_by_allele)
+    df = load_dataframe(
+            'data/tcell_compact.csv',
+            assay_group = assay_group,
+            mhc_class = mhc_class,
+            hla_type = hla_type,
+            exclude_hla_type = exclude_hla_type,
+            peptide_length = peptide_length,
+            nrows = nrows,
+            verbose = verbose)
+    return group_epitopes(
+            df,
+            noisy_labels = 'percent',
+            group_by_allele = group_by_allele,
+            min_count = min_count,
+            verbose = verbose)
+
+def load_mhc_prct(
+        mhc_class = None, # 1, 2, or None for neither
+        hla_type = None,
+        exclude_hla_type = None,
+        peptide_length = None,
+        min_count = 0,
+        assay_group=None,
+        nrows = None,
+        group_by_allele = False,
+        verbose= True):
+    df = load_dataframe(
+            'data/elution_compact.csv',
+            assay_group = assay_group,
+            mhc_class = mhc_class,
+            hla_type = hla_type,
+            exclude_hla_type = exclude_hla_type,
+            peptide_length = peptide_length,
+            nrows = nrows,
+            verbose = verbose)
+
+    return group_epitopes(
+            df,
+            noisy_labels = 'percent',
+            group_by_allele = group_by_allele,
+            min_count = min_count,
+            verbose = verbose)
+
+def load_tcell_vs_mhc_prct(
+        mhc_class = None, # 1, 2, or None for neither
+        hla_type = None,
+        exclude_hla_type = None,
+        peptide_length = None,
+        min_count = 0,
+        assay_group=None,
+        nrows = None,
+        group_by_allele = False,
+        verbose= True):
+    """
+    Percentage positive results for both T-cell response assays
+    and MHC binding assays (keyed by epitopes for which we have data
+    for both)
+    """
+    mhc = load_mhc_prct(
+            mhc_class = mhc_class,
+            hla_type = hla_type,
+            exclude_hla_type = exclude_hla_type,
+            peptide_length = peptide_length,
+            assay_group=assay_group,
+            nrows = nrows,
+            min_count = min_count,
+            group_by_allele = group_by_allele,
+            verbose = verbose)
+    tcell = load_tcell_prct(
+                mhc_class = mhc_class,
+                hla_type = hla_type,
+                exclude_hla_type = exclude_hla_type,
+                assay_group=assay_group,
+                peptide_length = peptide_length,
+                nrows = nrows,
+                min_count = min_count,
+                group_by_allele = group_by_allele,
+                verbose = verbose)
 
     df_combined = pd.DataFrame({'mhc':mhc, 'tcell':tcell})
     both = ~(df_combined.mhc.isnull() | df_combined.tcell.isnull())
     return df_combined[both]
 
+
+"""
 import numpy as np
 import amino_acid
 from amino_acid import letter_to_index
@@ -216,7 +273,6 @@ fns = [amino_acid.hydropathy,
        amino_acid.accessible_surface_area_folded,
        amino_acid.refractivity
        ]
-
 
 
 import data
@@ -247,3 +303,4 @@ def load_dataset(filename = 'tcell_compact.csv',
        exclude_hla_a2,
        only_hla_a2)
     return data.make_ngram_dataset(imm,non, max_ngram, normalize_row, reduced_alphabet, rebalance, return_transformer)
+"""
