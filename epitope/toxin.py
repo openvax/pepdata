@@ -1,5 +1,8 @@
-TOXIN_TABLE_FILENAME = 'Toxin_Protein_Table.txt'
-TOXIN_LIST_FILENAME = 'toxins.txt'
+from base import DATA_DIR
+from os.path import join
+
+TOXIN_TABLE_FILENAME = join(DATA_DIR, 'Toxin_Protein_Table.txt')
+TOXIN_LIST_FILENAME = join(DATA_DIR, 'toxins.txt')
 
 def read_toxins_from_table(filename=TOXIN_TABLE_FILENAME):
     f = open(filename)
@@ -14,14 +17,12 @@ def gen_toxin_list(input_filename=TOXIN_TABLE_FILENAME,
         for protein in proteins:
             f.write(protein)
             f.write('\n')
-    print "Generated", len(proteins), "toxin sequences"
     return proteins
 
 def read_toxin_list(filename=TOXIN_LIST_FILENAME):
     f = open(filename)
     result = f.read().splitlines()
     f.close()
-    print "Read", len(result), "toxins"
     return result
 
 
@@ -73,8 +74,6 @@ def toxin_features(peptides, toxins = None, length = 3, reverse = False):
             for j, substr_set in enumerate(substr_sets):
                 if substr in substr_set:
                     X[i,j] = 1
-    print "Data shape", X.shape
-    print "Average non-zero per vector:", np.mean(X!=0) * X.shape[1]
     return X
 
 
@@ -101,6 +100,4 @@ def positional_toxin_features(peptides, toxins = None, length = 3, reverse = Tru
             for substr_set in substr_sets:
                 if substr in substr_set:
                     X[i,pos] += 1
-    print "Data shape", X.shape
-    print "Average:", np.mean(X)
     return X
