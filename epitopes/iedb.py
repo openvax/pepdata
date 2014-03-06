@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 
 from base import DATA_DIR
+from features import make_ngram_dataset
 
 TCELL_CSV = join(DATA_DIR, 'tcell_compact.csv')
 MHC_CSV = join(DATA_DIR, 'elution_compact.csv')
@@ -54,6 +55,7 @@ def load_dataframe(
         print "Human Class II MHCs", (human_mask & mhc2_mask).sum()
 
     epitopes = df['Epitope Linear Sequence'].str.upper()
+    df['Epitope Linear Sequence'] = epitopes
     null_epitope_seq = epitopes.isnull()
 
     bad_amino_acids = 'U|X|J|B|Z'
@@ -92,30 +94,29 @@ def load_dataframe(
     if verbose:
         print "Filtered sequences epitope sequences", mask.sum()
 
-    df = df[mask]
-    return df
+    return df[mask]
 
 def group_epitopes(
         df,
         unique_sequences = True,
-        noisy_labels = 'majority', # 'majority', 'percent', 'negative', 'positive'
         min_count = 0,
         group_by_allele = False,
+        reduced_alphabet = None,
         verbose = True):
     """
     Given a dataframe of epitopes and qualitative measures,
     group the epitope strings (optionally also grouping by allele),
-    and combine the response using the mechanism specified by the argument 'noisy_labels':
-        - majority = Split into two sets, epitope is Positive if majority of its results are Positive
-        - negative = epitope is Negative if any result is Negative
-        - positive = epitope is Positive if any result is Positive
-        - percent = instead of returning two sets, return a value in [0,1] indicating the percentage of positive results
+    and associate each group with its percentage of Positive
+    Qualitative Measure results
     """
     measure = df['Qualitative Measure']
-    pos_mask = measure.str.startswith('Positive').astype('bool')
 
     mhc = df['MHC Allele Name']
     epitopes = df['Epitope Linear Sequence'].str.upper()
+    pos_mask = measure.str.startswith('Positive').astype('bool')
+    if reduced_alphabet:
+      epitopes = epitopes.map(reduced_alphabet)
+      pos_mask.index = pos_mask.index.map(reduced_alphabet)
 
     if group_by_allele:
         groups = pos_mask.groupby([epitopes, mhc])
@@ -128,9 +129,22 @@ def group_epitopes(
         counts = groups.count()
         values = values[counts > min_count]
 
-    if noisy_labels == 'percent':
-        return values
-    elif noisy_labels == 'majority':
+    return values
+
+
+def split_dataset_classes(
+        values,
+        noisy_labels = 'majority',
+        unique_sequences = True,
+        verbose = True):
+    """
+    - majority = epitope is Positive if majority of its results are Positive
+    - negative = epitope is Negative if any result is Negative
+    - positive = epitope is Positive if any result is Positive
+    - drop = remove any epitopes with contradictory results
+    - keep = leave contradictory results in both positive and negative sets
+    """
+    if noisy_labels == 'majority':
         pos_mask = values >= 0.5
     elif noisy_labels == 'positive':
         pos_mask = values > 0
@@ -178,6 +192,7 @@ def load_tcell(
         assay_group=None,
         nrows = None,
         group_by_allele = False,
+        reduced_alphabet = None, # 20 letter AA strings -> simpler alphabet
         verbose= True):
 
     df = load_dataframe(
@@ -194,7 +209,32 @@ def load_tcell(
             noisy_labels = 'percent',
             group_by_allele = group_by_allele,
             min_count = min_count,
+            reduced_alphabet = reduced_alphabet,
             verbose = verbose)
+
+def load_tcell_dataset(
+        mhc_class = None, # 1, 2, or None for neither
+        hla_type = None,
+        exclude_hla_type = None,
+        peptide_length = None,
+        min_count = 0,
+        assay_group=None,
+        nrows = None,
+        reduced_alphabet = None, # 20 letter AA strings -> simpler alphabet
+        ngram = None, # order of n-grams or None for original AA strings
+        verbose= True):
+    tcell_values = load_tcell(
+        mhc_class,
+        hla_type,
+        exclude_hla_type,
+        peptide_length,
+        min_count,
+        assay_group,
+        nrows = nrows,
+        group_by_allele = False,
+        reduced_alphabet = reduced_alphabet,
+        verbose = verbose)
+
 
 def load_mhc(
         mhc_class = None, # 1, 2, or None for neither
@@ -205,6 +245,7 @@ def load_mhc(
         assay_group=None,
         nrows = None,
         group_by_allele = False,
+        reduced_alphabet = None, # 20 letter AA strings -> simpler alphabet
         verbose= True):
     df = load_dataframe(
             MHC_CSV,
@@ -221,6 +262,7 @@ def load_mhc(
             noisy_labels = 'percent',
             group_by_allele = group_by_allele,
             min_count = min_count,
+            reduced_alphabet = reduced_alphabet,
             verbose = verbose)
 
 def load_tcell_vs_mhc(

@@ -10,7 +10,7 @@ def make_ngram_dataset(
         max_ngram = 1,
         normalize_row = True,
         reduced_alphabet = None,
-        rebalance = False,
+        subsample_bigger_class = False,
         return_transformer = False,
         verbose = True):
 
@@ -32,7 +32,7 @@ def make_ngram_dataset(
     n_imm = len(imm)
     n_non = len(non)
 
-    if rebalance:
+    if subsample_bigger_class:
         X_true = X[:n_imm]
         X_false = X[n_imm:]
         n_min = min(n_imm, n_non)
@@ -86,7 +86,7 @@ amino_acid_features = [
 
 def transform_rows(
         X,
-        fns,
+        fns = amino_acid_features,
         positions = None,
         mean = False,
         pairwise_ratios = False):
