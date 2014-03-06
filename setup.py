@@ -16,7 +16,7 @@ from setuptools import setup
 
 if __name__ == '__main__':
     setup(
-        name='epitope',
+        name='epitopes',
         version="0.1",
         description="Python interface to IEDB and other immune epitope data",
         author="Alex Rubinsteyn",
@@ -38,6 +38,6 @@ if __name__ == '__main__':
             'scikit.learn(>=0.14.1)'
         ],
         long_description=readme,
-        packages=['epitope'],
+        packages=['epitopes'],
         include_package_data = True,
     )
