@@ -1,4 +1,4 @@
-from epitope import iedb
+from epitopes import iedb
 
 def test_tcell_hla_a24():
   """
