@@ -10,7 +10,7 @@ def make_ngram_dataset(
         max_ngram = 1,
         normalize_row = True,
         reduced_alphabet = None,
-        balanced_class_sizes = False,
+        subsample_bigger_class = False,
         return_transformer = False,
         verbose = True):
 
