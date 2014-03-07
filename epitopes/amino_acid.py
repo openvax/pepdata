@@ -1,13 +1,27 @@
-_short_names = ["Ala", "Arg", "Asn", "Asp", "Cys", "Glu", "Gln", "Gly", "His", 
-	       "Ile", "Leu", "Lys", "Met", "Phe", "Pro", "Ser", "Thr", "Trp", 
+# Copyright (c) 2014. Mount Sinai School of Medicine
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+_short_names = ["Ala", "Arg", "Asn", "Asp", "Cys", "Glu", "Gln", "Gly", "His",
+	       "Ile", "Leu", "Lys", "Met", "Phe", "Pro", "Ser", "Thr", "Trp",
 	       "Tyr", "Val"]
 
-_letters = ["A", "R", "N", "D", "C", "E", "Q", "G", "H", "I", "L", "K", 
+_letters = ["A", "R", "N", "D", "C", "E", "Q", "G", "H", "I", "L", "K",
 		"M", "F", "P", "S", "T", "W", "Y", "V"]
 
 def index_to_short_name(idx):
   return _short_names[idx]
-  
+
 def index_to_letter(idx):
   return _letters[idx]
 
@@ -20,7 +34,7 @@ def letter_to_index(x):
   assert x in _letters, x
   return _letters.index(x)
 
- 
+
 def peptide_to_indices(xs):
   return [letter_to_index(x) for x in xs if x != 'X' and x != 'U'  ]
 
@@ -29,7 +43,7 @@ def letter_to_short_name(x):
 
 def peptide_to_short_names(xs):
   return [letter_to_short_name(x) for x in xs]
- 
+
 
 def short_name_to_index(x):
   return _short_names.index(x.capitalize())
@@ -42,22 +56,22 @@ def parse_table(table_string):
   for line in table_string.splitlines():
     line = line.strip()
     if not line:
-      continue 
+      continue
     value, letter, _ = line.split(" ")
     idx = letter_to_index(letter)
     assert idx >= 0
     assert idx < 20
-    assert result[idx] is None, "Repeated amino acid " + line 
+    assert result[idx] is None, "Repeated amino acid " + line
     result[idx] = float(value)
   assert all(elt is not None for elt in result)
-  return result 
+  return result
 
 
 
 def get_idx(x):
   if isinstance(x, int):
     return x
-  assert isinstance(x, str) and len(x) in (1,3),  "Unexpected %s"  % x  
+  assert isinstance(x, str) and len(x) in (1,3),  "Unexpected %s"  % x
   x = x.upper()
   if len(x) == 3:
     return short_name_to_index(x)
@@ -193,7 +207,7 @@ prct_exposed_residues = transformation_from_table("""
 41.0000 Y TYR
 14.0000 V VAL
 """)
-  
+
 hydrophilicity = transformation_from_table("""
 -0.5000 A ALA
 3.00000 R ARG
