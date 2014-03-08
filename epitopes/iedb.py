@@ -20,12 +20,13 @@ import pandas as pd
 
 from base import DATA_DIR
 from features import make_ngram_dataset
+from common import split_classes
 
 TCELL_CSV = join(DATA_DIR, 'tcell_compact.csv')
 MHC_CSV = join(DATA_DIR, 'elution_compact.csv')
 
-def load_dataframe(
-        filename = TCELL_CSV,
+def _load_dataframe(
+        filename,
         human = True,
         mhc_class = None, # 1, 2, or None for both
         hla_type = None, # regex pattern i.e. '(HLA-A2)|(HLA-A\*02)'
@@ -33,6 +34,7 @@ def load_dataframe(
         peptide_length = None,
         assay_group=None,
         nrows = None,
+        reduced_alphabet = None,
         verbose= True):
     """
     Load an IEDB csv into a pandas dataframe and filter using the
@@ -70,6 +72,10 @@ def load_dataframe(
         print "Human Class II MHCs", (human_mask & mhc2_mask).sum()
 
     epitopes = df['Epitope Linear Sequence'].str.upper()
+    if reduced_alphabet:
+        def transform(s):
+            return ''.join([chr(48 + reduced_alphabet[char]) for char in s])
+        epitopes = epitopes.map(transform)
     df['Epitope Linear Sequence'] = epitopes
     null_epitope_seq = epitopes.isnull()
 
@@ -111,12 +117,11 @@ def load_dataframe(
 
     return df[mask]
 
-def group_epitopes(
+def _group_epitopes(
         df,
         unique_sequences = True,
         min_count = 0,
         group_by_allele = False,
-        reduced_alphabet = None,
         verbose = True):
     """
     Given a dataframe of epitopes and qualitative measures,
@@ -124,14 +129,7 @@ def group_epitopes(
     and associate each group with its percentage of Positive
     Qualitative Measure results.
     """
-    epitopes = df['Epitope Linear Sequence'].str.upper()
-    if reduced_alphabet:
-        def transform(s):
-            return ''.join([chr(48 + reduced_alphabet[char]) for char in s])
-        epitopes = epitopes.map(transform)
-        df['Epitope Linear Sequence'] = epitopes
-
-
+    epitopes = df['Epitope Linear Sequence']
     measure = df['Qualitative Measure']
     mhc = df['MHC Allele Name']
     pos_mask = measure.str.startswith('Positive').astype('bool')
@@ -150,55 +148,57 @@ def group_epitopes(
     return values
 
 
-def split_classes(
-        values,
-        noisy_labels = 'majority',
-        unique_sequences = True,
-        verbose = True):
+
+def load_tcell_dataframe(
+        mhc_class = None, # 1, 2, or None for neither
+        hla_type = None,
+        exclude_hla_type = None,
+        peptide_length = None,
+        assay_group=None,
+        reduced_alphabet = None, # 20 letter AA strings -> simpler alphabet
+        nrows = None,
+        verbose= True):
     """
-    - majority = epitope is Positive if majority of its results are Positive
-    - negative = epitope is Negative if any result is Negative
-    - positive = epitope is Positive if any result is Positive
-    - drop = remove any epitopes with contradictory results
-    - keep = leave contradictory results in both positive and negative sets
+    Load IEDB T-cell data without aggregating multiple entries for same epitope
+
+    Parameters
+    ----------
+    mhc_class: {None, 1, 2}
+        Restrict to MHC Class I or Class II (or None for neither)
+
+    hla_type: regex pattern, optional
+        Restrict results to specific HLA type used in assay
+
+    exclude_hla_type: regex pattern, optional
+        Exclude certain HLA types
+
+    peptide_length: int, optional
+        Restrict epitopes to amino acid strings of given length
+
+    assay_group: string, optional
+        Only collect results from assays of the given type
+
+    nrows: int, optional
+        Don't load the full IEDB dataset but instead read only the first nrows
+
+    reduced_alphabet: dictionary, optional
+        Remap amino acid letters to some other alphabet
+
+    verbose: bool
+        Print debug output
     """
-    if noisy_labels == 'majority':
-        pos_mask = values >= 0.5
-    elif noisy_labels == 'positive':
-        pos_mask = values > 0
-    else:
-        pos_mask = values == 1.0
 
-    neg_mask = ~pos_mask
-    pos = pos_mask.index[pos_mask]
-    neg = neg_mask.index[neg_mask]
 
-    pos_set = set(pos)
-    neg_set = set(neg)
-
-    if verbose:
-        print "# positive sequences", len(pos)
-        print "# negative sequences", len(neg)
-
-    noisy_set = pos_set.intersection(neg_set)
-
-    if verbose:
-        print "# unique positive", len(pos_set)
-        print "# unique negative", len(neg_set)
-        print "# overlap %d (%0.4f)" % (len(noisy_set), \
-          float(len(noisy_set)) / len(pos_set))
-
-    if noisy_labels != 'majority':
-        if (noisy_labels == 'drop') or (noisy_labels == 'negative'):
-            pos_set = pos_set.difference(noisy_set)
-        if (noisy_labels == 'drop') or (noisy_labels == 'positive'):
-            neg_set = neg_set.difference(noisy_set)
-    if unique_sequences:
-        return pos_set, neg_set
-    else:
-        pos = [epitope for epitope in pos if epitope not in pos_set]
-        neg = [epitope for epitope in neg if epitope not in neg_set]
-        return pos, neg
+    return _load_dataframe(
+            TCELL_CSV,
+            assay_group = assay_group,
+            mhc_class = mhc_class,
+            hla_type = hla_type,
+            exclude_hla_type = exclude_hla_type,
+            peptide_length = peptide_length,
+            reduced_alphabet = reduced_alphabet,
+            nrows = nrows,
+            verbose = verbose)
 
 
 def load_tcell(
@@ -206,11 +206,11 @@ def load_tcell(
         hla_type = None,
         exclude_hla_type = None,
         peptide_length = None,
-        min_count = 0,
         assay_group=None,
-        nrows = None,
-        group_by_allele = False,
         reduced_alphabet = None, # 20 letter AA strings -> simpler alphabet
+        nrows = None,
+        min_count = 0,
+        group_by_allele = False,
         verbose= True):
     """
     Load the T-cell response data from IEDB, collect into a dataframe mapping
@@ -230,11 +230,11 @@ def load_tcell(
     peptide_length: int, optional
         Restrict epitopes to amino acid strings of given length
 
-    min_count: int, optional
-        Exclude epitopes which appear fewer times than min_count
-
     assay_group: string, optional
         Only collect results from assays of the given type
+
+    reduced_alphabet: dictionary, optional
+        Remap amino acid letters to some other alphabet
 
     nrows: int, optional
         Don't load the full IEDB dataset but instead read only the first nrows
@@ -242,29 +242,27 @@ def load_tcell(
     group_by_allele:
         Don't combine epitopes across multiple HLA types
 
-    reduced_alphabet: dictionary, optional
-        Remap amino acid letters to some other alphabet
+    min_count: int, optional
+        Exclude epitopes which appear fewer times than min_count
 
     verbose: bool
         Print debug output
     """
 
+    df = load_tcell_dataframe(
+        mhc_class = mhc_class,
+        hla_type = hla_type,
+        exclude_hla_type = exclude_hla_type,
+        peptide_length = peptide_length,
+        assay_group = assay_group,
+        reduced_alphabet = reduced_alphabet,
+        nrows = nrows,
+        verbose = verbose)
 
-    df = load_dataframe(
-            TCELL_CSV,
-            assay_group = assay_group,
-            mhc_class = mhc_class,
-            hla_type = hla_type,
-            exclude_hla_type = exclude_hla_type,
-            peptide_length = peptide_length,
-            nrows = nrows,
-            verbose = verbose)
-
-    return group_epitopes(
+    return _group_epitopes(
             df,
             group_by_allele = group_by_allele,
             min_count = min_count,
-            reduced_alphabet = reduced_alphabet,
             verbose = verbose)
 
 def load_tcell_classes(*args, **kwargs):
@@ -328,16 +326,40 @@ def load_tcell_ngrams(*args, **kwargs):
         subsample_bigger_class = subsample_bigger_class,
         return_transformer = return_transformer)
 
+def load_mhc_dataframe(
+        mhc_class = None, # 1, 2, or None for neither
+        hla_type = None,
+        exclude_hla_type = None,
+        peptide_length = None,
+        assay_group=None,
+        reduced_alphabet = None, # 20 letter AA strings -> simpler alphabet
+        nrows = None,
+        verbose = True):
+    """
+    Load IEDB MHC data without aggregating multiple entries for the same epitope
+    """
+    return _load_dataframe(
+                MHC_CSV,
+                mhc_class = mhc_class,
+                hla_type = hla_type,
+                exclude_hla_type = exclude_hla_type,
+                peptide_length = peptide_length,
+                assay_group = assay_group,
+                reduced_alphabet = reduced_alphabet,
+                nrows = nrows,
+                verbose = verbose)
+
+
 def load_mhc(
         mhc_class = None, # 1, 2, or None for neither
         hla_type = None,
         exclude_hla_type = None,
         peptide_length = None,
-        min_count = 0,
         assay_group=None,
+        reduced_alphabet = None, # 20 letter AA strings -> simpler alphabet
         nrows = None,
         group_by_allele = False,
-        reduced_alphabet = None, # 20 letter AA strings -> simpler alphabet
+        min_count = 0,
         verbose= True):
     """
     Load the MHC binding results from IEDB, collect into a dataframe mapping
@@ -357,11 +379,11 @@ def load_mhc(
     peptide_length: int, optional
         Restrict epitopes to amino acid strings of given length
 
-    min_count: int, optional
-        Exclude epitopes which appear fewer times than min_count
-
     assay_group: string, optional
         Only collect results from assays of the given type
+
+    reduced_alphabet: dictionary, optional
+        Remap amino acid letters to some other alphabet
 
     nrows: int, optional
         Don't load the full IEDB dataset but instead read only the first nrows
@@ -369,27 +391,26 @@ def load_mhc(
     group_by_allele:
         Don't combine epitopes across multiple HLA types
 
-    reduced_alphabet: dictionary, optional
-        Remap amino acid letters to some other alphabet
+    min_count: int, optional
+        Exclude epitopes which appear fewer times than min_count
 
     verbose: bool
         Print debug output
     """
-    df = load_dataframe(
-            MHC_CSV,
-            assay_group = assay_group,
-            mhc_class = mhc_class,
-            hla_type = hla_type,
-            exclude_hla_type = exclude_hla_type,
-            peptide_length = peptide_length,
-            nrows = nrows,
-            verbose = verbose)
+    df = load_mhc_dataframe(
+        mhc_class = mhc_class,
+        hla_type = hla_type,
+        exclude_hla_type = exclude_hla_type,
+        peptide_length = peptide_length,
+        assay_group = assay_group,
+        reduced_alphabet = reduced_alphabet,
+        nrows = nrows,
+        verbose = verbose)
 
-    return group_epitopes(
+    return _group_epitopes(
             df,
             group_by_allele = group_by_allele,
             min_count = min_count,
-            reduced_alphabet = reduced_alphabet,
             verbose = verbose)
 
 def load_mhc_classes(*args, **kwargs):

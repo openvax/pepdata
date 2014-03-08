@@ -29,23 +29,39 @@ from base import DATA_DIR
 S1_FILE = join(DATA_DIR, 'calis_s1.csv')
 S2_FILE = join(DATA_DIR, 'calis_s2.csv')
 
-def load_s1(imm_file = S1_FILE):
+def load_s1():
     """
-    Immunogenic and non-immunogenic pMHCs that were found in the IEDB, Vaccinia, Arena and Coxiella data sets
+    Immunogenic and non-immunogenic pMHCs that were found in the IEDB,
+    Vaccinia, Arena and Coxiella data sets.
     """
-    data = pd.read_csv(imm_file)
+    return pd.read_csv(S1_FILE)
+
+def load_s1_classes():
+    data = load_s1()
     imm = data[ (data.Immunogenicity == 'immunogenic') & (data.Species == 'Mus')].Peptide
     non = data[ (data.Immunogenicity == 'non-immunogenic') & (data.Species == 'Mus')].Peptide
     return imm, non
 
-def load_s2(imm_file = S2_FILE):
+def load_s1_ngrams():
+    imm, non = load_s1_classes()
+
+def load_s2():
     """
     Non-redundant murine and human Dengue epitopes and non-epitopes
     """
-    data = pd.read_csv(imm_file)
-    imm = data[ (data['epitope status'] == 'epitope') & (data.host == 'Homo')].peptide
-    non = data[ (data['epitope status'] == 'non-epitope') & (data.host == 'Homo')].peptide
+    data = pd.read_csv(S2_FILE)
+
+def load_s2_classes():
+    data = load_s2()
+    human = data.host == 'Homo'
+    pos = data['epitope status'] == 'epitope'
+    neg = data['epitope status'] == 'non-epitope'
+    imm = data[human & pos].peptide
+    non = data[human & neg].peptide
     return imm, non
+
+def load_s2_ngrams():
+    imm, non = load_s2_classes()
 
 def load_counts(normalize_row = False, redundant = False, max_ngram = 1):
     c = CountVectorizer(analyzer='char', ngram_range=(1, max_ngram), dtype=np.float)
