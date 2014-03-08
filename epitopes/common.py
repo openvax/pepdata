@@ -1,3 +1,4 @@
+bad_amino_acids = 'U|X|J|B|Z'
 
 def split_classes(
         values,

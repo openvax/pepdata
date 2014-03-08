@@ -25,40 +25,89 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.preprocessing import normalize
 
 from base import DATA_DIR
+from common import bad_amino_acids
 
 S1_FILE = join(DATA_DIR, 'calis_s1.csv')
 S2_FILE = join(DATA_DIR, 'calis_s2.csv')
 
-def load_s1():
+def load_s1(
+        human = True,
+        peptide_length = None,
+        hla_type = None,
+        exclude_hla_type = None):
     """
     Immunogenic and non-immunogenic pMHCs that were found in the IEDB,
     Vaccinia, Arena and Coxiella data sets.
     """
-    return pd.read_csv(S1_FILE)
+    df = pd.read_csv(S1_FILE)
+    mask = ~df.Peptide.str.contains(bad_amino_acids)
+    if human:
+        mask &= df.Species == 'Homo'
+    if peptide_length:
+        mask &= df.Peptide.str.len() == peptide_length
+    if hla_type:
+        mask &= df.MHC.str.contains(hla_type, na=False).astype('bool')
+    if exclude_hla_type:
+        mask &= ~(df.MHC.str.contains(exclude_hla, na=False).astype('bool'))
+    return df[mask]
 
-def load_s1_classes():
-    data = load_s1()
-    imm = data[ (data.Immunogenicity == 'immunogenic') & (data.Species == 'Mus')].Peptide
-    non = data[ (data.Immunogenicity == 'non-immunogenic') & (data.Species == 'Mus')].Peptide
+def load_s1_values(*args, **kwargs):
+    group_by_allele = kwargs.pop('group_by_allele', False)
+    df = load_s1(*args, **kwargs)
+    pos = (df.Immunogenicity == 'immunogenic')
+    if group_by_allele:
+        groups = pos.groupby([df.Peptide, df.MHC])
+    else:
+        groups = pos.groupby(df.Peptide)
+    return groups.mean()
+
+def load_s1_classes(*args, **kwargs):
+    values = load_s1_values(*args, **kwargs)
+    imm_mask = values > 0
+    non_mask = ~imm_mask
+    imm = set(values[imm_mask])
+    non = set(values[non_mask])
     return imm, non
 
 def load_s1_ngrams():
     imm, non = load_s1_classes()
 
-def load_s2():
+
+def load_s2(
+        human = True,
+        hla_type = None,
+        exclude_hla_type = None):
     """
     Non-redundant murine and human Dengue epitopes and non-epitopes
     """
-    data = pd.read_csv(S2_FILE)
+    df = pd.read_csv(S2_FILE)
+    mask = ~df.peptide.str.contains(bad_amino_acids)
+    if human:
+        mask &= df.host == 'Homo'
+    if hla_type:
+        mask &= df.HLA.str.contains(hla_type, na=False).astype('bool')
+    if exclude_hla_type:
+        mask &= ~df.HLA.str.contains(exclude_hla_type, na=False).astype('bool')
+    return df[mask]
+
+def load_s2_values(*args, **kwargs):
+    group_by_allele = kwargs.pop('group_by_allele', False)
+    df = load_s2(*args, **kwargs)
+    pos = (df['epitope status'] == 'epitope')
+    if group_by_allele:
+        groups = pos.groupby([df.peptide, df.HLA])
+    else:
+        groups = pos.groupby(df.peptide)
+    return groups.mean()
 
 def load_s2_classes():
-    data = load_s2()
-    human = data.host == 'Homo'
-    pos = data['epitope status'] == 'epitope'
-    neg = data['epitope status'] == 'non-epitope'
-    imm = data[human & pos].peptide
-    non = data[human & neg].peptide
+    values = load_s2_values()
+    imm_mask = values > 0
+    non_mask = ~imm_mask
+    imm = set(values[imm_mask])
+    non = set(values[non_mask])
     return imm, non
+
 
 def load_s2_ngrams():
     imm, non = load_s2_classes()

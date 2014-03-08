@@ -20,7 +20,7 @@ import pandas as pd
 
 from base import DATA_DIR
 from features import make_ngram_dataset
-from common import split_classes
+from common import split_classes, bad_amino_acids
 
 TCELL_CSV = join(DATA_DIR, 'tcell_compact.csv')
 MHC_CSV = join(DATA_DIR, 'elution_compact.csv')
@@ -79,7 +79,7 @@ def _load_dataframe(
     df['Epitope Linear Sequence'] = epitopes
     null_epitope_seq = epitopes.isnull()
 
-    bad_amino_acids = 'U|X|J|B|Z'
+
     # if have rare or unknown amino acids, drop the sequence
     bad_epitope_seq = \
         epitopes.str.contains(bad_amino_acids, na=False).astype('bool')
@@ -149,7 +149,7 @@ def _group_epitopes(
 
 
 
-def load_tcell_dataframe(
+def load_tcell(
         mhc_class = None, # 1, 2, or None for neither
         hla_type = None,
         exclude_hla_type = None,
@@ -201,7 +201,7 @@ def load_tcell_dataframe(
             verbose = verbose)
 
 
-def load_tcell(
+def load_tcell_values(
         mhc_class = None, # 1, 2, or None for neither
         hla_type = None,
         exclude_hla_type = None,
@@ -278,7 +278,7 @@ def load_tcell_classes(*args, **kwargs):
     """
     noisy_labels = kwargs.pop('noisy_labels', None)
     verbose = kwargs.get('verbose')
-    tcell_values = load_tcell(*args, **kwargs)
+    tcell_values = load_tcell_values(*args, **kwargs)
     return split_classes(
         tcell_values,
         noisy_labels = noisy_labels,
@@ -326,7 +326,7 @@ def load_tcell_ngrams(*args, **kwargs):
         subsample_bigger_class = subsample_bigger_class,
         return_transformer = return_transformer)
 
-def load_mhc_dataframe(
+def load_mhc(
         mhc_class = None, # 1, 2, or None for neither
         hla_type = None,
         exclude_hla_type = None,
@@ -350,7 +350,7 @@ def load_mhc_dataframe(
                 verbose = verbose)
 
 
-def load_mhc(
+def load_mhc_values(
         mhc_class = None, # 1, 2, or None for neither
         hla_type = None,
         exclude_hla_type = None,
@@ -397,7 +397,7 @@ def load_mhc(
     verbose: bool
         Print debug output
     """
-    df = load_mhc_dataframe(
+    df = load_mhc(
         mhc_class = mhc_class,
         hla_type = hla_type,
         exclude_hla_type = exclude_hla_type,
@@ -490,7 +490,7 @@ def load_tcell_vs_mhc(
     and MHC binding assays (keyed by epitopes for which we have data
     for both)
     """
-    mhc = load_mhc(
+    mhc = load_mhc_values(
             mhc_class = mhc_class,
             hla_type = hla_type,
             exclude_hla_type = exclude_hla_type,
@@ -500,7 +500,7 @@ def load_tcell_vs_mhc(
             min_count = min_count,
             group_by_allele = group_by_allele,
             verbose = verbose)
-    tcell = load_tcell(
+    tcell = load_tcell_values(
                 mhc_class = mhc_class,
                 hla_type = hla_type,
                 exclude_hla_type = exclude_hla_type,
