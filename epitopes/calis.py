@@ -21,12 +21,10 @@ from os.path import join
 
 import pandas as pd
 import numpy as np
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.preprocessing import normalize
 
 from base import DATA_DIR
 from common import bad_amino_acids
-
+from features import make_ngram_dataset, make_ngram_dataset_from_args
 S1_FILE = join(DATA_DIR, 'calis_s1.csv')
 S2_FILE = join(DATA_DIR, 'calis_s2.csv')
 
@@ -69,9 +67,8 @@ def load_s1_classes(*args, **kwargs):
     non = set(values[non_mask])
     return imm, non
 
-def load_s1_ngrams():
-    imm, non = load_s1_classes()
-
+def load_s1_ngrams(*args, **kwargs):
+    return make_ngram_dataset_from_args(load_s1_classes, *args, **kwargs)
 
 def load_s2(
         human = True,
@@ -100,8 +97,8 @@ def load_s2_values(*args, **kwargs):
         groups = pos.groupby(df.peptide)
     return groups.mean()
 
-def load_s2_classes():
-    values = load_s2_values()
+def load_s2_classes(*args, **kwargs):
+    values = load_s2_values(*args, **kwargs)
     imm_mask = values > 0
     non_mask = ~imm_mask
     imm = set(values[imm_mask])
@@ -109,20 +106,5 @@ def load_s2_classes():
     return imm, non
 
 
-def load_s2_ngrams():
-    imm, non = load_s2_classes()
-
-def load_counts(normalize_row = False, redundant = False, max_ngram = 1):
-    c = CountVectorizer(analyzer='char', ngram_range=(1, max_ngram), dtype=np.float)
-    if redudant:
-        imm, non = load_s1()
-    else:
-        imm, non = load_s2()
-    imm, non = load_csv()
-    total = list(imm) + list(non)
-    X = c.fit_transform(total)
-    if normalize_row:
-        X = normalize(X, norm='l1')
-    Y = np.ones(len(total), dtype='bool')
-    Y[len(imm):] = 0
-    return X, Y
+def load_s2_ngrams(*args, **kwargs):
+    return make_ngram_dataset_from_args(load_s2_classes, *args, **kwargs)

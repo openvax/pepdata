@@ -28,7 +28,28 @@ def make_ngram_dataset(
         subsample_bigger_class = False,
         return_transformer = False,
         verbose = True):
+    """
+    Given a set of positive amino acid string examples and a set
+    of negative examples, transform them into an array of n-gram counts
+    and a vector of target outputs.
 
+    Parameters
+    -----------
+    ngram : int
+        Degree of ngrams
+
+    normalize_row : bool
+        Return frequencies (default) or counts
+
+    subsample_bigger_class : bool
+        Default False
+
+    return_transformer : bool
+        Default False
+
+    verbose : bool
+        Default True
+    """
     if reduced_alphabet is None:
         preprocessor = None
     else:
@@ -82,6 +103,44 @@ def make_ngram_dataset(
     else:
         return X, Y
 
+
+def make_ngram_dataset_from_args(loader, *args, **kwargs):
+    """
+    Parameters
+    -----------
+    ngram : int
+        Degree of ngrams
+
+    normalize_row : bool
+        Return frequencies (default) or counts
+
+    subsample_bigger_class : bool
+        Default False
+
+    return_transformer : bool
+        Default False
+
+    verbose : bool
+        Default True
+
+    loader : fn
+        Takes all the remaining arguments and returns two sets
+        of positive and negative samples
+    """
+
+    ngram = kwargs.pop('ngram', 1)
+    normalize_row = kwargs.pop('normalize_row', True)
+    subsample_bigger_class = kwargs.pop('subsample_bigger_class', False)
+    return_transformer = kwargs.pop('return_transformer', False)
+    verbose = kwargs.get('verbose')
+    pos, neg = loader(*args, **kwargs)
+    return make_ngram_dataset(
+        pos,
+        neg,
+        max_ngram = ngram,
+        normalize_row = normalize_row,
+        subsample_bigger_class = subsample_bigger_class,
+        return_transformer = return_transformer)
 
 
 import amino_acid

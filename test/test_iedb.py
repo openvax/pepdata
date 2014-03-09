@@ -2,7 +2,7 @@ from epitopes import iedb
 
 def test_tcell_hla_a24():
   """
-  Test that HLA restriction actually decreases number of results and
+  IEDB : est that HLA restriction actually decreases number of results and
   that regular expression patterns are being used correctly
   """
   df_all = iedb.load_tcell()
@@ -17,7 +17,7 @@ def test_tcell_hla_a24():
 
 def test_mhc_hla_a2():
   """
-  Test that HLA restriction actually decreases number of results and
+  IEDB: Test that HLA restriction actually decreases number of results and
   that regular expression patterns are being used correctly
   """
   df_all = iedb.load_mhc()
