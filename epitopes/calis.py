@@ -63,8 +63,8 @@ def load_s1_classes(*args, **kwargs):
     values = load_s1_values(*args, **kwargs)
     imm_mask = values > 0
     non_mask = ~imm_mask
-    imm = set(values[imm_mask])
-    non = set(values[non_mask])
+    imm = set(values.index[imm_mask])
+    non = set(values.index[non_mask])
     return imm, non
 
 def load_s1_ngrams(*args, **kwargs):
@@ -101,8 +101,8 @@ def load_s2_classes(*args, **kwargs):
     values = load_s2_values(*args, **kwargs)
     imm_mask = values > 0
     non_mask = ~imm_mask
-    imm = set(values[imm_mask])
-    non = set(values[non_mask])
+    imm = set(values.index[imm_mask])
+    non = set(values.index[non_mask])
     return imm, non
 
 
