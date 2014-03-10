@@ -28,7 +28,7 @@ if __name__ == '__main__':
             'Environment :: Console',
             'Operating System :: OS Independent',
             'Intended Audience :: Science/Research',
-            'License :: OSI Approved :: BSD License',
+            'License :: OSI Approved :: Apache License',
             'Programming Language :: Python',
             'Topic :: Scientific/Engineering :: Bio-Informatics',
              ],
@@ -38,6 +38,7 @@ if __name__ == '__main__':
             'scikit.learn(>=0.14.1)'
         ],
         long_description=readme,
-        packages=['epitopes'],
-        include_package_data = True,
+        packages=['epitopes'],	
+        package_data = { 'epitopes' : ['data/*csv'] },
+        include_package_data = True
     )

@@ -152,6 +152,7 @@ def _group_epitopes(
 def load_tcell(
         mhc_class = None, # 1, 2, or None for neither
         hla_type = None,
+        human = True,
         exclude_hla_type = None,
         peptide_length = None,
         assay_group=None,
@@ -194,6 +195,7 @@ def load_tcell(
             assay_group = assay_group,
             mhc_class = mhc_class,
             hla_type = hla_type,
+            human = human,
             exclude_hla_type = exclude_hla_type,
             peptide_length = peptide_length,
             reduced_alphabet = reduced_alphabet,
@@ -204,6 +206,7 @@ def load_tcell(
 def load_tcell_values(
         mhc_class = None, # 1, 2, or None for neither
         hla_type = None,
+        human = True,
         exclude_hla_type = None,
         peptide_length = None,
         assay_group=None,
@@ -249,9 +252,10 @@ def load_tcell_values(
         Print debug output
     """
 
-    df = load_tcell_dataframe(
+    df = load_tcell(
         mhc_class = mhc_class,
         hla_type = hla_type,
+        human = human,
         exclude_hla_type = exclude_hla_type,
         peptide_length = peptide_length,
         assay_group = assay_group,
@@ -310,7 +314,7 @@ def load_tcell_ngrams(*args, **kwargs):
 
     *args, **kwargs : same as `load_tcell_classes`
     """
-    return load_ngram_datset_from_args(load_tcell_classes, *args, **kwargs)
+    return make_ngram_dataset_from_args(load_tcell_classes, *args, **kwargs)
     #ngram = kwargs.pop('max_ngram', 1)
     #normalize_row = kwargs.pop('normalize_row', True)
     #subsample_bigger_class = kwargs.pop('subsample_bigger_class', False)
