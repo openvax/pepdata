@@ -19,3 +19,9 @@ Python interface to IEDB and other immunology datasets (MHC binding and T-cell r
 **Installing**
 
 Eventually we'll have a proper process for downloading data to a user directory via Python. For now, install using `python setup.py develop` and then run `get_data.sh`. 
+
+**API**
+- `load_wuzzle`: Load all available data from the "wuzzle" dataset (filtered by options such as `mhc_class`). 
+- `load_wuzzle_values`: Group the dataset by epitope string and associate each epitope with the percentage of positive results. 
+- `load_wuzzle_classes`: Split the epitopes into positive and negative classes, return a set of strings for each. 
+- `load_wuzzle_ngrams`: Transform the amino acid string representation (or some reduced alphabet) into vectors of n-gram frequencies, return a sklearn-compatible `(samples, labels)` pair of arrays.   
