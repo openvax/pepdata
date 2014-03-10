@@ -19,13 +19,17 @@ from amino_acid import peptide_to_indices
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.preprocessing import normalize
 
+def make_alphabet_transformer(reduced_alphabet):
+    def transform(s):
+        return ''.join([chr(48 + reduced_alphabet[char]) for char in s])
+    return transform
 
 def make_ngram_dataset(
         imm, non = [],
         max_ngram = 1,
         normalize_row = True,
-        reduced_alphabet = None,
         subsample_bigger_class = False,
+        reduced_alphabet = None,
         return_transformer = False,
         verbose = True):
     """
@@ -35,7 +39,7 @@ def make_ngram_dataset(
 
     Parameters
     -----------
-    ngram : int
+    max_ngram : int
         Degree of ngrams
 
     normalize_row : bool
@@ -43,6 +47,11 @@ def make_ngram_dataset(
 
     subsample_bigger_class : bool
         Default False
+
+    reduced_alphabet : dictionary, optional
+        Remap amino acid characters into some alternative alphabet.
+        Recommended to transformer amino acid strings before
+        calling `make_ngram_dataset`.
 
     return_transformer : bool
         Default False
@@ -53,8 +62,7 @@ def make_ngram_dataset(
     if reduced_alphabet is None:
         preprocessor = None
     else:
-        preprocessor = \
-            lambda s: ''.join([chr(48 + reduced_alphabet[char]) for char in s])
+        preprocessor = make_alphabet_transformer(reduced_alphabet)
 
     c = CountVectorizer(analyzer='char',
                         ngram_range=(1,max_ngram),
@@ -108,7 +116,7 @@ def make_ngram_dataset_from_args(loader, *args, **kwargs):
     """
     Parameters
     -----------
-    ngram : int
+    max_ngram : int
         Degree of ngrams
 
     normalize_row : bool
@@ -128,7 +136,7 @@ def make_ngram_dataset_from_args(loader, *args, **kwargs):
         of positive and negative samples
     """
 
-    ngram = kwargs.pop('ngram', 1)
+    ngram = kwargs.pop('max_ngram', 1)
     normalize_row = kwargs.pop('normalize_row', True)
     subsample_bigger_class = kwargs.pop('subsample_bigger_class', False)
     return_transformer = kwargs.pop('return_transformer', False)

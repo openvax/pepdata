@@ -19,7 +19,9 @@ import numpy as np
 import pandas as pd
 
 from base import DATA_DIR
-from features import make_ngram_dataset
+from features import (
+    make_ngram_dataset, make_alphabet_transformer, make_ngram_dataset_from_args
+)
 from common import split_classes, bad_amino_acids
 
 TCELL_CSV = join(DATA_DIR, 'tcell_compact.csv')
@@ -73,9 +75,7 @@ def _load_dataframe(
 
     epitopes = df['Epitope Linear Sequence'].str.upper()
     if reduced_alphabet:
-        def transform(s):
-            return ''.join([chr(48 + reduced_alphabet[char]) for char in s])
-        epitopes = epitopes.map(transform)
+        epitopes = epitopes.map(make_alphabet_transformer(reduced_alphabet))
     df['Epitope Linear Sequence'] = epitopes
     null_epitope_seq = epitopes.isnull()
 
@@ -290,9 +290,9 @@ def load_tcell_ngrams(*args, **kwargs):
 
     Parameters:
     ----------
-    ngram : int
+    max_ngram : int
         Order of n-grams to consider when constructing X.
-        For example, when ngram = 1, the vector space is the individual
+        For example, when max_ngram = 1, the vector space is the individual
         frequencies of letters in the amino acid strings.
 
     normalize_row : bool, optional
@@ -310,21 +310,21 @@ def load_tcell_ngrams(*args, **kwargs):
 
     *args, **kwargs : same as `load_tcell_classes`
     """
+    return load_ngram_datset_from_args(load_tcell_classes, *args, **kwargs)
+    #ngram = kwargs.pop('max_ngram', 1)
+    #normalize_row = kwargs.pop('normalize_row', True)
+    #subsample_bigger_class = kwargs.pop('subsample_bigger_class', False)
+    #return_transformer = kwargs.pop('return_transformer', False)
+    #verbose = kwargs.get('verbose')
 
-    ngram = kwargs.pop('ngram', 1)
-    normalize_row = kwargs.pop('normalize_row', True)
-    subsample_bigger_class = kwargs.pop('subsample_bigger_class', False)
-    return_transformer = kwargs.pop('return_transformer', False)
-    verbose = kwargs.get('verbose')
-
-    pos, neg = load_tcell_classes(*args, **kwargs)
-    return make_ngram_dataset(
-        pos,
-        neg,
-        max_ngram = ngram,
-        normalize_row = normalize_row,
-        subsample_bigger_class = subsample_bigger_class,
-        return_transformer = return_transformer)
+    #pos, neg = load_tcell_classes(*args, **kwargs)
+    #return make_ngram_dataset(
+    #    pos,
+    #    neg,
+    #    max_ngram = max_ngram,
+    #    normalize_row = normalize_row,
+    #    subsample_bigger_class = subsample_bigger_class,
+    #    return_transformer = return_transformer)
 
 def load_mhc(
         mhc_class = None, # 1, 2, or None for neither
@@ -438,7 +438,7 @@ def load_mhc_ngrams(*args, **kwargs):
 
     Parameters:
     ----------
-    ngram : int
+    max_ngram : int
         Order of n-grams to consider when constructing X.
         For example, when ngram = 1, the vector space is the individual
         frequencies of letters in the amino acid strings.
@@ -458,21 +458,21 @@ def load_mhc_ngrams(*args, **kwargs):
 
     *args, **kwargs : same as `load_tcell_classes`
     """
+    return make_ngram_dataset_from_args(load_mhc_classes, *args, **kwargs)
 
-    ngram = kwargs.pop('ngram', 1)
-    normalize_row = kwargs.pop('normalize_row', True)
-    subsample_bigger_class = kwargs.pop('subsample_bigger_class', False)
-    return_transformer = kwargs.pop('return_transformer', False)
-    verbose = kwargs.get('verbose')
-
-    pos, neg = load_mhc_classes(*args, **kwargs)
-    return make_ngram_dataset(
-        pos,
-        neg,
-        max_ngram = ngram,
-        normalize_row = normalize_row,
-        subsample_bigger_class = subsample_bigger_class,
-        return_transformer = return_transformer)
+    #ngram = kwargs.pop('max_ngram', 1)
+    #normalize_row = kwargs.pop('normalize_row', True)
+    #subsample_bigger_class = kwargs.pop('subsample_bigger_class', False)
+    #return_transformer = kwargs.pop('return_transformer', False)
+    #verbose = kwargs.get('verbose')
+    #pos, neg = load_mhc_classes(*args, **kwargs)
+    #return make_ngram_dataset(
+    #    pos,
+    #    neg,
+    #    max_ngram = max_ngram,
+    #    normalize_row = normalize_row,
+    #    subsample_bigger_class = subsample_bigger_class,
+    #    return_transformer = return_transformer)
 
 
 def load_tcell_vs_mhc(
