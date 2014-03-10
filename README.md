@@ -13,7 +13,9 @@ Python interface to IEDB and other immunology datasets (MHC binding and T-cell r
 - `reference`: Peptide substrings of a reference exome
 - `cancer_immunity`: Tumor associated peptides from [Cancer Immunity](http://cancerimmunity.org/peptide/mutations/)
 - `tcga`: Variant peptide substrings extracted from TCGA mutations 
-
+- `hpv`: [Human Papillomavirus T cell Antigen Database](http://cvc.dfci.harvard.edu/cvccgi/hpv/)
+- `toxin`: Toxic protein sequences from [Animal Toxin Databse](http://protchem.hunnu.edu.cn/toxin/)
+- 
 **Installing**
 
 Eventually we'll have a proper process for downloading data to a user directory via Python. For now, install using `python setup.py develop` and then run `get_data.sh`. 
