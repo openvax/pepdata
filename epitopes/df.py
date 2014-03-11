@@ -1,3 +1,18 @@
+# Copyright (c) 2014. Mount Sinai School of Medicine
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import pandas as pd
 from download import fetch_data
 
 """
@@ -6,7 +21,7 @@ http://bio.dfci.harvard.edu/DFRMLI/HTML/TCellEpitopes.php
 """
 
 
-def load_df_tumor():
+def load_df_tumor(nrows = None):
     """
     Tumor antigens.
     This data set is a list of 718 T cell epitopes, 8-31 amino acids in length,
@@ -19,8 +34,9 @@ def load_df_tumor():
         filename = "tumor_epitopes.csv",
         download_url = \
             "http://bio.dfci.harvard.edu/DFRMLI/datasets/tumor_epitopes.htm")
+    return pd.read_csv(path, skipinitialspace=True, nrows = nrows)
 
-def load_df_virus():
+def load_df_virus(nrows = None):
     """
     Virus antigens.
     This data set is a list of 44 HLA-A2 restricted T cell epitopes,
@@ -33,8 +49,9 @@ def load_df_virus():
         filename = "virus_epitopes_A2.csv",
         download_url = \
             "http://bio.dfci.harvard.edu/DFRMLI/datasets/virus_epitopes_A2.htm")
+    return pd.read_csv(path, skipinitialspace=True, nrows = nrows)
 
-def load_df_cef():
+def load_df_cef(nrows = None):
     """
     This dataset is a list of 32 T cell epitopes, 8-12 amino acids in length,
     with sequences derived from the human Cytomegalovirus, Epstein-Barr Virus
@@ -43,3 +60,4 @@ def load_df_cef():
     path = fetch_data(
         filename = "CEF.csv",
         download_url = "http://bio.dfci.harvard.edu/DFRMLI/datasets/CEF.htm")
+    return pd.read_csv(path, skipinitialspace=True, nrows = nrows)

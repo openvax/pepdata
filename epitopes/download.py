@@ -29,5 +29,5 @@ def fetch_data(filename, download_url):
             remove(tmp_path)
         elif download_url.endswith(("html", "htm")):
             df = pd.read_html(download_url, header=0, infer_types=False)[0]
-            df.to_csv(full_path, sep='\t', index=False, encoding='utf-8')
+            df.to_csv(full_path, sep=',', index=False, encoding='utf-8')
     return full_path
