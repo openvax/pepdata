@@ -15,12 +15,15 @@ Python interface to IEDB and other immunology datasets (MHC binding and T-cell r
 - `tcga`: Variant peptide substrings extracted from TCGA mutations 
 - `hpv`: [Human Papillomavirus T cell Antigen Database](http://cvc.dfci.harvard.edu/cvccgi/hpv/)
 - `toxin`: Toxic protein sequences from [Animal Toxin Databse](http://protchem.hunnu.edu.cn/toxin/)
+- `df`: Dana Farber Repository for Machine Learning in Immunology
 
-**Installing**
-
-Eventually we'll have a proper process for downloading data to a user directory via Python. For now, install using `python setup.py develop` and then run `get_data.sh`. 
 
 **API**
+When a dataset consists only of an unlabeled list of epitopes, then it only needs two functions:
+- `load_wuzzle`: Returns set of amino acid strings 
+- `load_wuzzle_ngrams`: Array whose rows are amino acids transformed into n-gram vector space. 
+
+If, however, the dataset consists of assay results, then the following functions are available: 
 - `load_wuzzle`: Load all available data from the "wuzzle" dataset (filtered by options such as `mhc_class`). 
 - `load_wuzzle_values`: Group the dataset by epitope string and associate each epitope with the percentage of positive results. 
 - `load_wuzzle_classes`: Split the epitopes into positive and negative classes, return a set of strings for each. 
