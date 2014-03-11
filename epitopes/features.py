@@ -21,6 +21,7 @@ from sklearn.preprocessing import normalize
 
 def make_alphabet_transformer(reduced_alphabet):
     def transform(s):
+        print s
         return ''.join([chr(48 + reduced_alphabet[char]) for char in s])
     return transform
 

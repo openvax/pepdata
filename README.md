@@ -15,7 +15,7 @@ Python interface to IEDB and other immunology datasets (MHC binding and T-cell r
 - `tcga`: Variant peptide substrings extracted from TCGA mutations 
 - `hpv`: [Human Papillomavirus T cell Antigen Database](http://cvc.dfci.harvard.edu/cvccgi/hpv/)
 - `toxin`: Toxic protein sequences from [Animal Toxin Databse](http://protchem.hunnu.edu.cn/toxin/)
-- `df`: Dana Farber Repository for Machine Learning in Immunology
+- `danafarber`: [Dana Farber Repository for Machine Learning in Immunology](http://bio.dfci.harvard.edu/DFRMLI/)
 
 
 **API**
@@ -23,7 +23,12 @@ When a dataset consists only of an unlabeled list of epitopes, then it only need
 - `load_wuzzle`: Returns set of amino acid strings 
 - `load_wuzzle_ngrams`: Array whose rows are amino acids transformed into n-gram vector space. 
 
-If, however, the dataset consists of assay results, then the following functions are available: 
+If the dataset contains additional data about the epitopes (such as HLA type u or source protein):
+- `load_wuzzle`: Returns data frame with epitope strings and additional properties
+- `load_wuzzle_set`: Set of epitope amino acid strings 
+- `load_wuzzle_ngrams`: Array whose rows are amino acids transformed into n-gram vector space. 
+
+If the dataset is labeled (contains positive and negative assay results), then the following functions should be available: 
 - `load_wuzzle`: Load all available data from the "wuzzle" dataset (filtered by options such as `mhc_class`). 
 - `load_wuzzle_values`: Group the dataset by epitope string and associate each epitope with the percentage of positive results. 
 - `load_wuzzle_classes`: Split the epitopes into positive and negative classes, return a set of strings for each. 

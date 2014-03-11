@@ -71,11 +71,9 @@ def _load_dataframe(
         print "Human Class II MHCs", (human_mask & mhc2_mask).sum()
 
     epitopes = df['Epitope Linear Sequence'].str.upper()
-    if reduced_alphabet:
-        epitopes = epitopes.map(make_alphabet_transformer(reduced_alphabet))
     df['Epitope Linear Sequence'] = epitopes
-    null_epitope_seq = epitopes.isnull()
 
+    null_epitope_seq = epitopes.isnull()
 
     # if have rare or unknown amino acids, drop the sequence
     bad_epitope_seq = \
@@ -85,9 +83,7 @@ def _load_dataframe(
         print "Dropping %d null sequences" % null_epitope_seq.sum()
         print "Dropping %d bad sequences" % bad_epitope_seq.sum()
 
-    has_epitope_seq = ~(bad_epitope_seq | null_epitope_seq)
-
-    mask = has_epitope_seq
+    mask = ~(bad_epitope_seq | null_epitope_seq)
 
     if human:
         mask &= human_mask
@@ -112,7 +108,13 @@ def _load_dataframe(
     if verbose:
         print "Filtered sequences epitope sequences", mask.sum()
 
-    return df[mask]
+    df = df[mask]
+
+    if reduced_alphabet:
+        epitopes = df['Epitope Linear Sequence']
+        df['Epitope Linear Sequence']  = \
+            epitopes.map(make_alphabet_transformer(reduced_alphabet))
+    return df
 
 def _group_epitopes(
         df,

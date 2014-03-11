@@ -20,8 +20,13 @@ T-cell epitopes from Dana-Farber Repository for Machine Learning in Immunology
 http://bio.dfci.harvard.edu/DFRMLI/HTML/TCellEpitopes.php
 """
 
+from common import bad_amino_acids
 
-def load_df_tumor(nrows = None):
+def load_tumor(
+        peptide_length = None,
+        hla_type = None,
+        source_protein = None,
+        nrows = None):
     """
     Tumor antigens.
     This data set is a list of 718 T cell epitopes, 8-31 amino acids in length,
@@ -34,9 +39,25 @@ def load_df_tumor(nrows = None):
         filename = "tumor_epitopes.csv",
         download_url = \
             "http://bio.dfci.harvard.edu/DFRMLI/datasets/tumor_epitopes.htm")
-    return pd.read_csv(path, skipinitialspace=True, nrows = nrows)
+    df = pd.read_csv(path, skipinitialspace=True, nrows = nrows)
+    mask = ~df.Peptide.str.contains(bad_amino_acids)
+    if peptide_length:
+        mask &= df.Peptide.str.len() == peptide_length
+    if hla_type:
+        mask &= df.Allele.str.contains(hla_type)
+    if source_protein:
+        mask &= df.Protein.str.contains(source_protein)
+    return df[mask]
 
-def load_df_virus(nrows = None):
+def load_tumor_set(*args, **kwargs):
+    df = load_danafarber_tumor(*args, **kwargs)
+    return set(df.Peptide)
+
+def load_virus(
+        peptide_length = None,
+        hla_type = None,
+        source_protein = None,
+        nrows = None):
     """
     Virus antigens.
     This data set is a list of 44 HLA-A2 restricted T cell epitopes,
@@ -49,9 +70,26 @@ def load_df_virus(nrows = None):
         filename = "virus_epitopes_A2.csv",
         download_url = \
             "http://bio.dfci.harvard.edu/DFRMLI/datasets/virus_epitopes_A2.htm")
-    return pd.read_csv(path, skipinitialspace=True, nrows = nrows)
+    df = pd.read_csv(path, skipinitialspace=True, nrows = nrows)
+    mask = ~df.Epitope.str.contains(bad_amino_acids)
+    if peptide_length:
+        mask &= df.Epitope.str.len() == peptide_length
+    if hla_type:
+        mask &= df.Allele.str.contains(hla_type)
+    if source_protein:
+        mask &= df['Virus protein'].str.contains(source_protein)
+    return df[mask]
 
-def load_df_cef(nrows = None):
+def load_virus_set(*args, **kwargs):
+    df = load_virus(*args, **kwargs)
+    return set(df.Epitope)
+
+
+def load_cef(
+        peptide_length = None,
+        hla_type = None,
+        source_protein = None,
+        nrows = None):
     """
     This dataset is a list of 32 T cell epitopes, 8-12 amino acids in length,
     with sequences derived from the human Cytomegalovirus, Epstein-Barr Virus
@@ -60,4 +98,16 @@ def load_df_cef(nrows = None):
     path = fetch_data(
         filename = "CEF.csv",
         download_url = "http://bio.dfci.harvard.edu/DFRMLI/datasets/CEF.htm")
-    return pd.read_csv(path, skipinitialspace=True, nrows = nrows)
+    df = pd.read_csv(path, skipinitialspace=True, nrows = nrows)
+    mask = ~df.Peptide.str.contains(bad_amino_acids)
+    if peptide_length:
+        mask &= df.Peptide.str.len() == peptide_length
+    if hla_type:
+        mask &= df.Allele.str.contains(hla_type)
+    if source_protein:
+        mask &= df.Protein.str.contains(source_protein)
+    return df[mask]
+
+def load_cef_set(*args, **kwargs):
+    df = load_cef(*args, **kwargs)
+    return set(df.Peptide)
