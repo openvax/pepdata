@@ -347,7 +347,7 @@ def load_mhc(
         filename = "elution_compact.csv",
         download_url = "http://www.iedb.org/doc/elution_compact.zip")
     return _load_dataframe(
-                MHC_CSV,
+                data_path,
                 mhc_class = mhc_class,
                 hla_type = hla_type,
                 exclude_hla_type = exclude_hla_type,
