@@ -50,7 +50,7 @@ def load_imma2_non(reduced_alphabet = None):
     else:
         transformer = lambda x: x
 
-    with open(IMMA2_NON_FILE) as f:
+    with open(path) as f:
         non = [transformer(line.strip()) for line in f]
     return non
 

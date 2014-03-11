@@ -19,7 +19,7 @@ def test_imma2_no_overlap():
     IMMA2: Make sure the immunogenic and non-immunogenic sets have no common
     strings
     """
-    imm, non = imma2.load_imma2()
+    imm, non = imma2.load_imma2_classes()
     assert len(imm.intersection(non)) == 0
 
 def test_imma2_ngrams_same_size():
@@ -29,5 +29,5 @@ def test_imma2_ngrams_same_size():
     """
     X, Y = imma2.load_imma2_ngrams()
     assert len(X) == len(Y)
-    imm, non = imma2.load_imma2()
+    imm, non = imma2.load_imma2_classes()
     assert len(X) == len(imm) + len(non)
