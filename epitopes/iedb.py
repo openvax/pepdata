@@ -18,14 +18,11 @@ from os.path import join
 import numpy as np
 import pandas as pd
 
-from base import DATA_DIR
 from features import (
     make_ngram_dataset, make_alphabet_transformer, make_ngram_dataset_from_args
 )
 from common import split_classes, bad_amino_acids
-
-TCELL_CSV = join(DATA_DIR, 'tcell_compact.csv')
-MHC_CSV = join(DATA_DIR, 'elution_compact.csv')
+from download import fetch_data
 
 def _load_dataframe(
         filename,
@@ -189,9 +186,12 @@ def load_tcell(
         Print debug output
     """
 
+    data_path = fetch_data(
+        filename = "tcell_compact.csv",
+        download_url = "http://www.iedb.org/doc/tcell_compact.zip")
 
     return _load_dataframe(
-            TCELL_CSV,
+            data_path,
             assay_group = assay_group,
             mhc_class = mhc_class,
             hla_type = hla_type,
@@ -342,6 +342,10 @@ def load_mhc(
     """
     Load IEDB MHC data without aggregating multiple entries for the same epitope
     """
+
+    data_path = fetch_data(
+        filename = "elution_compact.csv",
+        download_url = "http://www.iedb.org/doc/elution_compact.zip")
     return _load_dataframe(
                 MHC_CSV,
                 mhc_class = mhc_class,

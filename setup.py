@@ -35,10 +35,11 @@ if __name__ == '__main__':
         requires=[
             'numpy(>=1.7)',
             'pandas(>=0.13.1)',
-            'scikit.learn(>=0.14.1)'
+            'scikit.learn(>=0.14.1)',
+            'appdirs',
         ],
         long_description=readme,
-        packages=['epitopes'],	
+        packages=['epitopes'],
         package_data = { 'epitopes' : ['data/*csv'] },
         include_package_data = True
     )
