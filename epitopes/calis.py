@@ -22,11 +22,9 @@ from os.path import join
 import pandas as pd
 import numpy as np
 
-from base import DATA_DIR
+from static_data import DATA_DIR
 from common import bad_amino_acids
 from features import make_ngram_dataset, make_ngram_dataset_from_args
-S1_FILE = join(DATA_DIR, 'calis_s1.csv')
-S2_FILE = join(DATA_DIR, 'calis_s2.csv')
 
 def load_s1(
         human = True,
@@ -37,7 +35,8 @@ def load_s1(
     Immunogenic and non-immunogenic pMHCs that were found in the IEDB,
     Vaccinia, Arena and Coxiella data sets.
     """
-    df = pd.read_csv(S1_FILE)
+    s1_path = join(DATA_DIR, 'calis_s1.csv')
+    df = pd.read_csv(s1_path)
     mask = ~df.Peptide.str.contains(bad_amino_acids)
     if human:
         mask &= df.Species == 'Homo'
@@ -77,7 +76,8 @@ def load_s2(
     """
     Non-redundant murine and human Dengue epitopes and non-epitopes
     """
-    df = pd.read_csv(S2_FILE)
+    s2_path = join(DATA_DIR, 'calis_s2.csv')
+    df = pd.read_csv(s2_path)
     mask = ~df.peptide.str.contains(bad_amino_acids)
     if human:
         mask &= df.host == 'Homo'

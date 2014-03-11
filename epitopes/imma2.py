@@ -30,21 +30,33 @@ from os.path  import join
 import pandas as pd
 import numpy as np
 
-from base import DATA_DIR
+from static_data import DATA_DIR
 from features import make_ngram_dataset_from_args, make_alphabet_transformer
 
-IMMA2_IMM_FILE = join(DATA_DIR, 'IMMA2_imm.txt')
-IMMA2_NON_FILE = join(DATA_DIR, 'IMMA2_non.txt')
-
-def load_imma2(reduced_alphabet = None):
+def load_imma2_imm(reduced_alphabet = None):
+    path = join(DATA_DIR, 'IMMA2_imm.txt')
     if reduced_alphabet:
         transformer = make_alphabet_transformer(reduced_alphabet)
     else:
         transformer = lambda x: x
-    with open(IMMA2_IMM_FILE) as f:
+    with open(path) as f:
         imm = [transformer(line.strip()) for line in f]
+    return imm
+
+def load_imma2_non(reduced_alphabet = None):
+    path = join(DATA_DIR, 'IMMA2_non.txt')
+    if reduced_alphabet:
+        transformer = make_alphabet_transformer(reduced_alphabet)
+    else:
+        transformer = lambda x: x
+
     with open(IMMA2_NON_FILE) as f:
         non = [transformer(line.strip()) for line in f]
+    return non
+
+def load_imma2_classes(reduced_alphabet = None):
+    imm = load_imma2_imm(reduced_alphabet)
+    non = load_imma2_non(reduced_alphabet)
     return set(imm), set(non)
 
 
@@ -69,7 +81,7 @@ def load_imma2_ngrams(*args, **kwargs):
     verbose : bool
         Default True
     """
-    return make_ngram_dataset_from_args(load_imma2, *args, **kwargs)
+    return make_ngram_dataset_from_args(load_imma2_classes, *args, **kwargs)
 
 
 

@@ -12,16 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pandas as pd
-from download import fetch_data
-
 """
 T-cell epitopes from Dana-Farber Repository for Machine Learning in Immunology
 http://bio.dfci.harvard.edu/DFRMLI/HTML/TCellEpitopes.php
 """
 
-from common import bad_amino_acids
+import pandas as pd
 
+from download import fetch_data
+from common import bad_amino_acids
+from features import make_ngram_dataset_from_args
 def load_tumor(
         peptide_length = None,
         hla_type = None,
@@ -52,6 +52,7 @@ def load_tumor(
 def load_tumor_set(*args, **kwargs):
     df = load_danafarber_tumor(*args, **kwargs)
     return set(df.Peptide)
+
 
 def load_virus(
         peptide_length = None,

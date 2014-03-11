@@ -1,0 +1,66 @@
+# Copyright (c) 2014. Mount Sinai School of Medicine
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""
+HPV T-cell antigens and MHC ligands from Dana Farber CVC
+http://cvc.dfci.harvard.edu/hpv/HTML/help.html
+"""
+
+from os.path import join
+
+import pandas as pd
+
+from static_data import DATA_DIR
+from common import bad_amino_acids
+
+def _load_dataframe(
+    path,
+    epitope_column_name,
+    mhc_class = None,
+    hla_type = None,
+    exclude_hla_type = None, # regex pattern i.e. '(HLA-A2)|(HLA-A\*02)'
+    peptide_length = None,
+    reduced_alphabet = None,
+    nrows = None):
+    df = pd.read_csv(path, skipinitialspace=True, nrows = nrows)
+    epitopes = df[epitope_column_name]
+    hla = df['HLA allele']
+    mask = ~(epitopes.str.contains(bad_amino_acids, na=False).astype('bool'))
+    if mhc_class == 1:
+        a = hla.str.startswith('A')
+        b = hla.str.startswith('B')
+        c = hla.str.startswith('C')
+        mask &= (a | b | c)
+    elif mhc_class == 2:
+        mask &= hla.str.startswith('D')
+    if hla_type:
+        mask &= hla.str.contains(hla_type, na=False).astype('bool')
+    if exclude_hla_type:
+        mask &= ~(hla.str.contains(exclude_hla_type, na=True).astype('bool'))
+    if peptide_length:
+        mask &= epitopes.str.len() == peptide_length
+    df = df[mask]
+    if reduced_alphabet:
+        epitopes = df[epitope_column_name]
+        df[] = \
+            epitopes.map(make_alphabet_transformer(reduced_alphabet))
+    return df
+
+def load_tcell(*args, **kwargs)
+    tcell_path = join(DATA_DIR, 'cvc_hpv_tcell.csv')
+    return _load_dataframe(tcell_path, 'Epitope sequence', *args, **kwargs)
+
+def load_mhc(*args, **kwargs):
+    mhc_path = join(DATA_DIR, 'cvc_hpv_ligand.csv')
+    return _load_dataframe(mhc_path, 'Ligand sequence', *args, **kwargs)
