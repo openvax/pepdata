@@ -37,9 +37,7 @@ def fetch_data(filename, download_url):
         in_stream.close()
         tmp_file.close()
 
-        if download_url.endswith(("csv", "hdf", "txt")):
-            move(tmp_path, full_path)
-        elif download_url.endswith("zip"):
+        if download_url.endswith("zip"):
             print "Decompressing..."
             with zipfile.ZipFile(tmp_path) as z:
                 extract_path = z.extract(filename)
@@ -55,6 +53,9 @@ def fetch_data(filename, download_url):
         elif download_url.endswith(("html", "htm")):
             df = pd.read_html(tmp_path, header=0, infer_types=False)[0]
             df.to_csv(full_path, sep=',', index=False, encoding='utf-8')
+        else:
+            move(tmp_path, full_path)
+
     return full_path
 
 def fetch_and_transform_data(

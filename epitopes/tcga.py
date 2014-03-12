@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import pandas as pd
-from tcga_sources import TCGA_SOURCES
+from tcga_sources import maf_urls
 from download import fetch_data
 
 def open_maf(filename):
@@ -46,5 +46,6 @@ def load_maf_files(sources_dict):
     return pd.concat(data_frames)
 
 def load_tcga():
-    combined_df = load_maf_files(TCGA_SOURCES)
-    return combined_df
+    combined_df = load_maf_files(maf_urls)
+    filtered = combined_df[["Refseq_prot_Id", "Protein_Change"]].dropna()
+    return filtered
