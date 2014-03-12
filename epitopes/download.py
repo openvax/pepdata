@@ -13,7 +13,7 @@ import appdirs
 import pandas as pd
 from progressbar import ProgressBar
 
-DATA_DIR = environ.get("EPITOPES_DATA", appdirs.user_cache_dir("epitopes"))
+DATA_DIR = environ.get("EPITOPES_DATA_DIR", appdirs.user_cache_dir("epitopes"))
 
 def ensure_dir(path):
     if not exists(path):
@@ -36,7 +36,6 @@ def fetch_data(filename, download_url):
         copyfileobj(in_stream, tmp_file)
         in_stream.close()
         tmp_file.close()
-        #tmp_path, _ = urlretrieve(download_url)#, reporthook = report_hook)
 
         if download_url.endswith(("csv", "hdf", "txt")):
             move(tmp_path, full_path)

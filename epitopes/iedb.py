@@ -39,7 +39,12 @@ def _load_dataframe(
     Load an IEDB csv into a pandas dataframe and filter using the
     criteria given as function arguments
     """
-    df = pd.read_csv(filename, skipinitialspace=True, nrows = nrows)
+    df = pd.read_csv(
+            filename,
+            skipinitialspace=True,
+            nrows = nrows,
+            low_memory=False)
+
     mhc = df['MHC Allele Name']
 
     #
