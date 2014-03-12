@@ -51,6 +51,8 @@ if __name__ == '__main__':
             'pandas(>=0.13.1)',
             'scikit.learn(>=0.14.1)',
             'appdirs',
+            'progressbar',
+            'biopython',
         ],
         long_description=readme,
         packages=['epitopes'],
