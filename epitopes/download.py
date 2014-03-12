@@ -15,9 +15,13 @@ from progressbar import ProgressBar
 
 DATA_DIR = environ.get("EPITOPES_DATA", appdirs.user_cache_dir("epitopes"))
 
+def ensure_dir(path):
+    if not exists(path):
+        makedirs(path)
+
+
 def fetch_data(filename, download_url):
-    if not exists(DATA_DIR):
-        makedirs(DATA_DIR)
+    ensure_dir(DATA_DIR)
     full_path = join(DATA_DIR, filename)
     if not exists(full_path):
         print "Downloading %s" %  download_url
@@ -53,6 +57,22 @@ def fetch_data(filename, download_url):
             df = pd.read_html(tmp_path, header=0, infer_types=False)[0]
             df.to_csv(full_path, sep=',', index=False, encoding='utf-8')
     return full_path
+
+def fetch_and_transform_data(
+        transformed_filename,
+        transformer,
+        loader,
+        source_filename,
+        source_url):
+    ensure_dir(DATA_DIR)
+    transformed_path = join(DATA_DIR, transformed_filename)
+    if not exists(transformed_path):
+        source_path = fetch_data(source_filename, source_url)
+        result = transformer(source_path, transformed_path)
+    else:
+        result = loader(transformed_path)
+    assert exists(transformed_path)
+    return result
 
 def clear_cache():
     rmtree(DATA_DIR)
