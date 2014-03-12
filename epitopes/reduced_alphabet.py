@@ -51,7 +51,12 @@ murphy10 = dict_from_list(
   ["LVIM", "C", "A", "G", "ST", "P", "FYW", "EDNQ", "KR", "H"]
 )
 
-
 alex6 = dict_from_list(["C", "G", "P", "FYW", "AVILM", "STNQRHKDE"])
 
 aromatic2 = dict_from_list(["FHWY", "ADKERNTSQLIVMCGP"])
+
+def make_alphabet_transformer(reduced_alphabet):
+    def transform(s):
+        print s
+        return ''.join([chr(48 + reduced_alphabet[char]) for char in s])
+    return transform

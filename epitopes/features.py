@@ -14,16 +14,12 @@
 
 
 import numpy as np
-from amino_acid import peptide_to_indices
-
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.preprocessing import normalize
 
-def make_alphabet_transformer(reduced_alphabet):
-    def transform(s):
-        print s
-        return ''.join([chr(48 + reduced_alphabet[char]) for char in s])
-    return transform
+from amino_acid import peptide_to_indices
+from reduced_alphabet import make_alphabet_transformer
+
 
 def make_ngram_dataset(
         imm, non = [],

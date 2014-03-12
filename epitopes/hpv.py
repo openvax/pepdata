@@ -61,6 +61,12 @@ def load_tcell(*args, **kwargs)
     tcell_path = join(DATA_DIR, 'cvc_hpv_tcell.csv')
     return _load_dataframe(tcell_path, 'Epitope sequence', *args, **kwargs)
 
+def load_tcell_ngrams():
+    pass
+
 def load_mhc(*args, **kwargs):
     mhc_path = join(DATA_DIR, 'cvc_hpv_ligand.csv')
     return _load_dataframe(mhc_path, 'Ligand sequence', *args, **kwargs)
+
+def load_mhc_ngrams():
+    pass
