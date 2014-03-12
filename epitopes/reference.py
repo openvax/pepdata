@@ -21,9 +21,6 @@ from progressbar import ProgressBar
 
 from download import fetch_data, fetch_and_transform_data
 
-def _most_common(d):
-    return list(sorted(d.iteritems(), key=lambda (x,y): y))
-
 def _generate_counts(src_filename, peptide_lengths, nrows):
     epitope_counts = {}
     get_count = epitope_counts.get
@@ -32,17 +29,20 @@ def _generate_counts(src_filename, peptide_lengths, nrows):
         print "Generating substrings of length %s" % (peptide_lengths,)
         pbar = ProgressBar(maxval = len(seqs)).start()
         for seq_num, seq in enumerate(seqs):
+            seq_len = len(seq)
             if nrows and seq_num > nrows:
                 break
             for size in peptide_lengths:
-                for i in xrange(len(seq) - size + 1):
+                for i in xrange(seq_len - size + 1):
                     epitope = seq[i:i+size]
-                    epitope_counts[epitope] = get_count(epitope, 0) + 1
+                    if epitope in epitope_counts:
+                        epitope_counts[epitope] += 1
+                    else:
+                        epitope_counts[epitope] = 1
             pbar.update(seq_num+1)
         pbar.finish()
-    return pd.DataFrame(
-        _most_common(epitope_counts),
-        columns=["Peptide", "Count"])
+    df = pd.DataFrame(epitope_counts, columns=["Peptide", "Count"])
+    return df.sort("Count", ascending=False)
 
 def _generate_set(src_filename, peptide_lengths, nrows):
     peptides = set([])
