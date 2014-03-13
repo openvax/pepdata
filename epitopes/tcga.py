@@ -17,6 +17,8 @@ import re
 import pandas as pd
 import numpy as np
 import Bio.SeqIO
+
+from common import int_or_seq, dataframe_from_counts
 from tcga_sources import TCGA_SOURCES, REFSEQ_PROTEIN_URL
 from download import fetch_data
 
@@ -97,9 +99,11 @@ SINGLE_AMINO_ACID_SUBSTITUTION = "p.([A-Z])([0-9]+)([A-Z])"
 DELETION = "p.([A-Z])([0-9]+)del"
 
 def load_mutant_peptides(
-        peptide_lengths = [8,9,10,11],
+        peptide_length = [8,9,10,11],
         cancer_type = None,
         verbose = True):
+    peptide_lengths = int_or_seq(peptide_length)
+
     combined_df = load_dataframe(cancer_type = cancer_type)
     filtered = combined_df[["Refseq_prot_Id", "Protein_Change"]].dropna()
 
@@ -116,8 +120,13 @@ def load_mutant_peptides(
 
     # single amino acid substitutions
     n_failed = 0
-    for i, wildtype, str_position, mutation in subst_matches.itertuples():
-        refseq_id = refseq_ids[i]
+    peptide_counts = {}
+    for match_num, wildtype, str_position, mutation in \
+            subst_matches.itertuples():
+        if wildtype == mutation:
+            # silent mutation, skipping
+            continue
+        refseq_id = refseq_ids[match_num]
         protein = refseq_ids_to_protein.get(refseq_id)
         if protein is None:
             if verbose:
@@ -144,6 +153,21 @@ def load_mutant_peptides(
                     mutation)
             n_failed += 1
             continue
+
+        m = len(protein)
+
+        for n in peptide_lengths:
+            for i in xrange(n):
+                start = amino_acid_pos - i
+                stop = start + n
+                if start >= 0 and stop <= m:
+                    substr = protein[start:stop]
+                    if substr in peptide_counts:
+                        peptide_counts[substr] += 1
+                    else:
+                        peptide_counts[substr] = 1
     if verbose:
         print "%d / %d failed" % (n_failed, len(filtered))
-    return combined_df
+    print len(peptide_counts)
+    return dataframe_from_counts(peptide_counts)
+

@@ -14,6 +14,13 @@
 
 from epitopes import tcga
 
-def test_tcga_loads():
+def test_tcga_dataframe_load():
     df = tcga.load_dataframe()
     assert df is not None
+    assert len(df) > 0
+
+def test_tcga_counts_load():
+    df = tcga.load_counts(cancer_type = 'paad', peptide_length = 9)
+    assert df is not None
+    assert len(df) > 0
+

@@ -12,7 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import pandas as pd
+
 bad_amino_acids = 'U|X|J|B|Z'
+
+def int_or_seq(x):
+    if isinstance(x, int):
+        return [x]
+    else:
+        return list(x)
+
+def dataframe_from_counts(counts):
+    invert =  {
+        'Peptide': counts.keys(),
+        'Count' : counts.values()
+    }
+
+    df = pd.DataFrame(invert)
+    return df.sort("Count", ascending=False)
 
 def split_classes(
         values,

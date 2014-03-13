@@ -19,6 +19,7 @@ import Bio.SeqIO
 import pandas as pd
 from progressbar import ProgressBar
 
+from common import int_or_seq, dataframe_from_counts
 from download import fetch_data, fetch_and_transform_data
 
 def _generate_counts(src_filename, peptide_lengths, nrows):
@@ -41,8 +42,7 @@ def _generate_counts(src_filename, peptide_lengths, nrows):
                         epitope_counts[epitope] = 1
             pbar.update(seq_num+1)
         pbar.finish()
-    df = pd.DataFrame(epitope_counts, columns=["Peptide", "Count"])
-    return df.sort("Count", ascending=False)
+    return dataframe_from_counts(epitope_counts)
 
 def _generate_set(src_filename, peptide_lengths, nrows):
     peptides = set([])
@@ -66,10 +66,11 @@ FASTA_FILENAME = "Homo_sapiens.GRCh37.75.pep.all.fa"
 GZ_FILENAME = FASTA_FILENAME + ".gz"
 FULL_URL = BASE_URL + FTP_DIR + GZ_FILENAME
 
-def load_peptide_counts(peptide_lengths = [8,9,10,11], nrows = None):
+def load_peptide_counts(peptide_length = [8,9,10,11], nrows = None):
     """
     List of all reference peptides encoded in a reference human exome
     """
+    peptide_lengths = int_or_seq(peptide_length)
     lens = "_".join(str(n) for n in peptide_lengths)
     cache_filename = \
         "reference_peptide_counts_" + lens + "_nrows_" + str(nrows) + ".csv"
@@ -87,7 +88,8 @@ def load_peptide_counts(peptide_lengths = [8,9,10,11], nrows = None):
         source_filename = FASTA_FILENAME,
         source_url = FULL_URL)
 
-def load_peptide_set(peptide_lengths = [8,9,10,11], nrows = None):
+def load_peptide_set(peptide_length = [8,9,10,11], nrows = None):
+    peptide_lengths = int_or_seq(peptide_length)
     lens = "_".join(str(n) for n in peptide_lengths)
     cache_filename = \
         "reference_peptide_set_" + lens + "_nrows_" + str(nrows) + ".pickle.gz"
