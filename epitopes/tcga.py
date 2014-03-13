@@ -15,6 +15,7 @@
 import re
 
 import pandas as pd
+import numpy as np
 import Bio.SeqIO
 from tcga_sources import TCGA_SOURCES, REFSEQ_PROTEIN_URL
 from download import fetch_data
@@ -62,7 +63,7 @@ def _load_maf_files(sources_dict, cancer_type = None):
 def load_dataframe(cancer_type = None):
     return _load_maf_files(TCGA_SOURCES, cancer_type)
 
-def _build_refseq_id_to_protein(refseq_path):
+def _build_refseq_id_to_protein(refseq_path, predicted_proteins = False):
     """
     Given the path to a local FASTA file containing
     RefSeq ID's and their protein transcripts,
@@ -74,10 +75,19 @@ def _build_refseq_id_to_protein(refseq_path):
             protein = str(record.seq)
             try:
                 name = record.id.split("|")[3]
-                # TODO: handle multiple entries more intelligently than this.
-                if name.startswith("NP_"):
+                if name.startswith("NP_") or name.startswith("YP_"):
                     before_dot = name.split('.')[0]
+                    assert before_dot not in result, \
+                        "Unexpected refseq ID repeat %s" % before_dot
                     result[before_dot] = protein
+                elif name.startswith("XP_"):
+                    if predicted_proteins:
+                        before_dot = name.split('.')[0]
+                        assert before_dot not in result, \
+                            "Unexpected refseq ID repeat %s" % before_dot
+                        result[before_dot] = protein
+                else:
+                    print "Unexpected refseq ID", name
             except IndexError:
                 pass
     return result
@@ -88,37 +98,52 @@ DELETION = "p.([A-Z])([0-9]+)del"
 
 def load_mutant_peptides(
         peptide_lengths = [8,9,10,11],
-        cancer_type = None):
+        cancer_type = None,
+        verbose = True):
     combined_df = load_dataframe(cancer_type = cancer_type)
     filtered = combined_df[["Refseq_prot_Id", "Protein_Change"]].dropna()
+
+    # discard indices of NA entries
+    filtered.index = np.arange(len(filtered))
     refseq_path = fetch_data('refseq_protein.faa', REFSEQ_PROTEIN_URL)
     refseq_ids_to_protein = _build_refseq_id_to_protein(refseq_path)
     refseq_ids = filtered.Refseq_prot_Id
     subst_matches = \
         filtered.Protein_Change.str.extract(SINGLE_AMINO_ACID_SUBSTITUTION)
+
     # drop non-matching rows
     subst_matches = subst_matches.dropna()
+
     # single amino acid substitutions
     n_failed = 0
     for i, wildtype, str_position, mutation in subst_matches.itertuples():
         refseq_id = refseq_ids[i]
         protein = refseq_ids_to_protein.get(refseq_id)
         if protein is None:
-            print "Couldn't find refseq ID %s" % refseq_id
+            if verbose:
+                print "Couldn't find refseq ID %s" % refseq_id
             n_failed += 1
             continue
         amino_acid_pos = int(str_position) - 1
         if len(protein) <= amino_acid_pos:
-            print "Protein %s too short, needed position %s but len %d" % \
-                (refseq_id, str_position, len(protein))
+            if verbose:
+                print "Protein %s too short, needed position %s but len %d" % \
+                    (refseq_id, str_position, len(protein))
             n_failed += 1
             continue
         old_aa = protein[amino_acid_pos]
         if old_aa != wildtype:
-            print "Expected %s but got %s at position %s in %s" % \
-                (wildtype, old_aa, str_position, refseq_id)
+            if verbose:
+                print "Expected %s but got %s at position %s in %s (%s%s%s)" % \
+                    (wildtype,
+                    old_aa,
+                    str_position,
+                    refseq_id,
+                    wildtype,
+                    str_position,
+                    mutation)
             n_failed += 1
             continue
-
-    print "%d / %d failed" % (n_failed, len(filtered))
+    if verbose:
+        print "%d / %d failed" % (n_failed, len(filtered))
     return combined_df
