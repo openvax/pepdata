@@ -132,8 +132,9 @@ def load_peptide_counts(
     #
     # generate substrings from all single amino acid substitutions
     #
-    print "Single amino acid substitutions"
-    pbar = ProgressBar(maxval = len(subst_matches)).start()
+    subst_count = len(subst_matches)
+    print "Simple substitutions (%d)" % subst_count
+    pbar = ProgressBar(maxval = np.array(subst_matches.index).max() ).start()
     for match_num, wildtype, str_position, mutation in \
             subst_matches.itertuples():
         if wildtype == mutation:
@@ -184,7 +185,68 @@ def load_peptide_counts(
                         peptide_counts[substr] = 1
         pbar.update(match_num)
     pbar.finish()
-    print "%d / %d failed" % (n_failed, len(filtered))
+
+
+    del_matches = \
+        filtered.Protein_Change.str.extract(DELETION)
+
+    # drop non-matching rows
+    del_matches = del_matches.dropna()
+
+    #
+    # generate substrings from all single amino acid substitutions
+    #
+    del_count = len(del_matches)
+    print "Simple deletions (%d)" % del_count
+    pbar = ProgressBar(maxval = np.array(del_matches.index).max()).start()
+    for match_num, wildtype, str_position in \
+            del_matches.itertuples():
+        refseq_id = refseq_ids[match_num]
+        protein = refseq_ids_to_protein.get(refseq_id)
+        if protein is None:
+            if verbose:
+                print "Couldn't find refseq ID %s" % refseq_id
+            n_failed += 1
+            continue
+        amino_acid_pos = int(str_position) - 1
+        if len(protein) <= amino_acid_pos:
+            if verbose:
+                print "Protein %s too short, needed position %s but len %d" % \
+                    (refseq_id, str_position, len(protein))
+            n_failed += 1
+            continue
+        old_aa = protein[amino_acid_pos]
+        if old_aa != wildtype:
+            if verbose:
+                print \
+                    "Expected %s but got %s at position %s in %s (%s%sdel)" % \
+                    (wildtype,
+                    old_aa,
+                    str_position,
+                    refseq_id,
+                    wildtype,
+                    str_position,
+                    )
+            n_failed += 1
+            continue
+
+        m = len(protein)
+
+        for n in peptide_lengths:
+            for i in xrange(n):
+                start = amino_acid_pos - i
+                stop = start + n + 1
+                if start >= 0 and stop <= m:
+                    substr = \
+                        protein[start:start+i] + \
+                        protein[start+i+1:stop]
+                    if substr in peptide_counts:
+                        peptide_counts[substr] += 1
+                    else:
+                        peptide_counts[substr] = 1
+        pbar.update(match_num)
+    pbar.finish()
+    print "Failed to parse %d / %d mutations" % (n_failed, len(filtered))
     return dataframe_from_counts(peptide_counts)
 
 def load_peptide_set(
