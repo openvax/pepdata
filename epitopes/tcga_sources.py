@@ -35,3 +35,6 @@ maf_urls = {
     'hnsc' : HNSC_URL,
     'gbm' : GBM_URL
 }
+
+REFSEQ_PROTEIN_URL = \
+'ftp://ftp.ncbi.nlm.nih.gov/refseq/H_sapiens/mRNA_Prot/human.protein.faa.gz'
