@@ -54,10 +54,10 @@ def _load_dataframe(
     #  'HLA-Class I,allele undetermined'
     #  or
     #  'Class I,allele undetermined'
-    mhc1_pattern = 'Class I,|HLA-[A-C]([0-9]|\*)'
+    mhc1_pattern = 'Class I,|HLA-[A-C](?:[0-9]|\*)'
     mhc1_mask = mhc.str.contains(mhc1_pattern, na=False).astype('bool')
 
-    mhc2_pattern = "Class II,|HLA-D(P|M|O|Q|R)"
+    mhc2_pattern = "Class II,|HLA-D(?:P|M|O|Q|R)"
     mhc2_mask = mhc.str.contains(mhc2_pattern, na=False).astype('bool')
 
     # just in case any of the results were from mice or other species,

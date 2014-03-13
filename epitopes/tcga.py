@@ -17,6 +17,7 @@ import re
 import pandas as pd
 import numpy as np
 import Bio.SeqIO
+from progressbar import ProgressBar
 
 from common import int_or_seq, dataframe_from_counts
 from tcga_sources import TCGA_SOURCES, REFSEQ_PROTEIN_URL
@@ -82,12 +83,14 @@ def _build_refseq_id_to_protein(refseq_path, predicted_proteins = False):
                     assert before_dot not in result, \
                         "Unexpected refseq ID repeat %s" % before_dot
                     result[before_dot] = protein
+                    result[name] = protein
                 elif name.startswith("XP_"):
                     if predicted_proteins:
                         before_dot = name.split('.')[0]
                         assert before_dot not in result, \
                             "Unexpected refseq ID repeat %s" % before_dot
                         result[before_dot] = protein
+                        result[name] = protein
                 else:
                     print "Unexpected refseq ID", name
             except IndexError:
@@ -98,10 +101,14 @@ def _build_refseq_id_to_protein(refseq_path, predicted_proteins = False):
 SINGLE_AMINO_ACID_SUBSTITUTION = "p.([A-Z])([0-9]+)([A-Z])"
 DELETION = "p.([A-Z])([0-9]+)del"
 
-def load_mutant_peptides(
+def load_peptide_counts(
         peptide_length = [8,9,10,11],
         cancer_type = None,
-        verbose = True):
+        verbose = False):
+    """
+    Call given functions for mutation type
+        subst_fn(protein, position, mutant_aa)
+    """
     peptide_lengths = int_or_seq(peptide_length)
 
     combined_df = load_dataframe(cancer_type = cancer_type)
@@ -112,15 +119,21 @@ def load_mutant_peptides(
     refseq_path = fetch_data('refseq_protein.faa', REFSEQ_PROTEIN_URL)
     refseq_ids_to_protein = _build_refseq_id_to_protein(refseq_path)
     refseq_ids = filtered.Refseq_prot_Id
+
+    n_failed = 0
+    peptide_counts = {}
+
     subst_matches = \
         filtered.Protein_Change.str.extract(SINGLE_AMINO_ACID_SUBSTITUTION)
 
     # drop non-matching rows
     subst_matches = subst_matches.dropna()
 
-    # single amino acid substitutions
-    n_failed = 0
-    peptide_counts = {}
+    #
+    # generate substrings from all single amino acid substitutions
+    #
+    print "Single amino acid substitutions"
+    pbar = ProgressBar(maxval = len(subst_matches)).start()
     for match_num, wildtype, str_position, mutation in \
             subst_matches.itertuples():
         if wildtype == mutation:
@@ -161,13 +174,23 @@ def load_mutant_peptides(
                 start = amino_acid_pos - i
                 stop = start + n
                 if start >= 0 and stop <= m:
-                    substr = protein[start:stop]
+                    substr = \
+                        protein[start:start+i] + \
+                        mutation + \
+                        protein[start+i+1:stop]
                     if substr in peptide_counts:
                         peptide_counts[substr] += 1
                     else:
                         peptide_counts[substr] = 1
-    if verbose:
-        print "%d / %d failed" % (n_failed, len(filtered))
-    print len(peptide_counts)
+        pbar.update(match_num)
+    pbar.finish()
+    print "%d / %d failed" % (n_failed, len(filtered))
     return dataframe_from_counts(peptide_counts)
 
+def load_peptide_set(
+        peptide_length = [8,9,10,11],
+        cancer_type = None):
+    counts = load_peptide_counts(
+        peptide_length = peptide_length,
+        cancer_type = cancer_type)
+    return set(counts.Peptide)

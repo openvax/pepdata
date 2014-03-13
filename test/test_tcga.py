@@ -15,7 +15,7 @@
 from epitopes import tcga
 
 def test_tcga_dataframe_load():
-    df = tcga.load_dataframe()
+    df = tcga.load_dataframe(cancer_type = 'paad')
     assert df is not None
     assert len(df) > 0
 
