@@ -16,7 +16,7 @@ import re
 
 import pandas as pd
 import Bio.SeqIO
-from tcga_sources import maf_urls, REFSEQ_PROTEIN_URL
+from tcga_sources import TCGA_SOURCES, REFSEQ_PROTEIN_URL
 from download import fetch_data
 
 def open_maf(filename):
@@ -33,22 +33,36 @@ def open_maf(filename):
         sep="\t",
         low_memory=False)
 
-def load_maf_files(sources_dict):
+def _load_maf_files(sources_dict, cancer_type = None):
     """
     Given a dictionary mapping cancer types to download urls,
     get all the source MAFs, load them as DataFrames, and then
     concatenate into a single DataFrame
     """
     data_frames = []
-    for cancer_type, maf_url in sources_dict.iteritems():
-        maf_filename = cancer_type + ".maf"
+    if cancer_type is None:
+        cancer_types = sources_dict.keys()
+    elif isinstance(cancer_type, str):
+        cancer_types = [cancer_type]
+    else:
+        assert isinstance(cancer_type, list), \
+            "Cancer type must be None, str, or list but got %s" % cancer_type
+        cancer_types = cancer_type
+
+    for key in cancer_types:
+        assert key in sources_dict, "Unknown cancer type %s" % key
+        maf_url = sources_dict[key]
+        maf_filename = key + ".maf"
         path = fetch_data(maf_filename, maf_url)
         df = open_maf(path)
-        df['Cancer Type'] = cancer_type
+        df['Cancer Type'] = key
         data_frames.append(df)
-    return pd.concat(data_frames)
+    return pd.concat(data_frames, ignore_index = True)
 
-def build_refseq_id_to_protein(refseq_path):
+def load_dataframe(cancer_type = None):
+    return _load_maf_files(TCGA_SOURCES, cancer_type)
+
+def _build_refseq_id_to_protein(refseq_path):
     """
     Given the path to a local FASTA file containing
     RefSeq ID's and their protein transcripts,
@@ -68,11 +82,43 @@ def build_refseq_id_to_protein(refseq_path):
                 pass
     return result
 
-SINGLE_AMINO_ACID_SUBSTITUTION = re.compile("p.([A-Z])([0-9]+)([A-Z])")
+# patterns for how protein changes are encoded i.e. p.Q206E
+SINGLE_AMINO_ACID_SUBSTITUTION = "p.([A-Z])([0-9]+)([A-Z])"
+DELETION = "p.([A-Z])([0-9]+)del"
 
-def load_tcga():
-    combined_df = load_maf_files(maf_urls)
+def load_mutant_peptides(
+        peptide_lengths = [8,9,10,11],
+        cancer_type = None):
+    combined_df = load_dataframe(cancer_type = cancer_type)
     filtered = combined_df[["Refseq_prot_Id", "Protein_Change"]].dropna()
     refseq_path = fetch_data('refseq_protein.faa', REFSEQ_PROTEIN_URL)
-    refseq_id_to_protein = build_refseq_id_to_protein(refseq_path)
-    return filtered
+    refseq_ids_to_protein = _build_refseq_id_to_protein(refseq_path)
+    refseq_ids = filtered.Refseq_prot_Id
+    subst_matches = \
+        filtered.Protein_Change.str.extract(SINGLE_AMINO_ACID_SUBSTITUTION)
+    # drop non-matching rows
+    subst_matches = subst_matches.dropna()
+    # single amino acid substitutions
+    n_failed = 0
+    for i, wildtype, str_position, mutation in subst_matches.itertuples():
+        refseq_id = refseq_ids[i]
+        protein = refseq_ids_to_protein.get(refseq_id)
+        if protein is None:
+            print "Couldn't find refseq ID %s" % refseq_id
+            n_failed += 1
+            continue
+        amino_acid_pos = int(str_position) - 1
+        if len(protein) <= amino_acid_pos:
+            print "Protein %s too short, needed position %s but len %d" % \
+                (refseq_id, str_position, len(protein))
+            n_failed += 1
+            continue
+        old_aa = protein[amino_acid_pos]
+        if old_aa != wildtype:
+            print "Expected %s but got %s at position %s in %s" % \
+                (wildtype, old_aa, str_position, refseq_id)
+            n_failed += 1
+            continue
+
+    print "%d / %d failed" % (n_failed, len(filtered))
+    return combined_df

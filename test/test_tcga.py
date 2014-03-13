@@ -15,5 +15,5 @@
 from epitopes import tcga
 
 def test_tcga_loads():
-    df = tcga.load_tcga()
+    df = tcga.load_dataframe()
     assert df is not None

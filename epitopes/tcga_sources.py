@@ -29,7 +29,7 @@ GBM_URL = \
 "https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/gbm/gsc/broad.mit.edu/illuminaga_dnaseq/mutations/broad.mit.edu_GBM.IlluminaGA_DNASeq.Level_2.100.1.0/step4_gbm_liftover.aggregated.capture.tcga.uuid.maf2.4.migrated.somatic.maf"
 
 # map cancer types to MAF download URLs
-maf_urls = {
+TCGA_SOURCES = {
     'blca' : BLCA_URL,
     'paad' : PAAD_URL,
     'hnsc' : HNSC_URL,
