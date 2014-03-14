@@ -1,0 +1,53 @@
+Gene,Tumor,HLA,HLA Frequency,Peptide,Position,Lymphocyte Stimulation Method
+alpha-actinin-4,lung carcinoma,A2,44,FIASNGVKLV,118-127,autologous tumor cells
+ARTC1,melanoma,DR1,18,YSVYFNLPADTIYTN,,autologous tumor cells
+BCR-ABL fusion protein (b3a2),chronic myeloid leukemia,A2,44,SSKALQRPV,926-934,peptide
+BCR-ABL fusion protein (b3a2),chronic myeloid leukemia,B8,14,GFKQSSKAL,922-930,peptide
+BCR-ABL fusion protein (b3a2),chronic myeloid leukemia,DR4,24,ATGFKQSSKALQRPVAS,920-936,peptide
+BCR-ABL fusion protein (b3a2),chronic myeloid leukemia,DR9,3,ATGFKQSSKALQRPVAS,920-936,peptide
+B-RAF,melanoma,DR4,24,EDLTVKIGDFGLATEKSRWSGSHQFEQLS,586-614,peptide
+CASP-5,colorectal;gastric;endometrial carcinoma,A2,44,FLIIWQNTM,67-75,peptide
+CASP-8,head and neck squamous cell carcinoma,B35,20,FPSDSWCYF,476-484,autologous tumor cells
+beta-catenin,melanoma,A24,20,SYLDSGIHF,29-37,autologous tumor cells
+Cdc27,melanoma,DR4,24,FSWAMDLDPKGAe,760-771,autologous tumor cells
+CDK4,melanoma,A2,44,ACDPHSGHFV,23-32,autologous tumor cells
+CDKN2A,melanoma,A11,13,AVCPWTWLR,125-133 (p14ARF-ORF3) or 111-119 (p16INK4a-ORF3),autologous tumor cells
+CLPP,melanoma,A2,44,ILDKVLVHL,240-248,autologous tumor cells
+COA-1,colorectal carcinoma,DR4,24,TLYQDDTLTLQAAG,447-460,autologous tumor cells
+COA-1,colorectal carcinoma,DR13,19,TLYQDDTLTLQAAG,447-460,autologous tumor cells
+dek-can fusion protein,myeloid leukemia,DR53,49,TMKQICKKEIRRLHQY,342-357,peptide
+EFTUD2,melanoma,A3,22,KILDAVVAQK,668-677,autologous tumor cells
+Elongation factor 2,lung squamous CC,A68,8,ETVSEQSNV,581-589,autologous tumor cells
+ETV6-AML1 fusion protein,acute lymphoblastic leukemia,A2,44,RIAECILGM,334-342,peptide
+ETV6-AML1 fusion protein,acute lymphoblastic leukemia,DP5,3,IGRIAECILGMNPSR,332-346,peptide
+ETV6-AML1 fusion protein,acute lymphoblastic leukemia,DP17,1,IGRIAECILGMNPSR,332-346,peptide
+FLT3-ITD,acute myelogenous leukemia,A1,26,YVDFREYEYY,591-600,peptide
+FN1,melanoma,DR2,25,MIFEKHGFRRTTPP,2050-2063,autologous tumor cells
+GPNMB,melanoma,A3,22,TLDWLLQTPK,179-188,autologous tumor cells
+LDLR-fucosyltransferaseAS fusion protein,melanoma,DR1,18,WRRAPAPGA,315-323,autologous tumor cells
+LDLR-fucosyltransferaseAS fusion protein,melanoma,DR1,18,PVTWRRAPA,312-320,autologous tumor cells
+hsp70-2,renal cell carcinoma,A2,44,SLFEGIDIYT,286-295,autologous tumor cells
+hsp70-2,bladder tumor,B44,21,AEPINIQTW,262-270,autologous tumor cells
+MART2,melanoma,A1,26,FLEGNEVGKTY,446-455,autologous tumor cells
+ME1,non-small cell lung carcinoma,A2,44,FLDEFMEGV,224-232,autologous tumor cells
+MUM-1f,melanoma,B44,21,EEKLIVVLF,30-38,autologous tumor cells
+MUM-2,melanoma,B44,21,SELFRSGLDSY,123-133,autologous tumor cells
+MUM-2,melanoma,Cw6,18,FRSGLDSYV,126-134,autologous tumor cells
+MUM-3,melanoma,A68,8,EAFIQPITR,322-330,autologous tumor cells
+neo-PAP,melanoma,DR7,25,RVIKNSIRLTLe,724-734,autologous tumor cells
+Myosin class I,melanoma,A3,22,KINKNPKYK,911-919,expansion of TIL with IL-2
+NFYC,lung squamous cell carcinoma,B52,5,QQITKTEV,275-282,autologous tumor cells
+OGT,colorectal carcinoma,A2,44,SLYKFSPFPLg,28-37,peptide
+OS-9,melanoma,B44,21,KELEGILLL,438-446,autologous tumor cells
+p53,head and neck squamous cell carcinoma,A2,44,VVPCEPPEV,217-225,peptide
+pml-RARalpha fusion protein,promyelocytic leukemia,DR11,25,NSNHVASGAGEAAIETQSSSSEEIV,,peptide
+PRDX5,melanoma,A2,44,LLLDDLLVSI,163-172,peptide
+PTPRK,melanoma,DR10,3,PYYFAAELPPRNLPEP,667-682,autologous tumor cells
+K-ras,pancreatic adenocarcinoma,B35,20,VVVGAVGVG,7-15,peptide
+N-ras,melanoma,A1,26,ILDTAGREEY,55-64,autologous tumor cells
+RBAF600,melanoma,B7,17,RPHVPESAF,329-337,autologous tumor cells
+SIRT2,melanoma,A3,22,KIFSEVTLK,192-200,autologous tumor cells
+SNRPD1,melanoma,B38,5,SHETVIIEL,11-19,autologous tumor cells
+SYT-SSX1,sarcoma,B7,17,QRPYGYDQIM,402-410,peptide
+TGF-betaRII,colorectal carcinoma,A2,44,RLSSCVPVA,131-139,peptide
+Triosephosphate isomerase,melanoma,DR1,18,GELIGILNAAKVPAD,23-37,autologous tumor cells
