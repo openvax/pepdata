@@ -58,3 +58,14 @@ def test_unlabeled_unigrams():
     assert X.shape[1] == 20, \
         "Expected feature vectors to be of length 20, got %d" % X.shape[1]
 
+
+import cPickle
+def test_pickle_ngram_vectorizer():
+    X, V = features.make_unlabeled_ngram_dataset(
+        A,
+        max_ngram = 1,
+        return_transformer = True)
+    s = cPickle.dumps(V)
+    V2 = cPickle.loads(s)
+    X2 = V2.transform(A)
+    assert (X == X2).all()
