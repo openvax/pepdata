@@ -6,16 +6,19 @@ Python interface to IEDB and other immunology datasets (MHC binding and T-cell r
 **Data Sources** 
 
 - `iedb`: [Immune Epitope Database](http://www.iedb.org), large collection of epitope assay results for MHC binding as well as T-cell/B-cell responses
+- `tcga`: Variant peptide substrings extracted from [TCGA](http://en.wikipedia.org/wiki/The_Cancer_Genome_Atlas) mutations across all cancer types
+- `reference`: Peptide substrings from the [human reference protein sequence](ftp://ftp.ensembl.org/pub/release-75/fasta/homo_sapiens/pep/)
 - `imma2`: IMMA2 epitope immunogenic vs. non-immunogenic data set used by Tung et al. for evaluating the [POPISK](http://www.biomedcentral.com/1471-2105/12/446) immunogenicity predictor 
 - `calis`: Two datasets used in Calis et al.'s [Properties of MHC Class I Presented Peptides That Enhance Immunogenicity](http://www.ploscompbiol.org/article/info%3Adoi%2F10.1371%2Fjournal.pcbi.1003266#pcbi.1003266.s005) 
-- `reference`: Peptide substrings of a reference exome
-- `tcga`: Variant peptide substrings extracted from TCGA mutations 
 - `hpv`: [Human Papillomavirus T cell Antigen Database](http://cvc.dfci.harvard.edu/cvccgi/hpv/)
 - `toxin`: Toxic protein sequences from [Animal Toxin Databse](http://protchem.hunnu.edu.cn/toxin/)
 - `danafarber`: [Dana Farber Repository for Machine Learning in Immunology](http://bio.dfci.harvard.edu/DFRMLI/)
+- `cri_tumor_antigens`: Tumor associated peptides from [Cancer Immunity](http://cancerimmunity.org/peptide/mutations/)
+
+Planned:
+
 - `tantigen`: [Tumor T-cell Antigen Database](http://cvc.dfci.harvard.edu/tadb/)
 - `bcipep`: [B-cell epitopes](http://www.imtech.res.in/raghava/bcipep/data.html) 
-- `cancer_immunity`: Tumor associated peptides from [Cancer Immunity](http://cancerimmunity.org/peptide/mutations/)
 
 
 **API**
