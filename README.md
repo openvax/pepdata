@@ -1,7 +1,8 @@
 epitopes
 =======
 
-Python interface to IEDB and other immunology datasets (MHC binding and T-cell response assays)
+Computational immunology seeks to investigate and model the properties of *peptides* (short strings of amino acids). Peptides can be substrings of some larger protein, naturally occurring small proteins, or synthesized for therapeutic purposes. We can investigate whether a peptide is presented on the cell surface for immune recognition by [MHC molecules](http://en.wikipedia.org/wiki/Major_histocompatibility_complex), in which case we call it an *epitope*. If an epitope elicits a response from [white blood cells](http://en.wikipedia.org/wiki/Lymphocyte) it can be called  *immunogenic*. To make useful predictions (i.e. "what peptides should go in this vaccine?") we need to partition the combinatorial space of peptides into classes such as epitopes vs. non-epitope and immunogenic vs. non-immunogenic 
+Computational immunology. One approach to modeling such distinctions is to collect a large volume of data about peptides to model their properties statistically. This library seeks to aid you in that process by providing simple Python/NumPy/Pandas interfaces to commonly used immunology and bioninformatics datasets. 
 
 **Data Sources** 
 

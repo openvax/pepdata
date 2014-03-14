@@ -30,6 +30,14 @@ GZ_FILENAME = FASTA_FILENAME + ".gz"
 FULL_URL = BASE_URL + FTP_DIR + GZ_FILENAME
 
 def load_dataframe():
+    """
+    Loads the protein products of the reference genome
+    in a dataframe with columns:
+        - protein : amino acid string
+        - protein_id
+        - gene_id
+        - transcript_id
+    """
     filename = fetch_data(FASTA_FILENAME, FULL_URL)
     sequences = []
     protein_ids = []
