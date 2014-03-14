@@ -24,7 +24,7 @@ import numpy as np
 
 from static_data import DATA_DIR
 
-def load_tumor_specific_antigens(
+def load_dataframe(
         mhc_class = None,
         hla_type = None):
     path = join(DATA_DIR, 'cri_mutations.csv')
@@ -39,3 +39,6 @@ def load_tumor_specific_antigens(
     else:
         return df
 
+def load_peptides(*args, **kwargs)
+    df = load_dataframe(*args, **kwargs)
+    return set(df.Peptide)
