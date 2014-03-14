@@ -14,11 +14,9 @@
 
 
 import numpy as np
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.preprocessing import normalize
 
 from amino_acid import peptide_to_indices
-from reduced_alphabet import make_alphabet_transformer
+from peptide_vectorizer import PeptideVectorizer
 
 
 def make_ngram_dataset(
@@ -27,6 +25,7 @@ def make_ngram_dataset(
         normalize_row = True,
         subsample_bigger_class = False,
         reduced_alphabet = None,
+        training_already_reduced = False,
         return_transformer = False,
         verbose = True):
     """
@@ -46,68 +45,90 @@ def make_ngram_dataset(
         Default False
 
     reduced_alphabet : dictionary, optional
-        Remap amino acid characters into some alternative alphabet.
-        Recommended to transformer amino acid strings before
-        calling `make_ngram_dataset`.
+        Remap amino acid characters into some alternative alphabet
+
+    training_already_reduced : bool
+        Only apply reduced alphabet to testing set (training data is already
+        transformed)
 
     return_transformer : bool
-        Default False
+        In addition to the data X, Y, also return a feature transformer
+        (default False)
 
     verbose : bool
-        Default True
+        Print debug messages (default True)
     """
-    if reduced_alphabet is None:
-        preprocessor = None
-    else:
-        preprocessor = make_alphabet_transformer(reduced_alphabet)
 
-    c = CountVectorizer(analyzer='char',
-                        ngram_range=(1,max_ngram),
-                        dtype=np.float,
-                        preprocessor = preprocessor)
 
-    total = list(imm) + list(non)
-    # returns a sparse matrix
-    X = c.fit_transform(total).todense()
-
+    imm = list(imm)
+    non = list(non)
     n_imm = len(imm)
     n_non = len(non)
 
+    # if class sizes are unequal
+    # may want to subsample the larger
+    # class so that training set becomes balanced
     if subsample_bigger_class:
-        X_true = X[:n_imm]
-        X_false = X[n_imm:]
         n_min = min(n_imm, n_non)
         idx = np.arange(n_imm)
         np.random.shuffle(idx)
-        X_true = X_true[idx[:n_min]]
+        imm = [imm[i] for i in idx[:n_min]]
         idx = np.arange(n_non)
         np.random.shuffle(idx)
-        X_false = X_false[idx[:n_min]]
-        X = np.vstack([X_true, X_false])
-        Y = np.ones(2*n_min, dtype='bool')
-        Y[n_min:] = False
-        if verbose:
-            print "Rebalancing %d, %d -> %d" % (n_imm, n_non, n_min)
-    else:
-        Y = np.ones(len(total), dtype='bool')
-        Y[n_imm:] = 0
+        non = [non[i] for i in idx[:n_min]]
+        n_imm = n_min
+        n_non = n_min
 
-    if reduced_alphabet and verbose:
-        print "Alphabet", c.get_feature_names()
-    if normalize_row:
-        X = normalize(X, norm='l1')
+    combined = imm + non
+
+    V = PeptideVectorizer(
+        max_ngram = max_ngram,
+        normalize_row = normalize_row,
+        reduced_alphabet = reduced_alphabet,
+        training_already_reduced = training_already_reduced)
+
+    X = V.fit_transform(combined)
+    Y = np.ones(len(combined), dtype='bool')
+    Y[n_imm:] = 0
+
     if verbose:
         print "Dataset size", X.shape
+
     if return_transformer:
-        def transform(test_strings):
-            X_test = c.transform(test_strings).todense()
-            if normalize_row:
-                X_test = normalize(X_test, norm='l1')
-            return X_test
-        return X, Y, transform
+        return X, Y, V
     else:
         return X, Y
 
+def make_unlabeled_ngram_dataset(strings,  **kwargs):
+    # reuse the vectorizer for labeled dataset but give
+    # an empty list for the negative class
+    # then throw away the label array Y
+    kwargs['subsample_bigger_class'] = False
+    result = make_ngram_dataset(strings, [], **kwargs)
+    # expect to get back either just the labeled data (X, Y)(
+    # or (X, Y, vectorizer)
+    if len(result) == 2:
+        return result[0]
+    else:
+        assert len(result) == 3
+        return result[0], result[2]
+
+def _split_ngram_kwargs(kwargs):
+    """
+    Functions which call both a data loader and then vectorizer
+    need to split their kwargs into two dictionaries
+    """
+    d = {
+        'max_ngram' : kwargs.pop('max_ngram', 1),
+        'normalize_row' : kwargs.pop('normalize_row', True),
+        'subsample_bigger_class' : kwargs.pop('subsample_bigger_class', False),
+        'return_transformer' : kwargs.pop('return_transformer', False),
+        'reduced_alphabet' :  kwargs.get('reduced_alphabet'),
+        'training_already_reduced' : \
+            kwargs.pop('training_already_reduced', False),
+        'verbose' : kwargs.get('verbose')
+    }
+    return kwargs, d
 
 def make_ngram_dataset_from_args(loader, *args, **kwargs):
     """
@@ -125,6 +146,13 @@ def make_ngram_dataset_from_args(loader, *args, **kwargs):
     return_transformer : bool
         Default False
 
+    reduced_alphabet : dictionary, optional
+        Remap amino acid characters into some alternative alphabet
+
+    training_already_reduced : bool
+        Only apply reduced alphabet to testing set
+        (training data is already transformed)
+
     verbose : bool
         Default True
 
@@ -132,21 +160,14 @@ def make_ngram_dataset_from_args(loader, *args, **kwargs):
         Takes all the remaining arguments and returns two sets
         of positive and negative samples
     """
+    loader_kwargs, kwargs = _split_ngram_kwargs(kwargs)
+    pos, neg = loader(*args, **loader_kwargs)
+    return make_ngram_dataset(pos, neg, **kwargs)
 
-    ngram = kwargs.pop('max_ngram', 1)
-    normalize_row = kwargs.pop('normalize_row', True)
-    subsample_bigger_class = kwargs.pop('subsample_bigger_class', False)
-    return_transformer = kwargs.pop('return_transformer', False)
-    verbose = kwargs.get('verbose')
-    pos, neg = loader(*args, **kwargs)
-    return make_ngram_dataset(
-        pos,
-        neg,
-        max_ngram = ngram,
-        normalize_row = normalize_row,
-        subsample_bigger_class = subsample_bigger_class,
-        return_transformer = return_transformer)
-
+def make_unlabeled_ngram_dataset_from_args(loader, *args, **kwargs):
+    loader_kwargs, kwargs = _split_ngram_kwargs(kwargs)
+    strings = loader(*args, **loader_kwargs)
+    return make_unlabeled_ngram_dataset(strings, **kwargs)
 
 import amino_acid
 

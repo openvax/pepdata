@@ -30,8 +30,10 @@ from os.path  import join
 import pandas as pd
 import numpy as np
 
+
+from features import make_ngram_dataset_from_args
+from reduced_alphabet import make_alphabet_transformer
 from static_data import DATA_DIR
-from features import make_ngram_dataset_from_args, make_alphabet_transformer
 
 def load_imma2_imm(reduced_alphabet = None):
     path = join(DATA_DIR, 'IMMA2_imm.txt')

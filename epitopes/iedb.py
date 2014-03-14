@@ -18,8 +18,10 @@ from os.path import join
 import numpy as np
 import pandas as pd
 
+from reduced_alphabet import make_alphabet_transformer
 from features import (
-    make_ngram_dataset, make_alphabet_transformer, make_ngram_dataset_from_args
+    make_ngram_dataset, make_ngram_dataset_from_args,
+    make_unlabeled_ngram_dataset, make_unlabeled_ngram_dataset_from_args
 )
 from common import split_classes, bad_amino_acids
 from download import fetch_data
