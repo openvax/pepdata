@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import cPickle
 from gzip import GzipFile
-from cPickle import dumps, dump, loads, load
+import re
 
 import Bio.SeqIO
 import pandas as pd
@@ -21,6 +22,44 @@ from progressbar import ProgressBar
 
 from common import int_or_seq, dataframe_from_counts
 from download import fetch_data, fetch_and_transform_data
+
+BASE_URL = "ftp://ftp.ensembl.org"
+FTP_DIR = "/pub/release-75/fasta/homo_sapiens/pep/"
+FASTA_FILENAME = "Homo_sapiens.GRCh37.75.pep.all.fa"
+GZ_FILENAME = FASTA_FILENAME + ".gz"
+FULL_URL = BASE_URL + FTP_DIR + GZ_FILENAME
+
+def load_dataframe():
+    filename = fetch_data(FASTA_FILENAME, FULL_URL)
+    sequences = []
+    protein_ids = []
+    gene_ids = []
+    transcript_ids = []
+    gene_pattern = re.compile('gene:(ENSG[0-9]*)')
+    transcript_pattern = re.compile('transcript:(ENST[0-9]*)')
+
+    with open(filename, 'r') as f:
+        for record in Bio.SeqIO.parse(f, 'fasta'):
+            protein_ids.append(record.id)
+            sequences.append(str(record.seq))
+            desc = record.description
+            gene_matches = gene_pattern.findall(desc)
+            if gene_matches:
+                gene_id = gene_matches[0]
+            else:
+                gene_id = None
+            gene_ids.append(gene_id)
+            transcript_matches = transcript_pattern.findall(desc)
+            if transcript_matches:
+                transcript_id = transcript_matches[0]
+            else:
+                transcript_id = None
+            transcript_ids.append(transcript_id)
+    return pd.DataFrame({
+        'protein' : sequences,
+        'gene_id' : gene_ids,
+        'protein_id' : protein_ids,
+        'transcript_id': transcript_ids})
 
 def _generate_counts(src_filename, peptide_lengths, nrows):
     epitope_counts = {}
@@ -60,11 +99,7 @@ def _generate_set(src_filename, peptide_lengths, nrows):
         pbar.finish()
     return peptides
 
-BASE_URL = "ftp://ftp.ensembl.org"
-FTP_DIR = "/pub/release-75/fasta/homo_sapiens/pep/"
-FASTA_FILENAME = "Homo_sapiens.GRCh37.75.pep.all.fa"
-GZ_FILENAME = FASTA_FILENAME + ".gz"
-FULL_URL = BASE_URL + FTP_DIR + GZ_FILENAME
+
 
 def load_peptide_counts(peptide_length = [8,9,10,11], nrows = None):
     """
@@ -97,13 +132,13 @@ def load_peptide_set(peptide_length = [8,9,10,11], nrows = None):
     def save_set(src_path, dst_path):
         string_set = _generate_set(src_path, peptide_lengths, nrows)
         with GzipFile(dst_path, 'w') as out_file:
-            out_file.write(dumps(string_set))
+            out_file.write(cPickle.dumps(string_set))
         return string_set
 
     def load_set(path):
         result = None
         with GzipFile(path, 'r') as in_file:
-            result = loads(in_file.read())
+            result = cPickle.loads(in_file.read())
         return result
 
     return fetch_and_transform_data(
