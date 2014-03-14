@@ -323,6 +323,7 @@ def load_tcell_ngrams(*args, **kwargs):
 
     *args, **kwargs : same as `load_tcell_classes`
     """
+    kwargs['training_already_reduced'] = True
     return make_ngram_dataset_from_args(load_tcell_classes, *args, **kwargs)
 
 def load_mhc(
@@ -461,6 +462,7 @@ def load_mhc_ngrams(*args, **kwargs):
 
     *args, **kwargs : same as `load_tcell_classes`
     """
+    kwargs['training_already_reduced'] = True
     return make_ngram_dataset_from_args(load_mhc_classes, *args, **kwargs)
 
 def load_tcell_vs_mhc(

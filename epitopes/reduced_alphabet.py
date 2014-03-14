@@ -57,6 +57,5 @@ aromatic2 = dict_from_list(["FHWY", "ADKERNTSQLIVMCGP"])
 
 def make_alphabet_transformer(reduced_alphabet):
     def transform(s):
-        print s
         return ''.join([chr(48 + reduced_alphabet[char]) for char in s])
     return transform

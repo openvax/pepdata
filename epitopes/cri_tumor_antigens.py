@@ -39,6 +39,6 @@ def load_dataframe(
     else:
         return df
 
-def load_peptides(*args, **kwargs)
+def load_peptides(*args, **kwargs):
     df = load_dataframe(*args, **kwargs)
     return set(df.Peptide)

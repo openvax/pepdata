@@ -169,6 +169,22 @@ def make_unlabeled_ngram_dataset_from_args(loader, *args, **kwargs):
     strings = loader(*args, **loader_kwargs)
     return make_unlabeled_ngram_dataset(strings, **kwargs)
 
+
+def array_from_kmers(strings):
+    result = [peptide_to_indices(s) for s in strings]
+    return np.array(result)
+
+
+def make_kmer_dataset(imm_strings, non_strings, verbose = True):
+    X_imm = array_from_kmers(imm_strings)
+    X_non = array_from_kmers(non_strings)
+    X = np.vstack([X_imm, X_non])
+    Y = np.ones(len(X), dtype='bool')
+    Y[len(X_imm):] = 0
+    if verbose:
+        print "[make_kmer_dataset] X.shape = %s" % (X.shape,)
+    return X, Y
+
 import amino_acid
 
 amino_acid_features = [

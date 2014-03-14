@@ -48,10 +48,12 @@ class PeptideVectorizer(object):
 
         if self.training_already_reduced:
             c = make_count_vectorizer(None, self.max_ngram)
+            X = c.fit_transform(amino_acid_strings).todense()
+            self.count_vectorizer.vocabulary_ = c.vocabulary_
         else:
             c = self.count_vectorizer
+            X = c.fit_transform(amino_acid_strings).todense()
 
-        X = c.fit_transform(amino_acid_strings).todense()
         if self.normalize_row:
             X = normalize(X, norm='l1')
         return X

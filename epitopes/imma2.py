@@ -35,7 +35,7 @@ from features import make_ngram_dataset_from_args
 from reduced_alphabet import make_alphabet_transformer
 from static_data import DATA_DIR
 
-def load_imma2_imm(reduced_alphabet = None):
+def load_imm_list(reduced_alphabet = None):
     path = join(DATA_DIR, 'IMMA2_imm.txt')
     if reduced_alphabet:
         transformer = make_alphabet_transformer(reduced_alphabet)
@@ -45,7 +45,7 @@ def load_imma2_imm(reduced_alphabet = None):
         imm = [transformer(line.strip()) for line in f]
     return imm
 
-def load_imma2_non(reduced_alphabet = None):
+def load_non_list(reduced_alphabet = None):
     path = join(DATA_DIR, 'IMMA2_non.txt')
     if reduced_alphabet:
         transformer = make_alphabet_transformer(reduced_alphabet)
@@ -56,13 +56,13 @@ def load_imma2_non(reduced_alphabet = None):
         non = [transformer(line.strip()) for line in f]
     return non
 
-def load_imma2_classes(reduced_alphabet = None):
-    imm = load_imma2_imm(reduced_alphabet)
-    non = load_imma2_non(reduced_alphabet)
+def load_classes(reduced_alphabet = None):
+    imm = load_imm_list(reduced_alphabet)
+    non = load_non_list(reduced_alphabet)
     return set(imm), set(non)
 
 
-def load_imma2_ngrams(*args, **kwargs):
+def load_ngrams(*args, **kwargs):
     """
     Load IMMA2 dataset and transform into n-gram vector representation
 
@@ -83,7 +83,7 @@ def load_imma2_ngrams(*args, **kwargs):
     verbose : bool
         Default True
     """
-    return make_ngram_dataset_from_args(load_imma2_classes, *args, **kwargs)
+    return make_ngram_dataset_from_args(load_classes, *args, **kwargs)
 
 
 
