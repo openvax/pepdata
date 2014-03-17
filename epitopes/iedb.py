@@ -289,7 +289,7 @@ def load_tcell_classes(*args, **kwargs):
 
     *args, **kwargs : same as 'load_tcell'
     """
-    noisy_labels = kwargs.pop('noisy_labels', None)
+    noisy_labels = kwargs.pop('noisy_labels', 'majority')
     verbose = kwargs.get('verbose')
     tcell_values = load_tcell_values(*args, **kwargs)
     return split_classes(
@@ -428,7 +428,7 @@ def load_mhc_classes(*args, **kwargs):
 
     *args, **kwargs : same as 'load_tcell'
     """
-    noisy_labels = kwargs.pop('noisy_labels', None)
+    noisy_labels = kwargs.pop('noisy_labels', 'majority')
     verbose = kwargs.get('verbose')
     mhc_values = load_mhc_values(*args, **kwargs)
     return split_classes(

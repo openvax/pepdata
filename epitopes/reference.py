@@ -20,7 +20,7 @@ import Bio.SeqIO
 import pandas as pd
 from progressbar import ProgressBar
 
-from common import int_or_seq, dataframe_from_counts
+from common import int_or_seq, dataframe_from_counts, bad_amino_acids
 from download import fetch_data, fetch_and_transform_data
 
 BASE_URL = "ftp://ftp.ensembl.org"
@@ -63,11 +63,16 @@ def load_dataframe():
             else:
                 transcript_id = None
             transcript_ids.append(transcript_id)
-    return pd.DataFrame({
+    df = pd.DataFrame({
         'protein' : sequences,
         'gene_id' : gene_ids,
         'protein_id' : protein_ids,
         'transcript_id': transcript_ids})
+    return df
+    #if filter_amino_acids:
+    #    return df.ix[df.protein.str.contains(bad_amino_acids)]
+    #else:
+    #    return df
 
 def _generate_counts(src_filename, peptide_lengths, nrows):
     epitope_counts = {}
