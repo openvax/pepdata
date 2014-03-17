@@ -35,7 +35,7 @@ def split_classes(
         values,
         noisy_labels = 'majority',
         unique_sequences = True,
-        verbose = True):
+        verbose = False):
     """
     Given a dataframe mapping epitope strings to percentages in [0,1],
     split them into two sets (positive and negative examples.

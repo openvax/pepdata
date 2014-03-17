@@ -36,7 +36,7 @@ def _load_dataframe(
         assay_group=None,
         nrows = None,
         reduced_alphabet = None,
-        verbose= True):
+        verbose= False):
     """
     Load an IEDB csv into a pandas dataframe and filter using the
     criteria given as function arguments
@@ -128,7 +128,7 @@ def _group_epitopes(
         unique_sequences = True,
         min_count = 0,
         group_by_allele = False,
-        verbose = True):
+        verbose = False):
     """
     Given a dataframe of epitopes and qualitative measures,
     group the epitope strings (optionally also grouping by allele),
@@ -164,7 +164,7 @@ def load_tcell(
         assay_group=None,
         reduced_alphabet = None, # 20 letter AA strings -> simpler alphabet
         nrows = None,
-        verbose= True):
+        verbose= False):
     """
     Load IEDB T-cell data without aggregating multiple entries for same epitope
 
@@ -223,7 +223,7 @@ def load_tcell_values(
         nrows = None,
         min_count = 0,
         group_by_allele = False,
-        verbose= True):
+        verbose= False):
     """
     Load the T-cell response data from IEDB, collect into a dataframe mapping
     epitopes to percentage positive results.
@@ -334,7 +334,7 @@ def load_mhc(
         assay_group=None,
         reduced_alphabet = None, # 20 letter AA strings -> simpler alphabet
         nrows = None,
-        verbose = True):
+        verbose = False):
     """
     Load IEDB MHC data without aggregating multiple entries for the same epitope
     """
@@ -364,7 +364,7 @@ def load_mhc_values(
         nrows = None,
         group_by_allele = False,
         min_count = 0,
-        verbose= True):
+        verbose= False):
     """
     Load the MHC binding results from IEDB, collect into a dataframe mapping
     epitopes to percentage positive results.
@@ -474,7 +474,7 @@ def load_tcell_vs_mhc(
         assay_group=None,
         nrows = None,
         group_by_allele = False,
-        verbose= True):
+        verbose= False):
     """
     Percentage positive results for both T-cell response assays
     and MHC binding assays (keyed by epitopes for which we have data
