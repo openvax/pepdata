@@ -53,7 +53,7 @@ def _load_dataframe(
     df = df[mask]
     if reduced_alphabet:
         epitopes = df[epitope_column_name]
-        df[] = \
+        df[epitope_column_name] = \
             epitopes.map(make_alphabet_transformer(reduced_alphabet))
     return df
 
