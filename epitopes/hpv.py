@@ -57,7 +57,7 @@ def _load_dataframe(
             epitopes.map(make_alphabet_transformer(reduced_alphabet))
     return df
 
-def load_tcell(*args, **kwargs)
+def load_tcell(*args, **kwargs):
     tcell_path = join(DATA_DIR, 'cvc_hpv_tcell.csv')
     return _load_dataframe(tcell_path, 'Epitope sequence', *args, **kwargs)
 
