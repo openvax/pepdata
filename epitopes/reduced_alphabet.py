@@ -55,7 +55,21 @@ alex6 = dict_from_list(["C", "G", "P", "FYW", "AVILM", "STNQRHKDE"])
 
 aromatic2 = dict_from_list(["FHWY", "ADKERNTSQLIVMCGP"])
 
+hp_vs_aromatic = dict_from_list(["H", "CMILV", "FWY", "ADKERNTSQGP"])
+
+class AlphabetTransformer(object):
+    def __init__(self, reduced_alphabet):
+        self.reduced_alphabet = reduced_alphabet
+
+    def __call__(self, s):
+        return self.transform(s)
+
+    def transform(self, s):
+        d = self.reduced_alphabet
+        return ''.join([chr(48 + d[char]) for char in s])
+
+    def __getstate__(self):
+        return {'reduced_alphabet':self.reduced_alphabet}
+
 def make_alphabet_transformer(reduced_alphabet):
-    def transform(s):
-        return ''.join([chr(48 + reduced_alphabet[char]) for char in s])
-    return transform
+    return AlphabetTransformer(reduced_alphabet)

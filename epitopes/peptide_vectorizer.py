@@ -41,6 +41,15 @@ class PeptideVectorizer(object):
         self.max_ngram = max_ngram
         self.normalize_row = normalize_row
         self.training_already_reduced = training_already_reduced
+        self.count_vectorizer = None
+    def __getstate__(self):
+        return {
+            'reduced_alphabet': self.reduced_alphabet,
+            'count_vectorizer' : self.count_vectorizer,
+            'training_already_reduced' : self.training_already_reduced,
+            'normalize_row' : self.normalize_row,
+            'max_ngram' : self.max_ngram,
+        }
 
     def fit_transform(self, amino_acid_strings):
         self.count_vectorizer = \
