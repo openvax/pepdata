@@ -14,7 +14,7 @@
 
 import pandas as pd
 
-bad_amino_acids = 'U|X|J|B|Z|\*'
+bad_amino_acids = 'U|X|J|B|Z'
 
 def int_or_seq(x):
     if isinstance(x, int):

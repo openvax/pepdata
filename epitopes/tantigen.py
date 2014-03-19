@@ -13,16 +13,18 @@
 # limitations under the License.
 
 """
-HPV T-cell antigens and MHC ligands from Dana Farber CVC
-http://cvc.dfci.harvard.edu/hpv/HTML/help.html
+TANTIGEN: Tumor T-cell Antigen Database from Dana Farber CVC
+http://cvc.dfci.harvard.edu/tadb/index.html
 """
 
 from os.path import join
 
 import pandas as pd
+import numpy as np
 
 from static_data import DATA_DIR
 from common import bad_amino_acids
+from features import make_unlabeled_ngram_dataset_from_args
 
 def _load_dataframe(
         path,
@@ -58,7 +60,11 @@ def _load_dataframe(
     return df
 
 def load_tcell(*args, **kwargs):
-    tcell_path = join(DATA_DIR, 'cvc_hpv_tcell.csv')
+    """
+    Return a dataframe with accession IDs, peptide sequence, and MHC allele
+    for T-cell responsive tumor antigens
+    """
+    tcell_path = join(DATA_DIR, 'tantigen_tcell.csv')
     return _load_dataframe(tcell_path, 'Epitope sequence', *args, **kwargs)
 
 def load_tcell_set(*args, **kwargs):
@@ -70,7 +76,11 @@ def load_tcell_ngrams(*args, **kwargs):
         load_tcell_set, *args, **kwargs)
 
 def load_mhc(*args, **kwargs):
-    mhc_path = join(DATA_DIR, 'cvc_hpv_ligand.csv')
+    """
+    Return a dataframe with accession IDs, peptide sequence, and MHC allele
+    for MHC-binding tumor antigens
+    """
+    mhc_path = join(DATA_DIR, 'tantigen_mhc.csv')
     return _load_dataframe(mhc_path, 'Ligand sequence', *args, **kwargs)
 
 def load_mhc_set(*args, **kwargs):
