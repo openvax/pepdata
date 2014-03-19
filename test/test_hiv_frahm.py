@@ -12,24 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from epitopes import tantigen
+from epitopes import hiv_frahm
 
-def test_load_tcell():
-    df = tantigen.load_tcell()
+def test_load_dataframe():
+    df = hiv_frahm.load_dataframe()
     assert df is not None
     assert len(df) > 0
 
-def test_load_tcell_set():
-    peptides = tantigen.load_tcell_set()
+def test_load_set():
+    peptides = hiv_frahm.load_set()
     assert peptides is not None
     assert len(peptides) > 0
 
-def test_load_mhc():
-    df = tantigen.load_mhc()
-    assert df is not None
-    assert len(df) > 0
-
-def test_load_mhc_set():
-    peptides = tantigen.load_mhc_set()
-    assert peptides is not None
-    assert len(peptides) > 0
+def test_same_size():
+    peptides = hiv_frahm.load_set()
+    df = hiv_frahm.load_dataframe()
+    assert len(peptides) == len(df)
