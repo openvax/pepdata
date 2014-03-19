@@ -5,6 +5,6 @@ from features  import (
   make_ngram_dataset, transform_rows, toxin_features
 )
 import iedb
-import imma
+import imma2
 import calis 
 import toxin
