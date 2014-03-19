@@ -25,7 +25,6 @@ def load_dataframe(min_count = None, max_count = None):
     url = \
         "http://www.hiv.lanl.gov/content/immunology/hlatem/study1/peptides.html"
     df = pd.read_html(url, header=0)[0]
-    print df.columns
     peptides = df['Sequence']
     # header parsing of the table messes up, so
     # reactions gets labeled as nan and
