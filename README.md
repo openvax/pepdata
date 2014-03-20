@@ -15,13 +15,13 @@ To make useful predictions (i.e. "which peptides should go in this vaccine?") we
 - `hpv`: [Human Papillomavirus T cell Antigen Database](http://cvc.dfci.harvard.edu/cvccgi/hpv/)
 - `toxin`: Toxic protein sequences from [Animal Toxin Databse](http://protchem.hunnu.edu.cn/toxin/)
 - `danafarber`: [Dana Farber Repository for Machine Learning in Immunology](http://bio.dfci.harvard.edu/DFRMLI/)
+- `tantigen`: [Tumor T-cell Antigen Database](http://cvc.dfci.harvard.edu/tadb/)
 - `hiv_frahm`: Reactions to HIV epitopes across different ethnicities (from [LANL HIV Databases](http://www.hiv.lanl.gov/content/immunology/hlatem/study1/index.html))
 - `cri_tumor_antigens`: Tumor associated peptides from [Cancer Immunity](http://cancerimmunity.org/peptide/mutations/)
 
 
 Planned:
 
-- `tantigen`: [Tumor T-cell Antigen Database](http://cvc.dfci.harvard.edu/tadb/)
 - `bcipep`: [B-cell epitopes](http://www.imtech.res.in/raghava/bcipep/data.html) 
 
 
