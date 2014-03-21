@@ -31,7 +31,7 @@ def mutate(sequence, position, ref, alt):
     mutable_sequence[position : position + len(ref)] = alt
     return mutable_sequence
 
-def mutate_protein_from_transcript(transcript_seq, position, ref, alt, min_padding = 8):
+def mutate_protein_from_transcript(transcript_seq, position, ref, alt, max_length = 50, min_padding = 2):
     """ mutate a sequence by inserting the allele into the genomic transcript
         and translate to protein sequence
 
@@ -49,7 +49,7 @@ def mutate_protein_from_transcript(transcript_seq, position, ref, alt, min_paddi
     mutated_sequence = mutate(transcript_seq, position, ref, alt).toseq().translate()
     aa_position = int(position / 3)  # genomic position to codon position
     variant_length = max(len(ref), len(alt))
-    seq = get_mutation_region(mutated_sequence.tomutable(), aa_position, variant_length, min_padding = min_padding)
+    seq = get_mutation_region(mutated_sequence.tomutable(), aa_position, variant_length, max_length = max_length, min_padding = min_padding)
 
     return seq
 
