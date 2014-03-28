@@ -14,55 +14,74 @@
 
 
 def mutate(sequence, position, ref, alt):
-    """ mutate a sequence by inserting the allele
+    """
+    Mutate a sequence by substituting given `alt` at instead of `ref` at the
+    given `position`.
 
     Parameters
     ----------
     sequence : sequence or BioPython sequence
-    position : int 
+    position : int
     allele : sequence or str, alternate allele to insert
 
     """
     transcript_ref_base = sequence[position:position+len(ref)]
     assert str(transcript_ref_base) == ref, \
-        "Transcript reference base %s at position %d does not match reference %s" % (transcript_ref_base, position, ref)
-
+        "Transcript reference base %s at position %d != given reference %s" % \
+        (transcript_ref_base, position, ref)
     mutable_sequence = sequence.tomutable()
     mutable_sequence[position : position + len(ref)] = alt
     return mutable_sequence
 
-def mutate_protein_from_transcript(transcript_seq, position, ref, alt, min_padding = 8):
-    """ mutate a sequence by inserting the allele into the genomic transcript
-        and translate to protein sequence
+def mutate_protein_from_transcript(
+        transcript_seq, position, ref, alt, min_padding = 8):
+    """
+    Mutate a sequence by inserting the allele into the genomic transcript
+    and translate to protein sequence
 
     Parameters
     ----------
     sequence : sequence or BioPython sequence
-    position : int 
+    position : int
     allele : sequence or str, alternate allele to insert
 
     """
     transcript_ref_base = transcript_seq[position:position+len(ref)]
     assert str(transcript_ref_base) == ref, \
-        "Transcript reference base %s at position %d does not match reference %s" % (transcript_ref_base, position, ref)
+        "Transcript reference base %s at position %d != reference %s" % \
+        (transcript_ref_base, position, ref)
 
-    mutated_sequence = mutate(transcript_seq, position, ref, alt).toseq().translate()
+    mutated_dna = mutate(transcript_seq, position, ref, alt)
+    mutated_peptide = mutated_dna.toseq().translate()
+
     aa_position = int(position / 3)  # genomic position to codon position
     variant_length = max(len(ref), len(alt))
-    seq = get_mutation_region(mutated_sequence.tomutable(), aa_position, variant_length, min_padding = min_padding)
-
+    seq = get_mutation_region(
+        mutated_peptide.tomutable(),
+        aa_position,
+        variant_length,
+        min_padding = min_padding)
     return seq
 
-def get_mutation_region(seq, position, variant_length = 1, max_length = 50, min_padding = 2):
-    """ get surronding region of a sequence around a specific position.
+def get_mutation_region(
+        seq, position,
+        variant_length = 1,
+        max_length = 50,
+        min_padding = 2):
+    """
+    Get surronding region of a sequence around a specific position.
 
     Parameters
     ----------
     sequence : sequence or BioPython sequence
-    position : int, position around variant
-    variant_legnth : int, length of the mutation 
-    max_length : int, maximum length peptide to return
-    min_padding : int, minimum amount of residues before and after variant affected residues
+    position : int
+        Position around variant
+    variant_legnth : int
+        Length of the mutation
+    max_length : int
+        Maximum length peptide to return
+    min_padding : int
+        Minimum amount of residues before and after variant affected residues
     """
     end_pos = min(position + min_padding + 1, len(seq))
     start_pos = max(0, position - min_padding)

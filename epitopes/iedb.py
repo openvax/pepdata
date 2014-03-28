@@ -146,20 +146,22 @@ def _group_epitopes(
         groups = pos_mask.groupby(epitopes)
 
     values = groups.mean()
+    counts = groups.count()
 
     if min_count:
-        counts = groups.count()
-        values = values[counts >= min_count]
-
-    return values
-
+        mask = counts >= min_count
+        values = values[mask]
+    result = pd.DataFrame(
+        data = {'value' : values, 'count': counts},
+        index = values.index)
+    return result
 
 
 def load_tcell(
         mhc_class = None, # 1, 2, or None for neither
         hla_type = None,
-        human = True,
         exclude_hla_type = None,
+        human = True,
         peptide_length = None,
         assay_group=None,
         reduced_alphabet = None, # 20 letter AA strings -> simpler alphabet
@@ -178,6 +180,9 @@ def load_tcell(
 
     exclude_hla_type: regex pattern, optional
         Exclude certain HLA types
+
+    human: bool
+        Restrict to human samples (default True)
 
     peptide_length: int, optional
         Restrict epitopes to amino acid strings of given length
@@ -215,8 +220,8 @@ def load_tcell(
 def load_tcell_values(
         mhc_class = None, # 1, 2, or None for neither
         hla_type = None,
-        human = True,
         exclude_hla_type = None,
+        human = True,
         peptide_length = None,
         assay_group=None,
         reduced_alphabet = None, # 20 letter AA strings -> simpler alphabet
@@ -238,6 +243,9 @@ def load_tcell_values(
 
     exclude_hla_type: regex pattern, optional
         Exclude certain HLA types
+
+    human: bool
+        Restrict to human samples (default True)
 
     peptide_length: int, optional
         Restrict epitopes to amino acid strings of given length
@@ -293,7 +301,7 @@ def load_tcell_classes(*args, **kwargs):
     verbose = kwargs.get('verbose')
     tcell_values = load_tcell_values(*args, **kwargs)
     return split_classes(
-        tcell_values,
+        tcell_values.value,
         noisy_labels = noisy_labels,
         verbose = verbose)
 
@@ -330,6 +338,7 @@ def load_mhc(
         mhc_class = None, # 1, 2, or None for neither
         hla_type = None,
         exclude_hla_type = None,
+        human = True,
         peptide_length = None,
         assay_group=None,
         reduced_alphabet = None, # 20 letter AA strings -> simpler alphabet
@@ -337,6 +346,36 @@ def load_mhc(
         verbose = False):
     """
     Load IEDB MHC data without aggregating multiple entries for the same epitope
+
+
+    Parameters
+    ----------
+    mhc_class: {None, 1, 2}
+        Restrict to MHC Class I or Class II (or None for neither)
+
+    hla_type: regex pattern, optional
+        Restrict results to specific HLA type used in assay
+
+    exclude_hla_type: regex pattern, optional
+        Exclude certain HLA types
+
+    human: bool
+        Restrict to human samples (default True)
+
+    peptide_length: int, optional
+        Restrict epitopes to amino acid strings of given length
+
+    assay_group: string, optional
+        Only collect results from assays of the given type
+
+    reduced_alphabet: dictionary, optional
+        Remap amino acid letters to some other alphabet
+
+    nrows: int, optional
+        Don't load the full IEDB dataset but instead read only the first nrows
+
+    verbose: bool
+        Print debug output
     """
 
     data_path = fetch_data(
@@ -347,6 +386,7 @@ def load_mhc(
                 mhc_class = mhc_class,
                 hla_type = hla_type,
                 exclude_hla_type = exclude_hla_type,
+                human = human,
                 peptide_length = peptide_length,
                 assay_group = assay_group,
                 reduced_alphabet = reduced_alphabet,
@@ -358,6 +398,7 @@ def load_mhc_values(
         mhc_class = None, # 1, 2, or None for neither
         hla_type = None,
         exclude_hla_type = None,
+        human = True,
         peptide_length = None,
         assay_group=None,
         reduced_alphabet = None, # 20 letter AA strings -> simpler alphabet
@@ -379,6 +420,9 @@ def load_mhc_values(
 
     exclude_hla_type: regex pattern, optional
         Exclude certain HLA types
+
+    human: bool
+        Restrict to human samples (default True)
 
     peptide_length: int, optional
         Restrict epitopes to amino acid strings of given length
@@ -405,6 +449,7 @@ def load_mhc_values(
         mhc_class = mhc_class,
         hla_type = hla_type,
         exclude_hla_type = exclude_hla_type,
+        human = human,
         peptide_length = peptide_length,
         assay_group = assay_group,
         reduced_alphabet = reduced_alphabet,
@@ -432,7 +477,7 @@ def load_mhc_classes(*args, **kwargs):
     verbose = kwargs.get('verbose')
     mhc_values = load_mhc_values(*args, **kwargs)
     return split_classes(
-        mhc_values,
+        mhc_values.value,
         noisy_labels = noisy_labels,
         verbose = verbose)
 
@@ -500,7 +545,7 @@ def load_tcell_vs_mhc(
                 min_count = min_count,
                 group_by_allele = group_by_allele,
                 verbose = verbose)
-    df_combined = pd.DataFrame({'mhc':mhc, 'tcell':tcell})
+    df_combined = pd.DataFrame({'mhc':mhc.value, 'tcell':tcell.value})
     both = ~(df_combined.mhc.isnull() | df_combined.tcell.isnull())
     return df_combined[both]
 
