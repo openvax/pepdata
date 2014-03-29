@@ -13,12 +13,10 @@ import appdirs
 import pandas as pd
 from progressbar import ProgressBar
 
-DATA_DIR = environ.get("EPITOPES_DATA_DIR", appdirs.user_cache_dir("epitopes"))
-
 def ensure_dir(path):
     if not exists(path):
         makedirs(path)
-
+DATA_DIR = environ.get("EPITOPES_DATA_DIR", appdirs.user_cache_dir("epitopes"))
 
 def fetch_data(filename, download_url):
     ensure_dir(DATA_DIR)
