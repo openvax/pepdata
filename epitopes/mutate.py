@@ -82,7 +82,7 @@ def get_mutation_region(
 
 
 def mutate_protein_from_transcript(
-        transcript_seq, position, ref, alt, min_padding = 8):
+        transcript_seq, position, ref, alt, min_padding = 8, max_length = None):
     """
     Mutate a sequence by inserting the allele into the genomic transcript
     and translate to protein sequence
@@ -112,6 +112,8 @@ def mutate_protein_from_transcript(
 
     aa_position = int(position / 3)  # genomic position to codon position
     variant_length = max(len(ref), len(alt))
+    if max_length:
+        variant_length = min(variant_length, max_length)
     seq = get_mutation_region(
         mutated_peptide,
         aa_position,
