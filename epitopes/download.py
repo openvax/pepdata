@@ -82,15 +82,23 @@ def _db_table_exists(db, table_name):
         return True
     return False
 
-def fetch_fasta_db(db_filename, table_name,
-        fasta_filename, download_url, subdir = None):
+def fetch_fasta_db(
+        table_name,
+        fasta_filename,
+        download_url,
+        key_column = 'id',
+        value_column = 'seq',
+        subdir = None):
+    base_filename = splitext(fasta_filename)[0]
+    db_filename = "%s.%s.%s.db" % (base_filename, key_column, value_column)
     data_dir = get_data_dir(subdir)
     db_path = join(data_dir, db_filename)
     db = sqlite3.connect(db_path)
     if _db_table_exists(db, table_name):
         return db
     create = \
-        "create table if not exists %s (id TEXT, seq TEXT)" % table_name
+        "create table if not exists %s (%s TEXT, %s TEXT)" % \
+        (table_name, key_column, value_column)
     db.execute(create)
     dict = fetch_fasta_dict(fasta_filename, download_url, subdir)
     rows = [

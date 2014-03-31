@@ -1,7 +1,6 @@
 from epitopes.download import fetch_fasta_dict, fetch_fasta_db, fetch_data
 
 FASTA_FILENAME = 'Homo_sapiens.GRCh37.75.dna_rm.chromosome.MT.fa'
-DB_FILENAME = 'Homo_sapiens.GRCh37.75.dna_rm.chromosome.MT.db'
 URL = \
 'ftp://ftp.ensembl.org/pub/release-75/fasta/homo_sapiens/dna/Homo_sapiens.GRCh37.75.dna_rm.chromosome.MT.fa.gz'
 
@@ -22,5 +21,5 @@ def test_download_fasta_dict():
     assert len(d) > 0
 
 def test_downloadd_fasta_db():
-    db = fetch_fasta_db(DB_FILENAME, "DNA", FASTA_FILENAME, URL)
+    db = fetch_fasta_db("DNA", FASTA_FILENAME, URL)
     assert db is not None
