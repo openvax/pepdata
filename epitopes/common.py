@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import pandas as pd
+import logging
 
 bad_amino_acids = 'U|X|J|B|Z'
 
