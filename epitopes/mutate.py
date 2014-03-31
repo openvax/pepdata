@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from Bio.Seq import Seq
 
 def mutate(sequence, position, ref, alt):
     """
@@ -89,7 +90,7 @@ def mutate_protein_from_transcript(
 
     Parameters
     ----------
-    transcript_seq :  BioPython sequence
+    transcript_seq :  sequence
         Protein sequence we're going to mutate
 
     position : int
@@ -102,6 +103,9 @@ def mutate_protein_from_transcript(
         Alternate substring to insert
 
     """
+    # turn any character sequence into a BioPython sequence
+    transcript_seq = Seq(str(transcript_seq))
+
     transcript_ref_base = transcript_seq[position:position+len(ref)]
     assert str(transcript_ref_base) == ref, \
         "Transcript reference base %s at position %d != reference %s" % \
