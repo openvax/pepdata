@@ -30,10 +30,14 @@ def get_data_dir(subdir = None, envkey =  None):
     else:
         return dir
 
-def fetch_data(filename, download_url, subdir = None):
+def build_path(filename, subdir = None):
     data_dir = get_data_dir(subdir)
     ensure_dir(data_dir)
-    full_path = join(data_dir, filename)
+    return join(data_dir, filename)
+
+def fetch_data(filename, download_url, subdir = None):
+    logging.info("Fetching %s from %s", filename, download_url)
+    full_path = build_path(filename, subdir)
     if not exists(full_path):
         logging.info("Downloading %s",  download_url)
 
@@ -78,9 +82,9 @@ def _db_table_exists(db, table_name):
     query = \
         "SELECT name FROM sqlite_master WHERE type='table' AND name='%s'" % \
         table_name
-    for _ in db.execute(query):
-        return True
-    return False
+    cursor = db.execute(query)
+    results = cursor.fetchmany()
+    return len(results) > 0
 
 def fetch_fasta_db(
         table_name,
@@ -91,23 +95,33 @@ def fetch_fasta_db(
         subdir = None):
     base_filename = splitext(fasta_filename)[0]
     db_filename = "%s.%s.%s.db" % (base_filename, key_column, value_column)
-    data_dir = get_data_dir(subdir)
-    db_path = join(data_dir, db_filename)
+
+    db_path = build_path(db_filename, subdir)
     db = sqlite3.connect(db_path)
-    if _db_table_exists(db, table_name):
-        return db
-    create = \
-        "create table if not exists %s (%s TEXT, %s TEXT)" % \
-        (table_name, key_column, value_column)
-    db.execute(create)
-    dict = fetch_fasta_dict(fasta_filename, download_url, subdir)
-    rows = [
-        (idx, str(record.seq))
-        for (idx, record)
-        in dict.iteritems()
-    ]
-    db.executemany("insert into %s values (?, ?)" % table_name, rows)
-    db.commit()
+
+    # make sure to delete the database file in case anything goes wrong
+    # to avoid leaving behind an empty DB
+    try:
+        # if we've already create the table in the database
+        # then assuming it's complete/correct and return it
+        if _db_table_exists(db, table_name):
+            return db
+        create = \
+            "create table %s (%s TEXT, %s TEXT)" % \
+            (table_name, key_column, value_column)
+        db.execute(create)
+        dict = fetch_fasta_dict(fasta_filename, download_url, subdir)
+        rows = [
+            (idx, str(record.seq))
+            for (idx, record)
+            in dict.iteritems()
+        ]
+        db.executemany("insert into %s values (?, ?)" % table_name, rows)
+        db.commit()
+    except:
+        db.close()
+        remove(db_path)
+        raise
     return db
 
 
@@ -118,9 +132,7 @@ def fetch_and_transform_data(
         source_filename,
         source_url,
         subdir = None):
-    data_dir = get_data_dir(subdir)
-    ensure_dir(data_dir)
-    transformed_path = join(data_dir, transformed_filename)
+    transformed_path = build_path(transformed_filename, subdir)
     if not exists(transformed_path):
         source_path = fetch_data(source_filename, source_url, subdir)
         result = transformer(source_path, transformed_path)
