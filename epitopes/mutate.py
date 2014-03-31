@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
+
 from Bio.Seq import Seq
 
 def mutate(sequence, position, ref, alt):
@@ -34,10 +36,10 @@ def mutate(sequence, position, ref, alt):
         Alternate allele to insert
     """
     transcript_ref_base = sequence[position:position+len(ref)]
-
-    assert str(transcript_ref_base) == ref, \
-        "Transcript reference base %s at position %d != given reference %s" % \
-        (transcript_ref_base, position, ref)
+    if ref != '.' and ref != '*':
+        assert str(transcript_ref_base) == ref, \
+            "Transcript ref base %s at position %d != given reference %s" % \
+            (transcript_ref_base, position, ref)
     prefix = sequence[:position]
     suffix = sequence[position+len(ref):]
     return prefix + alt + suffix
@@ -107,9 +109,10 @@ def mutate_protein_from_transcript(
     transcript_seq = Seq(str(transcript_seq))
 
     transcript_ref_base = transcript_seq[position:position+len(ref)]
-    assert str(transcript_ref_base) == ref, \
-        "Transcript reference base %s at position %d != reference %s" % \
-        (transcript_ref_base, position, ref)
+    if ref != '.' and ref != '*':
+        assert str(transcript_ref_base) == ref, \
+            "Transcript reference base %s at position %d != reference %s" % \
+            (transcript_ref_base, position, ref)
 
     mutated_dna = mutate(transcript_seq, position, ref, alt)
     mutated_peptide = mutated_dna.translate()
