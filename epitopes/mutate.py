@@ -16,6 +16,36 @@ import logging
 
 from Bio.Seq import Seq
 
+
+def mutate_split(sequence, position, ref, alt):
+    """
+    Return the prefix, mutated region, and suffix of
+    applying a mutation to a sequence.
+
+    Parameters
+    ----------
+    sequence : sequence
+        String of amino acids or DNA bases
+
+    position : int
+        Position in the sequence, starts from 0
+
+    ref : sequence or str
+        What do we expect to find at the position?
+
+    alt : sequence or str
+        Alternate allele to insert
+    """
+
+    transcript_ref_base = sequence[position:position+len(ref)]
+    if ref != '.':
+        assert str(transcript_ref_base) == ref, \
+            "Transcript ref base %s at position %d != given reference %s" % \
+            (transcript_ref_base, position, ref)
+    prefix = sequence[:position]
+    suffix = sequence[position+len(ref):]
+    return prefix, alt, suffix
+
 def mutate(sequence, position, ref, alt):
     """
     Mutate a sequence by substituting given `alt` at instead of `ref` at the
@@ -35,13 +65,7 @@ def mutate(sequence, position, ref, alt):
     alt : sequence or str
         Alternate allele to insert
     """
-    transcript_ref_base = sequence[position:position+len(ref)]
-    if ref != '.' and ref != '*':
-        assert str(transcript_ref_base) == ref, \
-            "Transcript ref base %s at position %d != given reference %s" % \
-            (transcript_ref_base, position, ref)
-    prefix = sequence[:position]
-    suffix = sequence[position+len(ref):]
+    prefix, alt, suffix = mutate_split(sequence, position, ref, alt)
     return prefix + alt + suffix
 
 
@@ -109,7 +133,7 @@ def mutate_protein_from_transcript(
     transcript_seq = Seq(str(transcript_seq))
 
     transcript_ref_base = transcript_seq[position:position+len(ref)]
-    if ref != '.' and ref != '*':
+    if ref != '.':
         assert str(transcript_ref_base) == ref, \
             "Transcript reference base %s at position %d != reference %s" % \
             (transcript_ref_base, position, ref)
