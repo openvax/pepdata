@@ -175,8 +175,6 @@ def _annotate(
 
     last_mutation_pos = region.start + region.mutation_stop + 1
 
-
-
     if region.frameshift:
         return "%s%dfs" % (aa_ref[0], aa_position+1)
     elif n_alt == 0:
@@ -204,7 +202,8 @@ Mutation = \
             "start",  # start position of region in the protein
             "stop",   # stop position of region in the protein
             "mutation_start", # where in the region is the first mutated AA?
-            "mutation_stop",  # where does the region go back to wildtype?
+            "n_wildtype_modified",  # how many wildtype got modified?
+            "n_mutant_residues",  # how many new residues in the seq?
             "annot", # mutation annotation i.e. "V600E"
         ))
 
@@ -261,7 +260,10 @@ def mutate_protein_from_transcript(
     print region
     original_protein = transcript_seq.translate()
     annot = \
-        _annotate(original_protein, mutated_protein, region,
+        _annotate(
+            original_protein,
+            mutated_protein,
+            region,
             ref, alt, position)
 
     return Mutation(
@@ -269,5 +271,6 @@ def mutate_protein_from_transcript(
         start = region.start,
         stop = region.stop,
         mutation_start = region.mutation_start,
-        mutation_stop = region.mutation_stop,
+        n_wildtype_modified = ,
+        n_mutant_residues = ,
         annot = annot)
