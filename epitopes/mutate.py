@@ -13,7 +13,10 @@
 # limitations under the License.
 
 import math
+from collections import namedtuple
+
 from Bio.Seq import Seq
+
 
 
 def mutate_split(sequence, position, ref, alt):
@@ -70,12 +73,23 @@ def mutate(sequence, position, ref, alt):
 def is_frameshift(variant_length):
     return variant_length > 1 and variant_length % 3 != 0
 
+MutationRegion = \
+    namedtuple("MutationRegion",
+    (
+        "seq",   # amino acid sequence of region around mutation
+        "start"  # where in the original protein did we start?
+        "stop"   # where in the original protein did we end?
+        "mutation_start", # where in the region does the mutation start?
+        "mutation_stop",  # where in the region does the mutation end?
+        "frameshift" # was the mutation a frameshift?
+    )
+
 def get_mutation_region(
         seq,
         position,
         variant_length = 1,
-        max_length = 50,
-        min_padding = 2,
+        max_length = None,
+        min_padding = None,
         with_mutation_coordinates = False):
     """
     Get surrounding region of a sequence around a specific position.
@@ -91,15 +105,22 @@ def get_mutation_region(
     variant_length : int
         Length of the mutation
 
-    max_length : int
+    max_length : int, optional
         Maximum length peptide to return
 
-    min_padding : int
+    min_padding : int, optional
         Minimum amount of residues before and after variant affected residues
 
-    with_mutation_coordinates : bool (default = False)
-        Return start and stop of mutation region
+    return_info : bool (default = False)
+        Return start/stop for region, start/stop of mutation in region, and
+        boolean flag for frameshifts
     """
+    n = len(seq)
+    if max_length is None:
+        max_length = n
+    if min_padding is None:
+        min_padding = max_length
+
     end_pos = min(position + min_padding + 1, len(seq))
     start_pos = max(0, position - min_padding)
     num_residue_affected = int(math.ceil(variant_length / 3.0))
@@ -112,6 +133,9 @@ def get_mutation_region(
     if is_frameshift(variant_length):
         end_pos = start_pos + max_length
         num_residue_affected = end_pos - position
+        frameshift = True
+    else:
+        frameshift = False
 
     end_codon = str(seq[position:]).find("*")
     if end_codon > 0:
@@ -119,16 +143,28 @@ def get_mutation_region(
 
     seq_region = seq[start_pos : end_pos]
 
-    if with_mutation_coordinates:
-        mutation_start_pos = position - start_pos
-        mutation_end_pos = min(len(seq_region), mutation_start_pos + num_residue_affected)
-        return seq_region, mutation_start_pos, mutation_end_pos
+    mutation_end_pos = \
+        min(len(seq_region), mutation_start_pos + num_residue_affected)
+    mutation_start_pos = position - start_pos
+    return MutationRegion(
+        seq_region, start_pos, end_pos,
+        mutation_start_pos, mutation_end_pos,
+        frameshift)
 
-    return seq_region
+
+
+Mutation = namedtuple("Mutation",
+    (
+        "seq",  # mutated sequence
+        "original",  # original sequence
+        "pos",
+
 
 
 def mutate_protein_from_transcript(
-        transcript_seq, position, ref, alt, min_padding = 8, max_length = None, with_mutation_coordinates = False):
+        transcript_seq, position, ref, alt,
+            min_padding = None,
+            max_length = None):
     """
     Mutate a sequence by inserting the allele into the genomic transcript
     and translate to protein sequence
@@ -147,8 +183,6 @@ def mutate_protein_from_transcript(
     alt : sequence or str
         Alternate substring to insert
 
-    with_mutation_coordinates : bool (default = False)
-        Return start and stop of mutation region
     """
     # turn any character sequence into a BioPython sequence
     transcript_seq = Seq(str(transcript_seq))
@@ -166,9 +200,13 @@ def mutate_protein_from_transcript(
     variant_length = max(len(ref), len(alt))
     if max_length:
         variant_length = min(variant_length, max_length)
-    return get_mutation_region(
-        mutated_peptide,
-        aa_position,
-        variant_length,
-        min_padding = min_padding,
-        with_mutation_coordinates = with_mutation_coordinates)
+   region = \
+        get_mutation_region(
+            mutated_peptide,
+            aa_position,
+            variant_length,
+            min_padding = min_padding,
+            with_mutation_coordinates = True)
+    original_peptide = transcript_seq.translate()_
+    aa_ref =
+    return Mutat
