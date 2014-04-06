@@ -70,131 +70,34 @@ def mutate(sequence, position, ref, alt):
     prefix, alt, suffix = mutate_split(sequence, position, ref, alt)
     return prefix + alt + suffix
 
-def is_frameshift(variant_length):
-    return variant_length > 1 and variant_length % 3 != 0
 
-MutationRegion = \
-    namedtuple(
-        "MutationRegion",
-        (
-            "seq",   # amino acid sequence of region around mutation
-            "start",  # where in the original protein did we start?
-            "stop",   # where in the original protein did we end?
-            "mutation_start", # where in the region does the mutation start?
-            "mutation_stop",  # where in the region does the mutation end?
-            "frameshift" # was the mutation a frameshift?
-        ))
+def annotate(
+        original_protein,
+        mutated_protein,
+        aa_position,
+        n_deleted,
+        n_inserted,
+        frameshift,
+        early_stop):
 
-def get_mutation_region(
-        seq,
-        position,
-        variant_length = 1,
-        max_length = None,
-        min_padding = None):
-    """
-    Get surrounding region of a sequence around a specific position.
-
-    Parameters
-    ----------
-    seq : BioPython sequence
-        Full amino acid string from which we're extracting a substring
-
-    position : int
-        Position around variant
-
-    variant_length : int
-        Length of the mutation
-
-    max_length : int, optional
-        Maximum length peptide to return
-
-    min_padding : int, optional
-        Minimum amount of residues before and after variant affected residues
-
-    Returns MutationRegion struct with:
-     - 'seq': mutated sequence
-     - 'start'/'stop': start/stop of region in the context sequence
-     - 'mutation_start'/'mutation_stop': start/stop of mutation in the region
-     - 'frameshift' : was the mutation a frameshift?
-    """
-    n = len(seq)
-    if max_length is None:
-        max_length = n
-    if min_padding is None:
-        min_padding = max_length
-
-    end_pos = min(position + min_padding + 1, len(seq))
-    start_pos = max(0, position - min_padding)
-    num_residue_affected = int(math.ceil(variant_length / 3.0))
-
-    # move start pos to not include stop codons
-    prefix_stop_codon = str(seq[:position]).rfind("*") + 1
-    start_pos = max(start_pos, prefix_stop_codon)
-
-    # Choose end position to fit max length
-    if is_frameshift(variant_length):
-        end_pos = start_pos + max_length
-        num_residue_affected = end_pos - position
-        frameshift = True
-    else:
-        frameshift = False
-
-    end_codon = str(seq[position:]).find("*")
-    if end_codon >= 0:
-        end_pos = min(end_pos, position + end_codon)
-
-    seq_region = seq[start_pos : end_pos]
-    mutation_start_pos = position - start_pos
-
-    mutation_end_pos = \
-        min(len(seq_region), mutation_start_pos + num_residue_affected)
-
-    return MutationRegion(
-        seq_region,
-        start_pos, end_pos,
-        mutation_start_pos, mutation_end_pos,
-        frameshift)
-
-
-
-def _annotate(
-        original_protein, mutated_protein, region,  dna_ref, dna_alt, dna_pos):
-    aa_position = dna_pos / 3
-    ref_start = region.start + region.mutation_start
-    # deletions have same start/stop but still need to show
-    # which residue got deleted
-    ref_stop = max(ref_start+1, region.start + region.mutation_stop)
-
+    ref_start = aa_position
+    ref_stop = max(aa_position + n_deleted, 1)
     aa_ref = original_protein[ref_start : ref_stop]
 
+    mut_start = aa_position
+    mut_stop = max(aa_position + n_inserted, 1)
+    aa_mut = mutated_protein[mut_start : mut_stop]
 
-    n_ref = len(dna_ref)
-    n_alt = len(dna_alt)
-
-    # in case we hit an early stop codon
-
-    last_mutation_pos = region.start + region.mutation_stop + 1
-
-
-
-    if region.frameshift:
+    if frameshift:
         return "%s%dfs" % (aa_ref[0], aa_position+1)
-    elif n_alt == 0:
+    elif early_stop:
+        return "%s%d%s*" % \
+            (aa_ref, aa_position+1, aa_mut)
+    elif n_inserted == 0:
         return "%s%ddel" % (aa_ref, aa_position+1)
-    elif n_ref == n_alt:
-        mutated_stop = min(ref_stop, last_mutation_pos)
+    else:
         return "%s%d%s" % \
-            (aa_ref, aa_position+1, mutated_protein[ref_start:mutated_stop])
-    elif n_ref > n_alt:
-        diff = (n_ref - n_alt) / 3
-        mutated_stop = min(ref_stop - diff, last_mutation_pos)
-        return "%s%d%s" % \
-            (aa_ref, aa_position+1, mutated_protein[ref_start:mutated_stop])
-    elif n_ref < n_alt:
-        diff = (n_alt - n_ref) / 3
-        mutated_stop = min(ref_stop + diff, last_mutation_pos)
-        return "%s%d%s" % \
-            (aa_ref, aa_position+1, mutated_protein[ref_start:mutated_stop])
+            (aa_ref, aa_position+1, aa_mut)
 
 Mutation = \
     namedtuple(
@@ -204,16 +107,18 @@ Mutation = \
             "start",  # start position of region in the protein
             "stop",   # stop position of region in the protein
             "mutation_start", # where in the region is the first mutated AA?
-            "mutation_stop",  # where does the region go back to wildtype?
+            "n_removed",  # how many wildtype residues removed?
+            "n_inserted",  # how many new residues in the seq?
             "annot", # mutation annotation i.e. "V600E"
         ))
 
 
-
 def mutate_protein_from_transcript(
-        transcript_seq, position, ref, alt,
-        min_padding = None,
-        max_length = None):
+        transcript_seq,
+        position,
+        dna_ref,
+        dna_alt,
+        padding = None):
     """
     Mutate a sequence by inserting the allele into the genomic transcript
     and translate to protein sequence
@@ -226,48 +131,99 @@ def mutate_protein_from_transcript(
     position : int
         Position in `transcript_seq`, starts from 0
 
-    ref : sequence or str
+    dna_ref : sequence or str
         What's already supposed to be at the given position
 
-    alt : sequence or str
+    dna_alt : sequence or str
         Alternate substring to insert
 
+    padding : int, optional
+        Number of wildtype amino acids to keep left and right of the
+        mutation. Default is to return whole mutated string.
     """
     # turn any character sequence into a BioPython sequence
     transcript_seq = Seq(str(transcript_seq))
 
-    transcript_ref_base = transcript_seq[position:position+len(ref)]
-    if ref != '.':
-        assert str(transcript_ref_base) == ref, \
+    transcript_ref_base = transcript_seq[position:position+len(dna_ref)]
+
+    if dna_ref != '.':
+        assert str(transcript_ref_base) == dna_ref, \
             "Transcript reference base %s at position %d != reference %s" % \
-            (transcript_ref_base, position, ref)
+            (transcript_ref_base, position, dna_ref)
 
-    mutated_dna = mutate(transcript_seq, position, ref, alt)
+    original_protein = transcript_seq.translate()
+    n_original_protein = len(original_protein)
 
+    mutated_dna = mutate(transcript_seq, position, dna_ref, dna_alt)
     mutated_protein = mutated_dna.translate()
+    n_mutated_protein = len(mutated_protein)
 
     aa_position = int(position / 3)  # genomic position to codon position
 
-    variant_length = max(len(ref), len(alt))
-    if max_length:
-        variant_length = min(variant_length, max_length)
+    n_dna_ref = len(dna_ref)
+    n_dna_alt = len(dna_alt)
 
-    region = \
-        get_mutation_region(
+    # is this a frameshift mutation?
+    if abs(n_dna_ref - n_dna_alt) % 3 != 0:
+        # frameshifts 'delete' the rest of the origin protein string
+        # and 'insert' the frameshifted residues.
+        # These numbers, since they encompass the entire protein,
+        # will typically be larger than n_wildtype_deleted/n_mutant_inserted
+        # on the region struct below, since that restricts the residues counts
+        # to those within a particular region
+        n_aa_deleted = n_original_protein - aa_position
+        # careful, this doesn't include stop codons, will
+        # have to update it later
+        n_aa_inserted = n_mutated_protein - aa_position
+        frameshift = True
+    else:
+        n_aa_deleted = int(math.ceil(n_dna_ref / 3.0))
+
+        n_aa_inserted = int(math.ceil(n_dna_alt / 3.0))
+        frameshift = False
+
+    if padding is None:
+        start_pos = 0
+        end_pos = n_mutated_protein
+    else:
+        start_pos = max(0, aa_position - padding)
+        end_pos = min(n_mutated_protein, aa_position + padding + 1)
+
+
+    # move padding to not include stop codons
+    prefix_stop_codon = str(mutated_protein[:aa_position]).rfind("*")
+    #  stop codon found to the left
+    if prefix_stop_codon != -1:
+        start_pos = max(start_pos, prefix_stop_codon + 1)
+
+    suffix_stop_codon = str(mutated_protein[aa_position:]).find("*")
+    # stop codon found to the right
+    early_stop = False
+    if suffix_stop_codon != -1:
+        if suffix_stop_codon < n_aa_inserted:
+            n_aa_inserted = suffix_stop_codon
+            early_stop = True
+        end_pos = min(end_pos, suffix_stop_codon + aa_position)
+
+
+    seq_region = mutated_protein[start_pos : end_pos]
+    mutation_start_pos_in_region = aa_position - start_pos
+
+    annot = \
+        annotate(
+            original_protein,
             mutated_protein,
             aa_position,
-            variant_length,
-            min_padding = min_padding)
-    print region
-    original_protein = transcript_seq.translate()
-    annot = \
-        _annotate(original_protein, mutated_protein, region,
-            ref, alt, position)
+            n_aa_deleted,
+            n_aa_inserted,
+            frameshift,
+            early_stop)
 
     return Mutation(
-        seq = str(region.seq),
-        start = region.start,
-        stop = region.stop,
-        mutation_start = region.mutation_start,
-        mutation_stop = region.mutation_stop,
+        seq = str(seq_region),
+        start = start_pos,
+        stop = end_pos,
+        mutation_start = aa_position,
+        n_removed = n_aa_deleted,
+        n_inserted = n_aa_inserted,
         annot = annot)

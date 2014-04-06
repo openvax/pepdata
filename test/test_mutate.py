@@ -41,37 +41,6 @@ def test_deletion_mutation():
     assert(mutated[0] == 'A')
     assert(mutated[1] == 'T')
 
-def test_get_mutation_region_snp():
-    seq = Seq("EDLTVKIGDFGLATEKSRWSGSHQFEQLS")
-    region = mutate.get_mutation_region(seq, 10,
-        variant_length=1, min_padding = 2)
-    print(str(seq))
-    assert(len(region.seq) == 5)
-
-def test_get_mutation_region_snp_end_codon():
-    seq = Seq("EDLTVKIGDFGLA*TEKSRWSGSHQFEQLS")
-    region = mutate.get_mutation_region(seq, 10, variant_length=1,
-        min_padding = 2, max_length=10)
-    print str(region)
-    assert(len(region.seq) == 5)
-
-def test_get_mutation_region_indel():
-    seq = Seq("EDLTVKIGDFGLATEKSRWSGSHQFEQLS")
-    region = mutate.get_mutation_region(seq, 3,
-        variant_length = 4, max_length=20, min_padding=2)
-    print(str(region))
-    assert(region.seq[0] == 'D')
-    assert(len(region.seq) == 20)
-
-def test_get_mutation_region_indel_end_codon():
-    seq = Seq("EDLTVKIGDFGLA*TEKSRWSGSHQFEQLS")
-    region = mutate.get_mutation_region(seq, 3,
-        variant_length = 4, max_length=20, min_padding=2)
-    print str(region)
-    assert(region.seq[0] == 'D')
-    assert(len(region.seq) == 12)
-
-
 def test_mutate_protein_from_transcript_snp():
     seq = Seq("ACTGCTATTCGTAGT")
     prot_seq = Seq("TAIRS")
@@ -80,7 +49,7 @@ def test_mutate_protein_from_transcript_snp():
     mutated_seq = Seq("AATGCTATTCGTAGT").translate()
 
     region = mutate.mutate_protein_from_transcript(
-        seq, 1, 'C', 'A', min_padding = 8)
+        seq, 1, 'C', 'A', padding = 8)
     print(str(region))
     assert(region.seq[0] == 'N')
     assert(str(mutated_seq) == str(region.seq))
@@ -97,7 +66,7 @@ def test_mutate_protein_from_transcript_indel():
     print (str(mutated_seq))
 
     region = mutate.mutate_protein_from_transcript(
-        seq, 1, 'C', 'AA', min_padding = 8)
+        seq, 1, 'C', 'AA', padding = 8)
     print(str(region))
     assert(region.seq[0] == 'K')
     assert(region.seq[1] == 'C')
@@ -115,47 +84,12 @@ def test_mutate_protein_prefix_stop_codon():
     print (str(mutated_seq))
 
     region = mutate.mutate_protein_from_transcript(
-        seq, 4, 'C', 'A', min_padding = 8)
+        seq, 4, 'C', 'A', padding = 8)
     print(str(region))
     assert(region.seq[0] == 'D')
     assert(region.seq[1] == 'I')
     assert(str(region.seq) == str(mutated_seq[1:]))
     assert(region.annot == 'A2D')
-
-def test_get_mutation_region_snp_coordinates():
-    seq = Seq("EDLTVKIGDFGLATEKSRWSGSHQFEQLS")
-    region = mutate.get_mutation_region(
-        seq, 10, variant_length=1, min_padding = 2)
-
-    assert(len(region.seq) == 5)
-
-    assert(region.mutation_start == 2)
-    assert(region.mutation_stop == 3)
-
-def test_get_mutation_region_frameshift_coordinates():
-    seq = Seq("EDLTVKIGDFGLATEKSRWSGSHQFEQLS")
-    region = \
-        mutate.get_mutation_region(
-                seq, 3, variant_length = 4,
-                max_length=20, min_padding=2)
-    print(str(region))
-    assert(region.seq[0] == 'D')
-    assert(len(region.seq) == 20)
-
-    assert(region.mutation_start == 2)
-    assert(region.mutation_stop == len(region.seq))
-
-def test_get_mutation_region_indel_coordinates():
-    seq = Seq("EDLTVKIGDFGLATEKSRWSGSHQFEQLS")
-    region = \
-        mutate.get_mutation_region(
-                seq, 3, variant_length = 6,
-                max_length=20, min_padding=2)
-    print(str(region))
-    assert(region.seq[0] == 'D')
-
-    assert(region.mutation_start == 2)
-    assert(region.mutation_stop == 4)
 
 
 def test_mutate_protein_from_transcript_snp_coordinates():
@@ -167,15 +101,16 @@ def test_mutate_protein_from_transcript_snp_coordinates():
 
     region = \
         mutate.mutate_protein_from_transcript(
-                seq, 1, 'C', 'A', min_padding = 8)
+                seq, 1, 'C', 'A', padding = 8)
     print(str(region))
-    assert(region.seq[0] == 'N')
-    assert(str(mutated_seq) == str(region.seq))
-    assert(len(region.seq) == 5)
+    assert region.seq[0] == 'N'
+    assert str(mutated_seq) == str(region.seq)
+    assert len(region.seq) == 5
 
-    assert(region.mutation_start == 0)
-    assert(region.mutation_stop == 1)
-    assert(region.annot == 'T1N')
+    assert region.mutation_start == 0
+    assert region.n_removed == 1
+    assert region.n_inserted == 1
+    assert region.annot == 'T1N'
 
 def test_mutate_protein_from_transcript_indel_coordinates():
     seq = Seq("ACTGCTATTCGTAGT")
@@ -187,26 +122,27 @@ def test_mutate_protein_from_transcript_indel_coordinates():
 
     region = \
         mutate.mutate_protein_from_transcript(
-            seq, 1, 'C', 'AA', min_padding = 8)
+            seq, 1, 'C', 'AA', padding = 8)
     print(str(region))
-    assert(region.seq[0] == 'K')
-    assert(region.seq[1] == 'C')
-    assert(region.seq[2] == 'Y')
-    assert(str(region.seq) == str(mutated_seq[:-1]))
+    assert region.seq[0] == 'K'
+    assert region.seq[1] == 'C'
+    assert region.seq[2] == 'Y'
+    assert str(region.seq) == str(mutated_seq[:-1])
 
-    assert(region.mutation_start == 0)
-    assert(region.mutation_stop == len(region.seq))
-    assert(region.annot == 'T1fs')
+    assert region.mutation_start == 0
+    assert region.n_removed == len(str(prot_seq))
+    assert region.n_inserted == len(region.seq)
+    assert region.annot == 'T1fs'
 
 def test_del_annotation():
     seq = Seq("ACTGCTATTCGTAGT")
     prot_seq = Seq("TAIRS")
 
-    assert(str(seq.translate()) == str(prot_seq))
+    assert str(seq.translate()) == str(prot_seq)
 
     region = \
         mutate.mutate_protein_from_transcript(
-            seq, 3, "GCTATT", "", min_padding = 8)
+            seq, 3, "GCTATT", "", padding = 8)
     print(str(region))
     assert region.annot == 'AI2del', region
 
@@ -221,11 +157,10 @@ def test_stop_codon_annotation():
     # change the 4th-6th chars to stop codon TAG
     region = \
         mutate.mutate_protein_from_transcript(
-            seq, 3, "GCT", "TAGCCC", min_padding = 8)
+            seq, 3, "GCT", "TAGCCC", padding = 8)
     print(str(region))
     assert region.seq == 'T', region.seq
     assert region.annot == 'A2*', region
-
 
 
 def test_stop_codon_after_subst_annotation():
@@ -239,8 +174,10 @@ def test_stop_codon_after_subst_annotation():
     # change the 4th-6th chars to stop codon TAG
     region = \
         mutate.mutate_protein_from_transcript(
-            seq, 3, "GCT", "CCCTAG", min_padding = 8)
+            seq, 3, "GCT", "CCCTAG", padding = 8)
     print(str(region))
+    assert region.n_removed == 1
+    assert region.n_inserted == 1
     assert region.seq == 'TP', region.seq
     assert region.annot == 'A2P*', region
 
