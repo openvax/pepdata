@@ -77,7 +77,8 @@ def annotate(
         aa_position,
         n_deleted,
         n_inserted,
-        frameshift):
+        frameshift,
+        early_stop):
 
     ref_start = aa_position
     ref_stop = max(aa_position + n_deleted, 1)
@@ -89,6 +90,9 @@ def annotate(
 
     if frameshift:
         return "%s%dfs" % (aa_ref[0], aa_position+1)
+    elif early_stop:
+        return "%s%d%s*" % \
+            (aa_ref, aa_position+1, aa_mut)
     elif n_inserted == 0:
         return "%s%ddel" % (aa_ref, aa_position+1)
     else:
@@ -103,8 +107,8 @@ Mutation = \
             "start",  # start position of region in the protein
             "stop",   # stop position of region in the protein
             "mutation_start", # where in the region is the first mutated AA?
-            "n_wildtype_removed",  # how many wildtype residues removed?
-            "n_mutant_inserted",  # how many new residues in the seq?
+            "n_removed",  # how many wildtype residues removed?
+            "n_inserted",  # how many new residues in the seq?
             "annot", # mutation annotation i.e. "V600E"
         ))
 
@@ -114,8 +118,7 @@ def mutate_protein_from_transcript(
         position,
         dna_ref,
         dna_alt,
-        min_padded_length  = 0,
-        max_length = None):
+        padding = None):
     """
     Mutate a sequence by inserting the allele into the genomic transcript
     and translate to protein sequence
@@ -134,33 +137,26 @@ def mutate_protein_from_transcript(
     dna_alt : sequence or str
         Alternate substring to insert
 
-    min_padded_length : int, optional
-        Try to extend the result to this length, unless stop codons
-        get in the way.
-
-    max_length : int, optional
-        Maximum length of the returned string
-
+    padding : int, optional
+        Number of wildtype amino acids to keep left and right of the
+        mutation. Default is to return whole mutated string.
     """
     # turn any character sequence into a BioPython sequence
     transcript_seq = Seq(str(transcript_seq))
 
     transcript_ref_base = transcript_seq[position:position+len(dna_ref)]
 
-    if ref != '.':
+    if dna_ref != '.':
         assert str(transcript_ref_base) == dna_ref, \
             "Transcript reference base %s at position %d != reference %s" % \
             (transcript_ref_base, position, dna_ref)
 
     original_protein = transcript_seq.translate()
-    original_len = len(original_protein)
+    n_original_protein = len(original_protein)
 
     mutated_dna = mutate(transcript_seq, position, dna_ref, dna_alt)
     mutated_protein = mutated_dna.translate()
-    mutated_len = len(mutated_protein)
-
-    if max_length is None:
-        max_length = mutated_len
+    n_mutated_protein = len(mutated_protein)
 
     aa_position = int(position / 3)  # genomic position to codon position
 
@@ -175,47 +171,59 @@ def mutate_protein_from_transcript(
         # will typically be larger than n_wildtype_deleted/n_mutant_inserted
         # on the region struct below, since that restricts the residues counts
         # to those within a particular region
-        n_aa_deleted = original_len - aa_position
-        n_aa_inserted = mutated_len - aa_position
+        n_aa_deleted = n_original_protein - aa_position
+        # careful, this doesn't include stop codons, will
+        # have to update it later
+        n_aa_inserted = n_mutated_protein - aa_position
         frameshift = True
     else:
         n_aa_deleted = int(math.ceil(n_dna_ref / 3.0))
+
         n_aa_inserted = int(math.ceil(n_dna_alt / 3.0))
         frameshift = False
 
+    if padding is None:
+        start_pos = 0
+        end_pos = n_mutated_protein
+    else:
+        start_pos = max(0, aa_position - padding)
+        end_pos = min(n_mutated_protein, aa_position + padding + 1)
 
-    # move start pos to not include stop codons
-    prefix_stop_codon = str(mutated_protein[:aa_position]).rfind("*") + 1
+
+    # move padding to not include stop codons
+    prefix_stop_codon = str(mutated_protein[:aa_position]).rfind("*")
+    #  stop codon found to the left
+    if prefix_stop_codon != -1:
+        start_pos = max(start_pos, prefix_stop_codon + 1)
 
     suffix_stop_codon = str(mutated_protein[aa_position:]).find("*")
+    # stop codon found to the right
+    early_stop = False
+    if suffix_stop_codon != -1:
+        if suffix_stop_codon < n_aa_inserted:
+            n_aa_inserted = suffix_stop_codon
+            early_stop = True
+        end_pos = min(end_pos, suffix_stop_codon + aa_position)
 
-    # try to come up with padded length
-    end_pos = min(aa_position + padding_right + 1, mutated_len)
-    start_pos = max(0, aa_position - padding_left)
-
-    start_pos = max(start_pos, prefix_stop_codon)
-
-
-    if end_codon >= 0:
-        end_pos = min(end_pos, aa_position + end_codon)
 
     seq_region = mutated_protein[start_pos : end_pos]
     mutation_start_pos_in_region = aa_position - start_pos
 
     annot = \
-        _annotate(
+        annotate(
             original_protein,
             mutated_protein,
             aa_position,
             n_aa_deleted,
             n_aa_inserted,
-            frameshift)
+            frameshift,
+            early_stop)
 
     return Mutation(
-        seq = seq_region,
+        seq = str(seq_region),
         start = start_pos,
         stop = end_pos,
         mutation_start = aa_position,
-        n_wildtype_removed = n_aa_deleted,
-        n_mutant_inserted = n_aa_inserted,
+        n_removed = n_aa_deleted,
+        n_inserted = n_aa_inserted,
         annot = annot)
