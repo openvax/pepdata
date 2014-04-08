@@ -223,7 +223,7 @@ def mutate_protein_from_transcript(
         seq = str(seq_region),
         start = start_pos,
         stop = end_pos,
-        mutation_start = aa_position,
+        mutation_start = mutation_start_pos_in_region,
         n_removed = n_aa_deleted,
         n_inserted = n_aa_inserted,
         annot = annot)
