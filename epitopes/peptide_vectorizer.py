@@ -71,6 +71,7 @@ class PeptideVectorizer(object):
         self.fit_transform(amino_acid_strings)
 
     def transform(self, amino_acid_strings):
+        assert self.count_vectorizer, "Must call 'fit' before 'transform'"
         X = self.count_vectorizer.transform(amino_acid_strings).todense()
         if self.normalize_row:
             X = normalize(X, norm='l1')
