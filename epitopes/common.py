@@ -12,8 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pandas as pd
 import logging
+
+import pandas as pd
+import datacache
+
+def fix_subidr_arg(f):
+    """
+    Functions from datacache take an optional 'subdir' argument
+    which we want to make always "epitopes". 
+    """
+    def new_function(*args, **kwargs):
+        kwargs['subdir'] = 'epitopes'
+        return f(*args, **kwargs)
+    return new_function
+
+fetch_file = fix_subidr_arg(datacache.fetch_file)
+fetch_and_transform = fix_subidr_arg(datacache.fetch_and_transform)
 
 bad_amino_acids = 'U|X|J|B|Z'
 

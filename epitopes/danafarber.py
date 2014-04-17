@@ -19,9 +19,9 @@ http://bio.dfci.harvard.edu/DFRMLI/HTML/TCellEpitopes.php
 
 import pandas as pd
 
-from download import fetch_data
-from common import bad_amino_acids
+from common import bad_amino_acids, fetch_file
 from features import make_ngram_dataset_from_args
+
 def load_tumor(
         peptide_length = None,
         hla_type = None,
@@ -35,7 +35,7 @@ def load_tumor(
     immune recognition of HLA molecules and T cell stimulation. It could be used
     as a validation dataset for computational models to predict T cell epitopes.
     """
-    path = fetch_data(
+    path = fetch_file(
         filename = "tumor_epitopes.csv",
         download_url = \
             "http://bio.dfci.harvard.edu/DFRMLI/datasets/tumor_epitopes.htm")
@@ -67,7 +67,7 @@ def load_virus(
     of HLA molecule and T cell stimulation. It could be used as a validation
     dataset for computational models to predict T cell epitopes.
     """
-    path = fetch_data(
+    path = fetch_file(
         filename = "virus_epitopes_A2.csv",
         download_url = \
             "http://bio.dfci.harvard.edu/DFRMLI/datasets/virus_epitopes_A2.htm")
@@ -96,7 +96,7 @@ def load_cef(
     with sequences derived from the human Cytomegalovirus, Epstein-Barr Virus
     and Influenza Virus.
     """
-    path = fetch_data(
+    path = fetch_file(
         filename = "CEF.csv",
         download_url = "http://bio.dfci.harvard.edu/DFRMLI/datasets/CEF.htm")
     df = pd.read_csv(path, skipinitialspace=True, nrows = nrows)

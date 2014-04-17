@@ -18,13 +18,14 @@ from os.path import join
 import numpy as np
 import pandas as pd
 
+
 from reduced_alphabet import make_alphabet_transformer
 from features import (
     make_ngram_dataset, make_ngram_dataset_from_args,
     make_unlabeled_ngram_dataset, make_unlabeled_ngram_dataset_from_args
 )
-from common import split_classes, bad_amino_acids
-from download import fetch_data
+from common import split_classes, bad_amino_acids, fetch_file
+
 
 def _load_dataframe(
         filename,
@@ -200,7 +201,7 @@ def load_tcell(
         Print debug output
     """
 
-    data_path = fetch_data(
+    data_path = fetch_file(
         filename = "tcell_compact.csv",
         download_url = "http://www.iedb.org/doc/tcell_compact.zip")
 
@@ -378,7 +379,7 @@ def load_mhc(
         Print debug output
     """
 
-    data_path = fetch_data(
+    data_path = fetch_file(
         filename = "elution_compact.csv",
         download_url = "http://www.iedb.org/doc/elution_compact.zip")
     return _load_dataframe(

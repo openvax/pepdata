@@ -21,12 +21,13 @@ http://www.hiv.lanl.gov/content/immunology/hlatem/study1/index.html
 import numpy as np
 import pandas as pd
 
-from download import fetch_data
+from common import fetch_file
 
 def load_dataframe(min_count = None, max_count = None):
     url = \
         "http://www.hiv.lanl.gov/content/immunology/hlatem/study1/peptides.html"
-    df = pd.read_csv(fetch_data('frahm.csv', url))
+    local_path = fetch_file('frahm.csv', url)
+    df = pd.read_csv(local_path)
     peptides = df['Sequence']
     # header parsing of the table messes up, so
     # reactions gets labeled as nan and
