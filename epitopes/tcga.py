@@ -56,7 +56,10 @@ def _load_maf_files(sources_dict, cancer_type = None):
         assert key in sources_dict, "Unknown cancer type %s" % key
         maf_url = sources_dict[key]
         maf_filename = key + ".maf"
-        path = fetch_file(maf_filename, maf_url)
+        path = fetch_file(
+            download_url = maf_url, 
+            filename = maf_filename, 
+            subdir = "epitopes")
         df = open_maf(path)
         df['Cancer Type'] = key
         data_frames.append(df)
@@ -115,7 +118,7 @@ def load_peptide_counts(
 
     # discard indices of NA entries
     filtered.index = np.arange(len(filtered))
-    refseq_path = fetch_file('refseq_protein.faa', REFSEQ_PROTEIN_URL)
+    refseq_path = fetch_file(REFSEQ_PROTEIN_URL, filename = 'refseq_protein.faa', subdir = "epitopes")
     refseq_ids_to_protein = _build_refseq_id_to_protein(refseq_path)
     refseq_ids = filtered.Refseq_prot_Id
 

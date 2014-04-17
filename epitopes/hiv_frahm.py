@@ -26,7 +26,7 @@ from common import fetch_file
 def load_dataframe(min_count = None, max_count = None):
     url = \
         "http://www.hiv.lanl.gov/content/immunology/hlatem/study1/peptides.html"
-    local_path = fetch_file('frahm.csv', url)
+    local_path = fetch_file(download_url = url, filename = 'frahm.csv', subdir = "epitopes")
     df = pd.read_csv(local_path)
     peptides = df['Sequence']
     # header parsing of the table messes up, so
