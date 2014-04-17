@@ -20,8 +20,10 @@ import Bio.SeqIO
 import pandas as pd
 from progressbar import ProgressBar
 
-from common import int_or_seq, dataframe_from_counts, bad_amino_acids
-from download import fetch_data, fetch_and_transform_data
+from common import (
+    int_or_seq, dataframe_from_counts, bad_amino_acids, 
+    fetch_file, fetch_and_transform
+)
 
 BASE_URL = "ftp://ftp.ensembl.org"
 FTP_DIR = "/pub/release-75/fasta/homo_sapiens/pep/"
@@ -38,7 +40,7 @@ def load_dataframe():
         - gene_id
         - transcript_id
     """
-    filename = fetch_data(FASTA_FILENAME, FULL_URL)
+    filename = fetch_file(FASTA_FILENAME, FULL_URL)
     sequences = []
     protein_ids = []
     gene_ids = []
@@ -129,7 +131,7 @@ def load_peptide_counts(peptide_length = [8,9,10,11], nrows = None):
         counts.to_csv(dst_path)
         return counts
 
-    return fetch_and_transform_data(
+    return fetch_and_transform(
         transformed_filename = cache_filename,
         transformer = save_counts,
         loader = pd.read_csv,
@@ -154,7 +156,7 @@ def load_peptide_set(peptide_length = [8,9,10,11], nrows = None):
             result = cPickle.loads(in_file.read())
         return result
 
-    return fetch_and_transform_data(
+    return fetch_and_transform(
         transformed_filename = cache_filename,
         transformer = save_set,
         loader = load_set,
