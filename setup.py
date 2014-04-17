@@ -31,7 +31,7 @@ from setuptools import setup
 if __name__ == '__main__':
     setup(
         name='epitopes',
-        version="0.2",
+        version="0.3",
         description="Python interface to IEDB and other immune epitope data",
         author="Alex Rubinsteyn",
         author_email="alex {dot} rubinsteyn {at} mssm {dot} edu",
