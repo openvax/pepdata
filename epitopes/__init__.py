@@ -8,3 +8,4 @@ import iedb
 import imma2
 import calis 
 import toxin
+import fritsch_neoepitopes

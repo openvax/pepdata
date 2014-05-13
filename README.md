@@ -18,7 +18,7 @@ To make useful predictions (i.e. "which peptides should go in this vaccine?") we
 - `tantigen`: [Tumor T-cell Antigen Database](http://cvc.dfci.harvard.edu/tadb/)
 - `hiv_frahm`: Reactions to HIV epitopes across different ethnicities (from [LANL HIV Databases](http://www.hiv.lanl.gov/content/immunology/hlatem/study1/index.html))
 - `cri_tumor_antigens`: Tumor associated peptides from [Cancer Immunity](http://cancerimmunity.org/peptide/mutations/)
-
+- `fritsch_neoepitopes`: Mutated and wildtype tumor epitopes from Fritsch et al. [HLA-binding properties of tumor neoepitopes in humans](http://cancerimmunolres.aacrjournals.org/content/early/2014/03/01/2326-6066.CIR-13-0227.abstract) 
 
 Planned:
 
