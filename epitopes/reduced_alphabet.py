@@ -59,6 +59,8 @@ hp_vs_aromatic = dict_from_list(["H", "CMILV", "FWY", "ADKERNTSQGP"])
 
 class AlphabetTransformer(object):
     def __init__(self, reduced_alphabet):
+        assert isinstance(reduced_alphabet, dict), \
+            "Expected dictionary, got %s" % (reduced_alphabet,)
         self.reduced_alphabet = reduced_alphabet
 
     def __call__(self, s):
@@ -72,4 +74,6 @@ class AlphabetTransformer(object):
         return {'reduced_alphabet':self.reduced_alphabet}
 
 def make_alphabet_transformer(reduced_alphabet):
+    if isinstance(reduced_alphabet, (str, unicode)):
+        reduced_alphabet = globals()[reduced_alphabet]
     return AlphabetTransformer(reduced_alphabet)
