@@ -52,7 +52,7 @@ if __name__ == '__main__':
             'scikit-learn>=0.14.1',
             'progressbar',
             'biopython',
-	        'datacache',
+            'datacache',
         ],
         long_description=readme,
         packages=['epitopes'],
