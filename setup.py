@@ -46,13 +46,13 @@ if __name__ == '__main__':
             'Programming Language :: Python',
             'Topic :: Scientific/Engineering :: Bio-Informatics',
              ],
-        requires=[
-            'numpy(>=1.7)',
-            'pandas(>=0.13.1)',
-            'scikit.learn(>=0.14.1)',
+        install_requires=[
+            'numpy>=1.7',
+            'pandas>=0.13.1',
+            'scikit-learn>=0.14.1',
             'progressbar',
             'biopython',
-	    'datacache',
+            'datacache',
         ],
         long_description=readme,
         packages=['epitopes'],
