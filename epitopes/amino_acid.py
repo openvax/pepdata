@@ -52,21 +52,25 @@ def short_name_to_letter(x):
   return _letters[short_name_to_index(x)]
 
 def parse_table(table_string):
-  result = [None] * 20
+  value_dict = {}
   for line in table_string.splitlines():
     line = line.strip()
     if not line:
       continue
     value, letter, _ = line.split(" ")
+    assert letter not in value_dict,  "Repeated amino acid " + line
+    value_dict[letter] = float(value)
+  return value_dict
+
+def aa_value_dict_to_positional_list(value_dict):
+  value_list = [None] * 20
+  for letter, value in value_dict.iteritems():
     idx = letter_to_index(letter)
     assert idx >= 0
     assert idx < 20
-    assert result[idx] is None, "Repeated amino acid " + line
-    result[idx] = float(value)
-  assert all(elt is not None for elt in result)
-  return result
-
-
+    value_list[idx] = value
+  assert all(elt is not None for elt in value_list), "Missing amino acids in:\n%s" % value_dict.keys()
+  return value_list
 
 def get_idx(x):
   if isinstance(x, int):
@@ -78,16 +82,24 @@ def get_idx(x):
   else:
     return letter_to_index(x)
 
+class SequenceTransformer(object):
+  def __init__(self, table):
+    self.table = table
+    self.value_dict = parse_table(self.table)
+    self.value_list = aa_value_dict_to_positional_list(self.value_dict)
+
+  def __call__(self, letter):
+    return self.value_dict[letter]
+
+  def transform_string(self, letters):
+    return np.array([self.value_dict[amino_acid] for amino_acid in letters])
+
+  def transform_strings(self, strings):
+    d = self.value_dict
+    return np.array([[d[x] for x in s] for x in strings])
+
 def transformation_from_table(table):
-  values = []
-  def f(x):
-    if not values:
-      # parse lazily
-      actual_values = parse_table(table)
-      values.extend(actual_values)
-      print actual_values
-    return values[get_idx(x)]
-  return f
+  return SequenceTransformer(table)
 
 """
 Amino acids property tables copied from CRASP website

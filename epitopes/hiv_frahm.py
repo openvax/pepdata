@@ -27,14 +27,24 @@ def load_dataframe(min_count = None, max_count = None):
     url = \
         "http://www.hiv.lanl.gov/content/immunology/hlatem/study1/peptides.html"
     local_path = fetch_file(download_url = url, filename = 'frahm.csv', subdir = "epitopes")
-    df = pd.read_csv(local_path)
+    df = pd.read_csv(local_path, names = [
+        "Peptide",
+        "Sequence", 
+        "Protein", 
+        "HXB2",
+        "HXB2 loc",
+        "Ref",
+        "Ref loc",
+        "Reactions",
+        "Entropy",
+    ])
     peptides = df['Sequence']
     # header parsing of the table messes up, so
     # reactions gets labeled as nan and
     # entropy  gets labeled as 'nan.1'
 
-    reactions = df['Unnamed: 7']
-    entropy = df['nan.1']
+    reactions = df['Reactions']
+    entropy = df['Entropy']
     df = pd.DataFrame({
         'Peptide' : peptides,
         'Reactions' : reactions,

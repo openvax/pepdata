@@ -203,7 +203,8 @@ def load_tcell(
 
     data_path = fetch_file(
         filename = "tcell_compact.csv",
-        download_url = "http://www.iedb.org/doc/tcell_compact.zip")
+        download_url = "http://www.iedb.org/doc/tcell_compact.zip",
+        decompress = True)
 
     return _load_dataframe(
             data_path,
@@ -381,7 +382,9 @@ def load_mhc(
 
     data_path = fetch_file(
         filename = "elution_compact.csv",
-        download_url = "http://www.iedb.org/doc/elution_compact.zip")
+        download_url = "http://www.iedb.org/doc/mhc_ligand_compact.zip",
+        decompress = True)
+    
     return _load_dataframe(
                 data_path,
                 mhc_class = mhc_class,

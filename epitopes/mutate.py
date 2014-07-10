@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
 import math
 from collections import namedtuple
 
 from Bio.Seq import Seq
-
 
 
 def mutate_split(sequence, position, ref, alt):
@@ -71,7 +71,15 @@ def mutate(sequence, position, ref, alt):
     return prefix + alt + suffix
 
 
-def annotate(
+def gene_mutation_description(pos, ref, alt):
+    if len(ref) == 0 or alt.startswith(ref):
+        return "g.%d ins%s" % (pos + len(ref),  alt[len(ref):])
+    elif len(alt) == 0 or ref.startswith(alt):
+        return "g.%d_%d del%s" % (pos + len(alt), pos + len(ref), ref[len(alt):])
+    else:
+        return "g.%d %s>%s" % (pos, ref, alt)
+
+def protein_mutation_description(
         original_protein,
         mutated_protein,
         aa_position,
@@ -95,7 +103,11 @@ def annotate(
             (aa_ref, aa_position+1, aa_mut)
     elif n_inserted == 0:
         return "%s%ddel" % (aa_ref, aa_position+1)
+    elif n_deleted == 0:
+        return "%dins%s" % (aa_position + 1, aa_mut)
     else:
+        if aa_ref == aa_mut:
+            logging.warn("Not a mutation: ref and alt = %s at position %d",  aa_ref, aa_position)
         return "%s%d%s" % \
             (aa_ref, aa_position+1, aa_mut)
 
@@ -210,7 +222,7 @@ def mutate_protein_from_transcript(
     mutation_start_pos_in_region = aa_position - start_pos
 
     annot = \
-        annotate(
+        protein_mutation_description(
             original_protein,
             mutated_protein,
             aa_position,
