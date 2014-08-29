@@ -72,7 +72,9 @@ def mutate(sequence, position, ref, alt):
 
 
 def gene_mutation_description(pos, ref, alt):
-    if len(ref) == 0 or alt.startswith(ref):
+    if ref == alt:
+        return "g.%d %s=%s" % (pos, ref, alt)
+    elif len(ref) == 0 or alt.startswith(ref):
         return "g.%d ins%s" % (pos + len(ref),  alt[len(ref):])
     elif len(alt) == 0 or ref.startswith(alt):
         return "g.%d_%d del%s" % (pos + len(alt), pos + len(ref), ref[len(alt):])
