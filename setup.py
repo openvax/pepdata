@@ -21,6 +21,7 @@ try:
         readme = f.read()
 except:
     print "Failed to load README file"
+    readme = ""
 
 try:
     import pypandoc
