@@ -24,7 +24,9 @@ from features import (
     make_ngram_dataset, make_ngram_dataset_from_args,
     make_unlabeled_ngram_dataset, make_unlabeled_ngram_dataset_from_args
 )
-from common import split_classes, bad_amino_acids, fetch_file
+from common import (
+    split_classes, bad_amino_acids, fetch_file, delete_old_file
+)
 
 
 def _load_dataframe(
@@ -148,15 +150,34 @@ def _group_epitopes(
 
     values = groups.mean()
     counts = groups.count()
+    pos_counts = groups.sum()
+    neg_counts = counts - pos_counts
 
     if min_count:
         mask = counts >= min_count
         values = values[mask]
+        counts = counts[mask]
+        pos_counts = pos_counts[mask]
+        neg_counts = neg_counts[mask]
+
     result = pd.DataFrame(
-        data = {'value' : values, 'count': counts},
+        data = {
+            'value' : values,
+            'count': counts,
+            'pos' : pos_counts,
+            'neg' : neg_counts,
+        },
         index = values.index)
     return result
 
+def _tcell_local_path():
+    return fetch_file(
+        filename = "tcell_compact.csv",
+        download_url = "http://www.iedb.org/doc/tcell_compact.zip",
+        decompress = True)
+
+def clear_tcell_cache():
+    delete_old_file(_tcell_local_path())
 
 def load_tcell(
         mhc_class = None, # 1, 2, or None for neither
@@ -201,10 +222,7 @@ def load_tcell(
         Print debug output
     """
 
-    data_path = fetch_file(
-        filename = "tcell_compact.csv",
-        download_url = "http://www.iedb.org/doc/tcell_compact.zip",
-        decompress = True)
+    data_path = _tcell_local_path()
 
     return _load_dataframe(
             data_path,
@@ -336,6 +354,15 @@ def load_tcell_ngrams(*args, **kwargs):
     kwargs['training_already_reduced'] = True
     return make_ngram_dataset_from_args(load_tcell_classes, *args, **kwargs)
 
+def _mhc_local_path():
+    return fetch_file(
+        filename = "elution_compact.csv",
+        download_url = "http://www.iedb.org/doc/mhc_ligand_compact.zip",
+        decompress = True)
+
+def clear_mhc_cache():
+    delete_old_file(_mhc_local_path())
+
 def load_mhc(
         mhc_class = None, # 1, 2, or None for neither
         hla_type = None,
@@ -345,7 +372,8 @@ def load_mhc(
         assay_group=None,
         reduced_alphabet = None, # 20 letter AA strings -> simpler alphabet
         nrows = None,
-        verbose = False):
+        verbose = False,
+        cache_download=True):
     """
     Load IEDB MHC data without aggregating multiple entries for the same epitope
 
@@ -379,12 +407,8 @@ def load_mhc(
     verbose: bool
         Print debug output
     """
+    data_path = _mhc_local_path()
 
-    data_path = fetch_file(
-        filename = "elution_compact.csv",
-        download_url = "http://www.iedb.org/doc/mhc_ligand_compact.zip",
-        decompress = True)
-    
     return _load_dataframe(
                 data_path,
                 mhc_class = mhc_class,

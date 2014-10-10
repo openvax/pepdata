@@ -13,6 +13,9 @@
 # limitations under the License.
 
 import logging
+from os import remove
+from os.path import getmtime, exists
+import time
 
 import pandas as pd
 import datacache
@@ -20,7 +23,7 @@ import datacache
 def fix_subidr_arg(f):
     """
     Functions from datacache take an optional 'subdir' argument
-    which we want to make always "epitopes". 
+    which we want to make always "epitopes".
     """
     def new_function(*args, **kwargs):
         kwargs['subdir'] = 'epitopes'
@@ -46,6 +49,14 @@ def dataframe_from_counts(counts):
 
     df = pd.DataFrame(invert)
     return df.sort("Count", ascending=False)
+
+def delete_old_file(path, delete_after_seconds = 10):
+    assert exists(path)
+    then = getmtime(path)
+    now = time.time()
+    if now - then > delete_after_seconds:
+        print "Deleting old file" % path
+        remove(path)
 
 def split_classes(
         values,
