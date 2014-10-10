@@ -38,6 +38,6 @@ If the dataset contains additional data about the epitopes (such as HLA type u o
 
 If the dataset is labeled (contains positive and negative assay results), then the following functions should be available: 
 - `load_wuzzle`: Load all available data from the "wuzzle" dataset (filtered by options such as `mhc_class`). 
-- `load_wuzzle_values`: Group the dataset by epitope string and associate each epitope with the percentage of positive results. 
+- `load_wuzzle_values`: Group the dataset by epitope string and associate each epitope with the positive and negative counts, along with percentage of positive results (in a column called "value"). 
 - `load_wuzzle_classes`: Split the epitopes into positive and negative classes, return a set of strings for each. 
 - `load_wuzzle_ngrams`: Transform the amino acid string representation (or some reduced alphabet) into vectors of n-gram frequencies, return a sklearn-compatible `(samples, labels)` pair of arrays.   
