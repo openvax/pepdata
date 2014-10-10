@@ -12,35 +12,80 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import numpy as np
+
+"""
+Quantify amino acids by their physical/chemical properties
+"""
+
 _long_names = [
-  "Alanine",
-  "Arginine",
-  "Asparagine",
-  "Aspartic Acid",
-  "Cysteine",
-  "Glutamic Acid",
-  "Glutamine",
-  "Glycine",
-  "Histidine",
-  "Isoleucine",
-  "Leucine",
-  "Lysine",
-  "Methionine",
-  "Phenylalanine",
-  "Proline",
-  "Serine",
-  "Threonine",
-  "Tryptophan",
-  "Tyrosine",
-  "Valine",
+    "Alanine",
+    "Arginine",
+    "Asparagine",
+    "Aspartic Acid",
+    "Cysteine",
+    "Glutamic Acid",
+    "Glutamine",
+    "Glycine",
+    "Histidine",
+    "Isoleucine",
+    "Leucine",
+    "Lysine",
+    "Methionine",
+    "Phenylalanine",
+    "Proline",
+    "Serine",
+    "Threonine",
+    "Tryptophan",
+    "Tyrosine",
+    "Valine",
 ]
 
-_short_names = ["Ala", "Arg", "Asn", "Asp", "Cys", "Glu", "Gln", "Gly", "His",
-	       "Ile", "Leu", "Lys", "Met", "Phe", "Pro", "Ser", "Thr", "Trp",
-	       "Tyr", "Val"]
+_short_names = [
+    "Ala",
+    "Arg",
+    "Asn",
+    "Asp",
+    "Cys",
+    "Glu",
+    "Gln",
+    "Gly",
+    "His",
+	  "Ile",
+    "Leu",
+    "Lys",
+    "Met",
+    "Phe",
+    "Pro",
+    "Ser",
+    "Thr",
+    "Trp",
+	  "Tyr",
+    "Val"
+]
 
-_letters = ["A", "R", "N", "D", "C", "E", "Q", "G", "H", "I", "L", "K",
-		"M", "F", "P", "S", "T", "W", "Y", "V"]
+_letters = [
+    "A",
+    "R",
+    "N",
+    "D",
+    "C",
+    "E",
+    "Q",
+    "G",
+    "H",
+    "I",
+    "L",
+    "K",
+		"M",
+    "F",
+    "P",
+    "S",
+    "T",
+    "W",
+    "Y",
+    "V"
+]
 
 def index_to_long_name(idx):
   return _long_names[idx]
@@ -372,7 +417,7 @@ refractivity = transformation_from_table("""
 
 
 
-#Chou-Fasman of structural properties from 
+#Chou-Fasman of structural properties from
 #http://prowl.rockefeller.edu/aainfo/chou.htm
 chou_fasman_table = """
 Alanine        142     83       66      0.06    0.076   0.035   0.058
@@ -397,35 +442,40 @@ Tyrosine        69    147      114      0.082   0.065   0.114   0.125
 Valine         106    170       50      0.062   0.048   0.028   0.053
 """
 
-alpha_helix_score_dict = {}
-beta_sheet_score_dict = {}
-turn_score_dict = {}
 
-for line in chou_fasman_table.split("\n"):
-  fields = [field for field in line.split(" ") if len(field.strip()) > 0]
-  if len(fields) == 0:
-    continue
+def parse_chou_fasman(table):
+    alpha_helix_score_dict = {}
+    beta_sheet_score_dict = {}
+    turn_score_dict = {}
 
-  if fields[1] == 'Acid':
-    name = fields[0] + " " + fields[1]
-    fields = fields[1:]
-  else:
-    name = fields[0]
-  
-  assert name in _long_names, "Invalid amino acid name %s" % name
-  idx = _long_names.index(name)
-  letter = _letters[idx]
-  alpha = int(fields[1])
-  beta = int(fields[2])
-  turn = int(fields[3])
-  alpha_helix_score_dict[letter] = alpha 
-  beta_sheet_score_dict[letter] = beta 
-  turn_score_dict[letter]= turn 
+    for line in table.split("\n"):
+        fields = [field for field in line.split(" ") if len(field.strip()) > 0]
+        if len(fields) == 0:
+          continue
 
-assert len(alpha_helix_score_dict) == 20
-assert len(beta_sheet_score_dict) == 20
-assert len(turn_score_dict) == 20
+        if fields[1] == 'Acid':
+            name = fields[0] + " " + fields[1]
+            fields = fields[1:]
+        else:
+            name = fields[0]
 
+        assert name in _long_names, "Invalid amino acid name %s" % name
+        idx = _long_names.index(name)
+        letter = _letters[idx]
+        alpha = int(fields[1])
+        beta = int(fields[2])
+        turn = int(fields[3])
+        alpha_helix_score_dict[letter] = alpha
+        beta_sheet_score_dict[letter] = beta
+        turn_score_dict[letter]= turn
+
+    assert len(alpha_helix_score_dict) == 20
+    assert len(beta_sheet_score_dict) == 20
+    assert len(turn_score_dict) == 20
+    return alpha_helix_score_dict, beta_sheet_score_dict, turn_score_dict
+
+alpha_helix_score_dict, beta_sheet_score_dict, turn_score_dict = \
+    parse_chou_fasman(chou_fasman_table)
 
 
 _interaction_letters = "ARNDCQEGHILKMFPSTWYV"
@@ -433,7 +483,7 @@ def parse_interaction_table(table):
   table = table.strip()
   while "  " in table:
     table = table.replace("  ", " ")
-  
+
   lines = [l.strip() for l in table.split("\n")]
   lines = [l for l in lines if len(l) > 0]
   assert len(lines) == 20, "Malformed amino acid interaction table"
@@ -448,7 +498,7 @@ def parse_interaction_table(table):
       value = float(coeff_str)
       y = _interaction_letters[j]
       d[x][y] = value
-  return d 
+  return d
 def transpose_interaction_dict(d):
   transposed = {}
   for x in _interaction_letters:
