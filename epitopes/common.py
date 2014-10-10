@@ -55,7 +55,7 @@ def delete_old_file(path, delete_after_seconds = 10):
     then = getmtime(path)
     now = time.time()
     if now - then > delete_after_seconds:
-        print "Deleting old file" % path
+        print "Deleting old file:", path
         remove(path)
 
 def split_classes(
