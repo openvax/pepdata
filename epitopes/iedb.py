@@ -33,9 +33,10 @@ def _load_dataframe(
         filename,
         human = True,
         mhc_class = None, # 1, 2, or None for both
-        hla_type = None, # regex pattern i.e. '(HLA-A2)|(HLA-A\*02)'
-        exclude_hla_type = None, # regex pattern i.e. '(HLA-A2)|(HLA-A\*02)'
+        hla = None, # regex pattern i.e. '(HLA-A2)|(HLA-A\*02)'
+        exclude_hla = None, # regex pattern i.e. '(HLA-A2)|(HLA-A\*02)'
         peptide_length = None,
+        assay_method=None,
         assay_group=None,
         nrows = None,
         reduced_alphabet = None,
@@ -50,35 +51,12 @@ def _load_dataframe(
             nrows = nrows,
             low_memory=False)
 
-    mhc = df['MHC Allele Name']
+    # Sometimes the IEDB seems to put in an extra comma in the
+    # header line, which creates an unnamed column of NaNs.
+    # To deal with this, drop any columns which are all NaN
+    df = df.dropna(axis=1, how='all')
 
-    #
-    # Match known alleles such as 'HLA-A*02:01',
-    # broader groupings such as 'HLA-A2'
-    # and unknown alleles of the MHC-1 listed either as
-    #  'HLA-Class I,allele undetermined'
-    #  or
-    #  'Class I,allele undetermined'
-    mhc1_pattern = 'Class I,|HLA-[A-C](?:[0-9]|\*)'
-    mhc1_mask = mhc.str.contains(mhc1_pattern, na=False).astype('bool')
-
-    mhc2_pattern = "Class II,|HLA-D(?:P|M|O|Q|R)"
-    mhc2_mask = mhc.str.contains(mhc2_pattern, na=False).astype('bool')
-
-    # just in case any of the results were from mice or other species,
-    # restrict to humans
-    organism = df['Host Organism Name']
-    human_organism_mask = \
-        organism.str.startswith('Homo sapiens', na=False).astype('bool')
-    human_hla_mask = mhc.str.startswith("HLA", na=False).astype('bool')
-    human_mask = human_organism_mask | human_hla_mask
-
-    if verbose:
-        print "Human entries", human_mask.sum()
-        print "Class I MHC Entries", mhc1_mask.sum()
-        print "Class II MHC Entries", mhc2_mask.sum()
-        print "Human Class I MHCs", (human_mask & mhc1_mask).sum()
-        print "Human Class II MHCs", (human_mask & mhc2_mask).sum()
+    n = len(df)
 
     epitopes = df['Epitope Linear Sequence'].str.upper()
     df['Epitope Linear Sequence'] = epitopes
@@ -96,34 +74,51 @@ def _load_dataframe(
     mask = ~(bad_epitope_seq | null_epitope_seq)
 
     if human:
-        mask &= human_mask
+        organism = df['Host Organism Name']
+        mask &= organism.str.startswith('Homo sapiens', na=False).astype('bool')
+
+    # Match known alleles such as 'HLA-A*02:01',
+    # broader groupings such as 'HLA-A2'
+    # and unknown alleles of the MHC-1 listed either as
+    #  'HLA-Class I,allele undetermined'
+    #  or
+    #  'Class I,allele undetermined'
+
+    mhc = df['MHC Allele Name']
+
     if mhc_class == 1:
-        mask &= mhc1_mask
-    if mhc_class == 2:
-        mask &= mhc2_mask
+        mhc1_pattern = 'Class I,|HLA-[A-C](?:[0-9]|\*)'
+        mask &= mhc.str.contains(mhc1_pattern, na=False).astype('bool')
+    elif mhc_class == 2:
+        mhc2_pattern = "Class II,|HLA-D(?:P|M|O|Q|R)"
+        mask &= mhc.str.contains(mhc2_pattern, na=False).astype('bool')
+
+    if hla:
+        mask &= df['MHC Allele Name'].str.contains(hla, na=False)
+
+    if exclude_hla:
+        mask &= ~df['MHC Allele Name'].str.contains(exclude_hla, na=False)
 
     if assay_group:
-        mask &= df['Assay Group'] == assay_group
+        mask &= df['Assay Group'].str.contains(assay_group)
 
-    if hla_type:
-        mask &= mhc.str.contains(hla_type, na=False)
-
-    if exclude_hla_type:
-        mask &= ~mhc.str.contains(exclude_hla_type, na=False)
+    if assay_method:
+        mask &= df['Method/Technique'].str.contains(assay_method)
 
     if peptide_length:
         assert peptide_length > 0
-        mask &=  epitopes.str.len() == peptide_length
-
-    if verbose:
-        print "Filtered sequences epitope sequences", mask.sum()
+        mask &=  df['Epitope Linear Sequence'].str.len() == peptide_length
 
     df = df[mask]
+
+    if verbose:
+        print "Returning %d / %d entries after filtering" % (len(df), n)
 
     if reduced_alphabet:
         epitopes = df['Epitope Linear Sequence']
         df['Epitope Linear Sequence']  = \
             epitopes.map(make_alphabet_transformer(reduced_alphabet))
+
     return df
 
 def _group_epitopes(
@@ -181,10 +176,11 @@ def clear_tcell_cache():
 
 def load_tcell(
         mhc_class = None, # 1, 2, or None for neither
-        hla_type = None,
-        exclude_hla_type = None,
+        hla = None,
+        exclude_hla = None,
         human = True,
         peptide_length = None,
+        assay_method=None,
         assay_group=None,
         reduced_alphabet = None, # 20 letter AA strings -> simpler alphabet
         nrows = None,
@@ -197,10 +193,10 @@ def load_tcell(
     mhc_class: {None, 1, 2}
         Restrict to MHC Class I or Class II (or None for neither)
 
-    hla_type: regex pattern, optional
+    hla: regex pattern, optional
         Restrict results to specific HLA type used in assay
 
-    exclude_hla_type: regex pattern, optional
+    exclude_hla: regex pattern, optional
         Exclude certain HLA types
 
     human: bool
@@ -209,8 +205,11 @@ def load_tcell(
     peptide_length: int, optional
         Restrict epitopes to amino acid strings of given length
 
+    assay_method string, optional
+        Only collect results with assay methods containing the given string
+
     assay_group: string, optional
-        Only collect results from assays of the given type
+        Only collect results with assay groups containing the given string
 
     nrows: int, optional
         Don't load the full IEDB dataset but instead read only the first nrows
@@ -226,23 +225,25 @@ def load_tcell(
 
     return _load_dataframe(
             data_path,
-            assay_group = assay_group,
-            mhc_class = mhc_class,
-            hla_type = hla_type,
-            human = human,
-            exclude_hla_type = exclude_hla_type,
-            peptide_length = peptide_length,
-            reduced_alphabet = reduced_alphabet,
-            nrows = nrows,
-            verbose = verbose)
+            human=human,
+            mhc_class=mhc_class,
+            hla=hla,
+            exclude_hla=exclude_hla,
+            assay_method=assay_method,
+            assay_group=assay_group,
+            peptide_length=peptide_length,
+            reduced_alphabet=reduced_alphabet,
+            nrows=nrows,
+            verbose=verbose)
 
 
 def load_tcell_values(
         mhc_class = None, # 1, 2, or None for neither
-        hla_type = None,
-        exclude_hla_type = None,
+        hla = None,
+        exclude_hla = None,
         human = True,
         peptide_length = None,
+        assay_method=None,
         assay_group=None,
         reduced_alphabet = None, # 20 letter AA strings -> simpler alphabet
         nrows = None,
@@ -258,10 +259,10 @@ def load_tcell_values(
     mhc_class: {None, 1, 2}
         Restrict to MHC Class I or Class II (or None for neither)
 
-    hla_type: regex pattern, optional
+    hla: regex pattern, optional
         Restrict results to specific HLA type used in assay
 
-    exclude_hla_type: regex pattern, optional
+    exclude_hla: regex pattern, optional
         Exclude certain HLA types
 
     human: bool
@@ -270,8 +271,11 @@ def load_tcell_values(
     peptide_length: int, optional
         Restrict epitopes to amino acid strings of given length
 
+    assay_method string, optional
+        Only collect results with assay methods containing the given string
+
     assay_group: string, optional
-        Only collect results from assays of the given type
+        Only collect results with assay groups containing the given string
 
     reduced_alphabet: dictionary, optional
         Remap amino acid letters to some other alphabet
@@ -290,15 +294,16 @@ def load_tcell_values(
     """
 
     df = load_tcell(
-        mhc_class = mhc_class,
-        hla_type = hla_type,
-        human = human,
-        exclude_hla_type = exclude_hla_type,
-        peptide_length = peptide_length,
-        assay_group = assay_group,
-        reduced_alphabet = reduced_alphabet,
-        nrows = nrows,
-        verbose = verbose)
+        mhc_class=mhc_class,
+        hla=hla,
+        human=human,
+        exclude_hla=exclude_hla,
+        peptide_length=peptide_length,
+        assay_method=assay_method,
+        assay_group=assay_group,
+        reduced_alphabet=reduced_alphabet,
+        nrows=nrows,
+        verbose=verbose)
 
     return _group_epitopes(
             df,
@@ -365,10 +370,11 @@ def clear_mhc_cache():
 
 def load_mhc(
         mhc_class = None, # 1, 2, or None for neither
-        hla_type = None,
-        exclude_hla_type = None,
+        hla = None,
+        exclude_hla = None,
         human = True,
         peptide_length = None,
+        assay_method=None,
         assay_group=None,
         reduced_alphabet = None, # 20 letter AA strings -> simpler alphabet
         nrows = None,
@@ -380,60 +386,65 @@ def load_mhc(
 
     Parameters
     ----------
-    mhc_class: {None, 1, 2}
+    mhc_class : {None, 1, 2}
         Restrict to MHC Class I or Class II (or None for neither)
 
-    hla_type: regex pattern, optional
+    hla : regex pattern, optional
         Restrict results to specific HLA type used in assay
 
-    exclude_hla_type: regex pattern, optional
+    exclude_hla : regex pattern, optional
         Exclude certain HLA types
 
-    human: bool
+    human : bool
         Restrict to human samples (default True)
 
     peptide_length: int, optional
         Restrict epitopes to amino acid strings of given length
 
-    assay_group: string, optional
-        Only collect results from assays of the given type
+    assay_method : string, optional
+        Limit to assay methods which contain the given string
 
-    reduced_alphabet: dictionary, optional
+    assay_group : string, optional
+        Limit to assay groups which contain the given string
+
+    reduced_alphabet : dictionary, optional
         Remap amino acid letters to some other alphabet
 
-    nrows: int, optional
+    nrows : int, optional
         Don't load the full IEDB dataset but instead read only the first nrows
 
-    verbose: bool
+    verbose : bool
         Print debug output
     """
     data_path = _mhc_local_path()
 
     return _load_dataframe(
                 data_path,
-                mhc_class = mhc_class,
-                hla_type = hla_type,
-                exclude_hla_type = exclude_hla_type,
-                human = human,
-                peptide_length = peptide_length,
-                assay_group = assay_group,
-                reduced_alphabet = reduced_alphabet,
-                nrows = nrows,
-                verbose = verbose)
+                mhc_class=mhc_class,
+                hla=hla,
+                exclude_hla=exclude_hla,
+                human=human,
+                peptide_length=peptide_length,
+                assay_method=assay_method,
+                assay_group=assay_group,
+                reduced_alphabet=reduced_alphabet,
+                nrows=nrows,
+                verbose=verbose)
 
 
 def load_mhc_values(
-        mhc_class = None, # 1, 2, or None for neither
-        hla_type = None,
-        exclude_hla_type = None,
-        human = True,
-        peptide_length = None,
+        mhc_class=None, # 1, 2, or None for neither
+        hla=None,
+        exclude_hla=None,
+        human=True,
+        peptide_length=None,
+        assay_method=None,
         assay_group=None,
-        reduced_alphabet = None, # 20 letter AA strings -> simpler alphabet
-        nrows = None,
-        group_by_allele = False,
-        min_count = 0,
-        verbose= False):
+        reduced_alphabet=None, # 20 letter AA strings -> simpler alphabet
+        nrows=None,
+        group_by_allele=False,
+        min_count=0,
+        verbose=False):
     """
     Load the MHC binding results from IEDB, collect into a dataframe mapping
     epitopes to percentage positive results.
@@ -443,10 +454,10 @@ def load_mhc_values(
     mhc_class: {None, 1, 2}
         Restrict to MHC Class I or Class II (or None for neither)
 
-    hla_type: regex pattern, optional
+    hla: regex pattern, optional
         Restrict results to specific HLA type used in assay
 
-    exclude_hla_type: regex pattern, optional
+    exclude_hla: regex pattern, optional
         Exclude certain HLA types
 
     human: bool
@@ -455,8 +466,11 @@ def load_mhc_values(
     peptide_length: int, optional
         Restrict epitopes to amino acid strings of given length
 
+    assay_method string, optional
+        Only collect results with assay methods containing the given string
+
     assay_group: string, optional
-        Only collect results from assays of the given type
+        Only collect results with assay groups containing the given string
 
     reduced_alphabet: dictionary, optional
         Remap amino acid letters to some other alphabet
@@ -474,21 +488,22 @@ def load_mhc_values(
         Print debug output
     """
     df = load_mhc(
-        mhc_class = mhc_class,
-        hla_type = hla_type,
-        exclude_hla_type = exclude_hla_type,
-        human = human,
-        peptide_length = peptide_length,
-        assay_group = assay_group,
-        reduced_alphabet = reduced_alphabet,
-        nrows = nrows,
-        verbose = verbose)
+        mhc_class=mhc_class,
+        hla=hla,
+        exclude_hla=exclude_hla,
+        human=human,
+        peptide_length=peptide_length,
+        assay_method=assay_method,
+        assay_group=assay_group,
+        reduced_alphabet=reduced_alphabet,
+        nrows=nrows,
+        verbose=verbose)
 
     return _group_epitopes(
             df,
-            group_by_allele = group_by_allele,
-            min_count = min_count,
-            verbose = verbose)
+            group_by_allele=group_by_allele,
+            min_count=min_count,
+            verbose=verbose)
 
 def load_mhc_classes(*args, **kwargs):
     """
@@ -506,8 +521,8 @@ def load_mhc_classes(*args, **kwargs):
     mhc_values = load_mhc_values(*args, **kwargs)
     return split_classes(
         mhc_values.value,
-        noisy_labels = noisy_labels,
-        verbose = verbose)
+        noisy_labels=noisy_labels,
+        verbose=verbose)
 
 def load_mhc_ngrams(*args, **kwargs):
     """
@@ -539,35 +554,40 @@ def load_mhc_ngrams(*args, **kwargs):
     return make_ngram_dataset_from_args(load_mhc_classes, *args, **kwargs)
 
 def load_tcell_vs_mhc(
-        mhc_class = None, # 1, 2, or None for neither
-        hla_type = None,
-        exclude_hla_type = None,
-        peptide_length = None,
-        min_count = 0,
-        assay_group=None,
-        nrows = None,
-        group_by_allele = False,
-        verbose= False):
+        mhc_class=None, # 1, 2, or None for neither
+        hla=None,
+        exclude_hla=None,
+        peptide_length=None,
+        min_count=0,
+        mhc_assay_method=None,
+        mhc_assay_group=None,
+        tcell_assay_method=None,
+        tcell_assay_group=None,
+        nrows=None,
+        group_by_allele=False,
+        verbose=False):
     """
     Percentage positive results for both T-cell response assays
     and MHC binding assays (keyed by epitopes for which we have data
     for both)
     """
     mhc = load_mhc_values(
-            mhc_class = mhc_class,
-            hla_type = hla_type,
-            exclude_hla_type = exclude_hla_type,
-            peptide_length = peptide_length,
-            assay_group=assay_group,
-            nrows = nrows,
+            mhc_class=mhc_class,
+            hla=hla,
+            exclude_hla=exclude_hla,
+            peptide_length=peptide_length,
+            assay_method=mhc_assay_method,
+            assay_group=mhc_assay_group,
+            nrows=nrows,
             min_count = min_count,
             group_by_allele = group_by_allele,
             verbose = verbose)
     tcell = load_tcell_values(
                 mhc_class = mhc_class,
-                hla_type = hla_type,
-                exclude_hla_type = exclude_hla_type,
-                assay_group=assay_group,
+                hla = hla,
+                exclude_hla = exclude_hla,
+                assay_method=tcell_assay_method,
+                assay_group=tcell_assay_group,
                 peptide_length = peptide_length,
                 nrows = nrows,
                 min_count = min_count,
