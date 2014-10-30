@@ -92,6 +92,15 @@ amino_acid_letters = [
     "V"
 ]
 
+
+amino_acid_letter_pairs = [
+  "%s%s" % (x,y) for y in amino_acid_letters for x in amino_acid_letters
+]
+
+amino_acid_pair_positions = {
+    pair : i for (i, pair) in enumerate(amino_acid_letter_pairs)
+}
+
 def index_to_long_name(idx):
   return long_amino_acid_names[idx]
 
