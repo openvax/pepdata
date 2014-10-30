@@ -491,7 +491,7 @@ def parse_chou_fasman(table):
     assert len(turn_score_dict) == 20
     return alpha_helix_score_dict, beta_sheet_score_dict, turn_score_dict
 
-alpha_helix_score_dict, beta_sheet_score_dict, turn_score_dict = \
+alpha_helix_score, beta_sheet_score, turn_score = \
     parse_chou_fasman(chou_fasman_table)
 
 

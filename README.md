@@ -25,7 +25,7 @@ Planned:
 - `bcipep`: [B-cell epitopes](http://www.imtech.res.in/raghava/bcipep/data.html) 
 
 
-**API**
+**Dataset API**
 
 When a dataset consists only of an unlabeled list of epitopes, then it only needs two functions:
 - `load_wuzzle`: Returns set of amino acid strings 
@@ -41,3 +41,37 @@ If the dataset is labeled (contains positive and negative assay results), then t
 - `load_wuzzle_values`: Group the dataset by epitope string and associate each epitope with the positive and negative counts, along with percentage of positive results (in a column called "value"). 
 - `load_wuzzle_classes`: Split the epitopes into positive and negative classes, return a set of strings for each. 
 - `load_wuzzle_ngrams`: Transform the amino acid string representation (or some reduced alphabet) into vectors of n-gram frequencies, return a sklearn-compatible `(samples, labels)` pair of arrays.   
+
+**Amino Acid Properties** 
+
+The `amino_acid` module contains a variety of physical/chemical properties for both single amino residues and interactions between pairs of residues. 
+
+Single residue feature tables are parsed into `StringTransformer` objects, which can be treated as dictionaries or will vectorize a string when you call their method `transform_string`. 
+
+Examples of single residue features:
+- `hydropathy`
+- `volume`
+- `polarity`
+- `pK_side_chain`
+- `prct_exposed_residues`
+- `hydrophilicity`
+- `accessible_surface_area`
+- `refractivity`
+- `local_flexibility`
+- `accessible_surface_area_folded`
+- `alpha_helix_score` (Chou-Fasman)
+- `beta_sheet_score` (Chou-Fasman)
+- `turn_score` (Chou-Fasman)
+
+Pairwise interaction tables are parsed into nested dictionaries, so that the interaction between amino acids `x` and `y` can be determined from `d[x][y]`. 
+
+Pairwise interaction dictionaries:
+- `strand_vs_coil` (and its transpose `coil_vs_strand`)
+- `helix_vs_strand` (and its transpose `strand_vs_helix`)
+- `helix_vs_coil` (and its transpose `coil_vs_helix`)
+- `blosum30`
+- `blosum50`
+- `blosum62`
+
+There is also a function to parse the coefficients of the [PMBEC similarity matrix](http://www.biomedcentral.com/1471-2105/10/394), though this currently lives in the separate `pmbec` module. 
+
