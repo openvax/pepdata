@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from epitopes import iedb, reduced_alphabet
+from pepdata import iedb, reduced_alphabet
 
 def test_tcell_hla_restrict_a24():
     """

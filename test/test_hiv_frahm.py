@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from epitopes import hiv_frahm
+from pepdata import hiv_frahm
 
 def test_load_dataframe():
     df = hiv_frahm.load_dataframe()

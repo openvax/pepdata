@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from epitopes import tantigen
+from pepdata import tantigen
 
 def test_load_tcell():
     df = tantigen.load_tcell()

@@ -33,12 +33,12 @@ from setuptools import setup
 
 if __name__ == '__main__':
     setup(
-        name='epitopes',
-        version="0.3.3",
+        name='pepdata',
+        version="0.4.0",
         description="Python interface to IEDB and other immune epitope data",
         author="Alex Rubinsteyn",
         author_email="alex {dot} rubinsteyn {at} mssm {dot} edu",
-        url="https://github.com/hammerlab/epitopes",
+        url="https://github.com/hammerlab/pepdata",
 	license="http://www.apache.org/licenses/LICENSE-2.0.html",
         classifiers=[
             'Development Status :: 3 - Alpha',
@@ -58,7 +58,7 @@ if __name__ == '__main__':
             'datacache',
         ],
         long_description=readme,
-        packages=['epitopes'],
-        package_data = { 'epitopes' : ['data/*csv'] },
+        packages=['pepdata'],
+        package_data = { 'pepdata' : ['data/*csv'] },
         include_package_data = True
     )

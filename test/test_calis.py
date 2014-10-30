@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from epitopes import calis
+from pepdata import calis
 
 def test_calis_s1():
     """

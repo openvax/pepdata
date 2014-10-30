@@ -1,9 +1,9 @@
-epitopes
+pepdata
 =======
 
 An important aspect of computational immunology is modeling the properties of [peptides](http://en.wikipedia.org/wiki/Peptide) (short strings of amino acids). Peptides can arise as substrings [cut](http://en.wikipedia.org/wiki/Proteolysis) out of a larger protein, naturally occurring [small proteins](http://en.wikipedia.org/wiki/Alpha-Amanitin), or be [synthesized](micchm01.u.hpc.mssm.edu/dashboard/accounts/activate/e2b4804ac4d7e59dcff89a474d1971b8a36dff77/
 ) for therapeutic purposes. 
-To make useful predictions (i.e. "which peptides should go in this vaccine?") we need to partition the combinatorial space of peptides into classes such as [epitopes](http://en.wikipedia.org/wiki/Epitope) vs. non-epitopes (is the peptide presented by [MHC molecules](http://en.wikipedia.org/wiki/Major_histocompatibility_complex)?) or [immunogenic](http://en.wikipedia.org/wiki/Immunogenicity) vs. non-immunogenic (do [white blood cells](http://en.wikipedia.org/wiki/Lymphocyte) respond?). One way to capture such distinctions is to collect large volumes of data about peptides and use that data to build statistical models of their immune properties. This library helps you build such models by providing simple Python/NumPy/Pandas interfaces to commonly used immunology and bioinformatics datasets. 
+To make useful clinical and research predictions (i.e. "which peptides should go in this vaccine?") we need to partition the combinatorial space of peptides into classes such as [T-cell epitopes](http://en.wikipedia.org/wiki/Epitope) or [MHC](http://en.wikipedia.org/wiki/Major_histocompatibility_complex) ligands. One way to capture such distinctions is to collect large volumes of data about peptides and use that data to build statistical models of their immune properties. This library helps you build such models by providing simple Python/NumPy/Pandas interfaces to commonly used immunology and bioinformatics datasets. 
 
 **Data Sources** 
 

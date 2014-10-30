@@ -1,4 +1,4 @@
-from epitopes import hpv
+from pepdata import hpv
 
 def test_hpv_load_tcell():
     df = hpv.load_tcell()

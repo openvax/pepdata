@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from epitopes import tcga
+from pepdata import tcga
 
 def test_tcga_dataframe_load():
     df = tcga.load_dataframe(cancer_type = 'paad')

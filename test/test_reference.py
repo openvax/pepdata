@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import pandas as pd
-from epitopes import reference
+from pepdata import reference
 
 def test_reference_peptide_counts():
     counts = reference.load_peptide_counts(peptide_length = 8, nrows = 20)

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from epitopes import imma2
+from pepdata import imma2
 
 def test_imma2_no_overlap():
     """
