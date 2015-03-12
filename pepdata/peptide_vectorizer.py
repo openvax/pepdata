@@ -28,27 +28,28 @@ def make_count_vectorizer(reduced_alphabet, max_ngram):
         analyzer='char',
         ngram_range=(1, max_ngram),
         dtype=np.float,
-        preprocessor = preprocessor)
+        preprocessor=preprocessor)
 
 class PeptideVectorizer(object):
     def __init__(
             self,
-            max_ngram = 1,
-            normalize_row = True,
-            reduced_alphabet = None,
-            training_already_reduced = False):
+            max_ngram=1,
+            normalize_row=True,
+            reduced_alphabet=None,
+            training_already_reduced=False):
         self.reduced_alphabet = reduced_alphabet
         self.max_ngram = max_ngram
         self.normalize_row = normalize_row
         self.training_already_reduced = training_already_reduced
         self.count_vectorizer = None
+
     def __getstate__(self):
         return {
             'reduced_alphabet': self.reduced_alphabet,
-            'count_vectorizer' : self.count_vectorizer,
-            'training_already_reduced' : self.training_already_reduced,
-            'normalize_row' : self.normalize_row,
-            'max_ngram' : self.max_ngram,
+            'count_vectorizer': self.count_vectorizer,
+            'training_already_reduced': self.training_already_reduced,
+            'normalize_row': self.normalize_row,
+            'max_ngram': self.max_ngram,
         }
 
     def fit_transform(self, amino_acid_strings):

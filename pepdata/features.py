@@ -15,19 +15,20 @@
 
 import numpy as np
 
-from amino_acid import peptide_to_indices
-from peptide_vectorizer import PeptideVectorizer
-
+from .amino_acid import peptide_to_indices
+from .peptide_vectorizer import PeptideVectorizer
+from . import (toxin, amino_acid)
 
 def make_ngram_dataset(
-        imm, non = [],
-        max_ngram = 1,
-        normalize_row = True,
-        subsample_bigger_class = False,
-        reduced_alphabet = None,
-        training_already_reduced = False,
-        return_transformer = False,
-        verbose = True):
+        imm,
+        non=[],
+        max_ngram=1,
+        normalize_row=True,
+        subsample_bigger_class=False,
+        reduced_alphabet=None,
+        training_already_reduced=False,
+        return_transformer=False,
+        verbose=True):
     """
     Given a set of positive amino acid string examples and a set
     of negative examples, transform them into an array of n-gram counts
@@ -59,7 +60,6 @@ def make_ngram_dataset(
         Print debug messages (default True)
     """
 
-
     imm = list(imm)
     non = list(non)
     n_imm = len(imm)
@@ -82,10 +82,10 @@ def make_ngram_dataset(
     combined = imm + non
 
     V = PeptideVectorizer(
-        max_ngram = max_ngram,
-        normalize_row = normalize_row,
-        reduced_alphabet = reduced_alphabet,
-        training_already_reduced = training_already_reduced)
+        max_ngram=max_ngram,
+        normalize_row=normalize_row,
+        reduced_alphabet=reduced_alphabet,
+        training_already_reduced=training_already_reduced)
 
     X = V.fit_transform(combined)
     Y = np.ones(len(combined), dtype='bool')
@@ -99,7 +99,7 @@ def make_ngram_dataset(
     else:
         return X, Y
 
-def make_unlabeled_ngram_dataset(strings,  **kwargs):
+def make_unlabeled_ngram_dataset(strings, **kwargs):
     # reuse the vectorizer for labeled dataset but give
     # an empty list for the negative class
     # then throw away the label array Y
@@ -119,14 +119,14 @@ def _split_ngram_kwargs(kwargs):
     need to split their kwargs into two dictionaries
     """
     d = {
-        'max_ngram' : kwargs.pop('max_ngram', 1),
-        'normalize_row' : kwargs.pop('normalize_row', True),
-        'subsample_bigger_class' : kwargs.pop('subsample_bigger_class', False),
-        'return_transformer' : kwargs.pop('return_transformer', False),
-        'reduced_alphabet' :  kwargs.get('reduced_alphabet'),
-        'training_already_reduced' : \
+        'max_ngram': kwargs.pop('max_ngram', 1),
+        'normalize_row': kwargs.pop('normalize_row', True),
+        'subsample_bigger_class': kwargs.pop('subsample_bigger_class', False),
+        'return_transformer': kwargs.pop('return_transformer', False),
+        'reduced_alphabet': kwargs.get('reduced_alphabet'),
+        'training_already_reduced':
             kwargs.pop('training_already_reduced', False),
-        'verbose' : kwargs.get('verbose')
+        'verbose': kwargs.get('verbose')
     }
     return kwargs, d
 
@@ -175,7 +175,7 @@ def array_from_kmers(strings):
     return np.array(result)
 
 
-def make_kmer_dataset(imm_strings, non_strings, verbose = True):
+def make_kmer_dataset(imm_strings, non_strings, verbose=True):
     X_imm = array_from_kmers(imm_strings)
     X_non = array_from_kmers(non_strings)
     X = np.vstack([X_imm, X_non])
@@ -184,8 +184,6 @@ def make_kmer_dataset(imm_strings, non_strings, verbose = True):
     if verbose:
         print "[make_kmer_dataset] X.shape = %s" % (X.shape,)
     return X, Y
-
-import amino_acid
 
 amino_acid_features = [
     amino_acid.hydropathy,
@@ -202,10 +200,10 @@ amino_acid_features = [
 
 def transform_rows(
         X,
-        fns = amino_acid_features,
-        positions = None,
-        mean = False,
-        pairwise_ratios = False):
+        fns=amino_acid_features,
+        positions=None,
+        mean=False,
+        pairwise_ratios=False):
     X2 = []
     for x in X:
         row = []
@@ -233,8 +231,7 @@ def transform_rows(
     X2 = np.array(X2)
     return X2
 
-import toxin
-def toxin_features(imm, non = [], substring_length=3, positional=False):
+def toxin_features(imm, non=[], substring_length=3, positional=False):
     if positional:
         imm_toxin_features = \
             toxin.positional_toxin_features(imm, length=substring_length)

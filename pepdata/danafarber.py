@@ -20,13 +20,12 @@ http://bio.dfci.harvard.edu/DFRMLI/HTML/TCellEpitopes.php
 import pandas as pd
 
 from common import bad_amino_acids, fetch_file
-from features import make_ngram_dataset_from_args
 
 def load_tumor(
-        peptide_length = None,
-        hla_type = None,
-        source_protein = None,
-        nrows = None):
+        peptide_length=None,
+        hla_type=None,
+        source_protein=None,
+        nrows=None):
     """
     Tumor antigens.
     This data set is a list of 718 T cell epitopes, 8-31 amino acids in length,
@@ -36,10 +35,10 @@ def load_tumor(
     as a validation dataset for computational models to predict T cell epitopes.
     """
     path = fetch_file(
-        filename = "tumor_epitopes.csv",
-        download_url = \
-            "http://bio.dfci.harvard.edu/DFRMLI/datasets/tumor_epitopes.htm")
-    df = pd.read_csv(path, skipinitialspace=True, nrows = nrows)
+        filename="tumor_epitopes.csv",
+        download_url="http://bio.dfci.harvard.edu/DFRMLI/datasets/tumor_epitopes.htm",
+        subdir="pepdata")
+    df = pd.read_csv(path, skipinitialspace=True, nrows=nrows)
     mask = ~df.Peptide.str.contains(bad_amino_acids)
     if peptide_length:
         mask &= df.Peptide.str.len() == peptide_length
@@ -50,15 +49,15 @@ def load_tumor(
     return df[mask]
 
 def load_tumor_set(*args, **kwargs):
-    df = load_danafarber_tumor(*args, **kwargs)
+    df = load_tumor(*args, **kwargs)
     return set(df.Peptide)
 
 
 def load_virus(
-        peptide_length = None,
-        hla_type = None,
-        source_protein = None,
-        nrows = None):
+        peptide_length=None,
+        hla_type=None,
+        source_protein=None,
+        nrows=None):
     """
     Virus antigens.
     This data set is a list of 44 HLA-A2 restricted T cell epitopes,
@@ -68,10 +67,10 @@ def load_virus(
     dataset for computational models to predict T cell epitopes.
     """
     path = fetch_file(
-        filename = "virus_epitopes_A2.csv",
-        download_url = \
-            "http://bio.dfci.harvard.edu/DFRMLI/datasets/virus_epitopes_A2.htm")
-    df = pd.read_csv(path, skipinitialspace=True, nrows = nrows)
+        filename="virus_epitopes_A2.csv",
+        download_url="http://bio.dfci.harvard.edu/DFRMLI/datasets/virus_epitopes_A2.htm",
+        subdir="pepdata")
+    df = pd.read_csv(path, skipinitialspace=True, nrows=nrows)
     mask = ~df.Epitope.str.contains(bad_amino_acids)
     if peptide_length:
         mask &= df.Epitope.str.len() == peptide_length
@@ -87,19 +86,19 @@ def load_virus_set(*args, **kwargs):
 
 
 def load_cef(
-        peptide_length = None,
-        hla_type = None,
-        source_protein = None,
-        nrows = None):
+        peptide_length=None,
+        hla_type=None,
+        source_protein=None,
+        nrows=None):
     """
     This dataset is a list of 32 T cell epitopes, 8-12 amino acids in length,
     with sequences derived from the human Cytomegalovirus, Epstein-Barr Virus
     and Influenza Virus.
     """
     path = fetch_file(
-        filename = "CEF.csv",
-        download_url = "http://bio.dfci.harvard.edu/DFRMLI/datasets/CEF.htm")
-    df = pd.read_csv(path, skipinitialspace=True, nrows = nrows)
+        filename="CEF.csv",
+        download_url="http://bio.dfci.harvard.edu/DFRMLI/datasets/CEF.htm")
+    df = pd.read_csv(path, skipinitialspace=True, nrows=nrows)
     mask = ~df.Peptide.str.contains(bad_amino_acids)
     if peptide_length:
         mask &= df.Peptide.str.len() == peptide_length

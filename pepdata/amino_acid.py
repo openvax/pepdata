@@ -56,7 +56,7 @@ short_amino_acid_names = [
     "Gln",
     "Gly",
     "His",
-	  "Ile",
+    "Ile",
     "Leu",
     "Lys",
     "Met",
@@ -65,7 +65,7 @@ short_amino_acid_names = [
     "Ser",
     "Thr",
     "Trp",
-	  "Tyr",
+    "Tyr",
     "Val"
 ]
 
@@ -82,7 +82,7 @@ amino_acid_letters = [
     "I",
     "L",
     "K",
-		"M",
+    "M",
     "F",
     "P",
     "S",
@@ -94,109 +94,108 @@ amino_acid_letters = [
 
 
 amino_acid_letter_pairs = [
-  "%s%s" % (x,y) for y in amino_acid_letters for x in amino_acid_letters
+  "%s%s" % (x, y) for y in amino_acid_letters for x in amino_acid_letters
 ]
 
 amino_acid_pair_positions = {
-    pair : i for (i, pair) in enumerate(amino_acid_letter_pairs)
+    pair: i for (i, pair) in enumerate(amino_acid_letter_pairs)
 }
 
 def index_to_long_name(idx):
-  return long_amino_acid_names[idx]
+    return long_amino_acid_names[idx]
 
 def index_to_short_name(idx):
-  return short_amino_acid_names[idx]
+    return short_amino_acid_names[idx]
 
 def index_to_letter(idx):
-  return amino_acid_letters[idx]
+    return amino_acid_letters[idx]
 
 def letter_to_index(x):
-  """
-  Convert from an amino acid's letter code to its position index
-  """
-  # assert len(x) == 1
-  x = x.upper()
-  assert x in amino_acid_letters, x
-  return amino_acid_letters.index(x)
+    """
+    Convert from an amino acid's letter code to its position index
+    """
+    # assert len(x) == 1
+    x = x.upper()
+    assert x in amino_acid_letters, x
+    return amino_acid_letters.index(x)
 
 
 def peptide_to_indices(xs):
-  return [letter_to_index(x) for x in xs if x != 'X' and x != 'U']
+    return [letter_to_index(x) for x in xs if x != 'X' and x != 'U']
 
 def letter_to_short_name(x):
-  return short_amino_acid_names[letter_to_index(x)]
+    return short_amino_acid_names[letter_to_index(x)]
 
 def long_name_to_letter(name):
-  assert name in long_amino_acid_names, "%s not found" % name
-  idx = long_amino_acid_names.index(x)
-  return amino_acid_letters[idx]
+    assert name in long_amino_acid_names, "%s not found" % name
+    idx = long_amino_acid_names.index(x)
+    return amino_acid_letters[idx]
 
 
 def peptide_toshort_amino_acid_names(xs):
-  return [letter_to_short_name(x) for x in xs]
-
+    return [letter_to_short_name(x) for x in xs]
 
 def short_name_to_index(x):
-  return short_amino_acid_names.index(x.capitalize())
+    return short_amino_acid_names.index(x.capitalize())
 
 def short_name_to_letter(x):
-  return amino_acid_letters[short_name_to_index(x)]
+    return amino_acid_letters[short_name_to_index(x)]
 
 def parse_table(table_string):
-  value_dict = {}
-  for line in table_string.splitlines():
-    line = line.strip()
-    if not line:
-      continue
-    fields = line.split(" ")
-    fields = [f for f in fields if len(f.strip()) > 0]
-    assert len(fields) >= 2
-    value, letter = fields[:2]
-    assert letter not in value_dict,  "Repeated amino acid " + line
-    value_dict[letter] = float(value)
-  return value_dict
+    value_dict = {}
+    for line in table_string.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        fields = line.split(" ")
+        fields = [f for f in fields if len(f.strip()) > 0]
+        assert len(fields) >= 2
+        value, letter = fields[:2]
+        assert letter not in value_dict, "Repeated amino acid " + line
+        value_dict[letter] = float(value)
+    return value_dict
 
 def aa_value_dict_to_positional_list(value_dict):
-  value_list = [None] * 20
-  for letter, value in value_dict.iteritems():
-    idx = letter_to_index(letter)
-    assert idx >= 0
-    assert idx < 20
-    value_list[idx] = value
-  assert all(elt is not None for elt in value_list), "Missing amino acids in:\n%s" % value_dict.keys()
-  return value_list
+    value_list = [None] * 20
+    for letter, value in value_dict.iteritems():
+        idx = letter_to_index(letter)
+        assert idx >= 0
+        assert idx < 20
+        value_list[idx] = value
+    assert all(elt is not None for elt in value_list), "Missing amino acids in:\n%s" % value_dict.keys()
+    return value_list
 
 def get_idx(x):
-  if isinstance(x, int):
-    return x
-  assert isinstance(x, str) and len(x) in (1,3),  "Unexpected %s"  % x
-  x = x.upper()
-  if len(x) == 3:
-    return short_name_to_index(x)
-  else:
-    return letter_to_index(x)
+    if isinstance(x, int):
+        return x
+    assert isinstance(x, str) and len(x) in (1, 3), "Unexpected %s" % x
+    x = x.upper()
+    if len(x) == 3:
+        return short_name_to_index(x)
+    else:
+        return letter_to_index(x)
 
 class SequenceTransformer(object):
-  def __init__(self, table):
-    self.table = table
-    self.value_dict = parse_table(self.table)
-    self.value_list = aa_value_dict_to_positional_list(self.value_dict)
+    def __init__(self, table):
+        self.table = table
+        self.value_dict = parse_table(self.table)
+        self.value_list = aa_value_dict_to_positional_list(self.value_dict)
 
-  def __call__(self, letter):
-    return self.value_dict[letter]
+    def __call__(self, letter):
+        return self.value_dict[letter]
 
-  def __getitem__(self, letter):
-    return self.value_dict[letter]
+    def __getitem__(self, letter):
+        return self.value_dict[letter]
 
-  def transform_string(self, letters):
-    return np.array([self.value_dict[amino_acid] for amino_acid in letters])
+    def transform_string(self, letters):
+        return np.array([self.value_dict[amino_acid] for amino_acid in letters])
 
-  def transform_strings(self, strings):
-    d = self.value_dict
-    return np.array([[d[x] for x in s] for x in strings])
+    def transform_strings(self, strings):
+        d = self.value_dict
+        return np.array([[d[x] for x in strings] for x in strings])
 
 def transformation_from_table(table):
-  return SequenceTransformer(table)
+    return SequenceTransformer(table)
 
 """
 Amino acids property tables copied from CRASP website
@@ -433,9 +432,8 @@ refractivity = transformation_from_table("""
 """)
 
 
-
-#Chou-Fasman of structural properties from
-#http://prowl.rockefeller.edu/aainfo/chou.htm
+# Chou-Fasman of structural properties from
+# http://prowl.rockefeller.edu/aainfo/chou.htm
 chou_fasman_table = """
 Alanine        142     83       66      0.06    0.076   0.035   0.058
 Arginine        98     93       95      0.070   0.106   0.099   0.085
@@ -468,7 +466,7 @@ def parse_chou_fasman(table):
     for line in table.split("\n"):
         fields = [field for field in line.split(" ") if len(field.strip()) > 0]
         if len(fields) == 0:
-          continue
+            continue
 
         if fields[1] == 'Acid':
             name = fields[0] + " " + fields[1]
@@ -484,7 +482,7 @@ def parse_chou_fasman(table):
         turn = int(fields[3])
         alpha_helix_score_dict[letter] = alpha
         beta_sheet_score_dict[letter] = beta
-        turn_score_dict[letter]= turn
+        turn_score_dict[letter] = turn
 
     assert len(alpha_helix_score_dict) == 20
     assert len(beta_sheet_score_dict) == 20
@@ -517,32 +515,31 @@ def parse_interaction_table(table):
     return d
 
 def transpose_interaction_dict(d):
-  transposed = {}
-  for x in amino_acid_letters:
-    transposed[x] = {}
-    for y in amino_acid_letters:
-      transposed[x][y] = d[y][x]
-  return transposed
+    transposed = {}
+    for x in amino_acid_letters:
+        transposed[x] = {}
+        for y in amino_acid_letters:
+            transposed[x][y] = d[y][x]
+    return transposed
 
 
-with open(join(MATRIX_DIR,'strand_vs_coil.txt'), 'r') as f:
-  strand_vs_coil_table = f.read()
-  strand_vs_coil = parse_interaction_table(strand_vs_coil_table)
-  coil_vs_strand = transpose_interaction_dict(strand_vs_coil)
+with open(join(MATRIX_DIR, 'strand_vs_coil.txt'), 'r') as f:
+    strand_vs_coil_table = f.read()
+    strand_vs_coil = parse_interaction_table(strand_vs_coil_table)
+    coil_vs_strand = transpose_interaction_dict(strand_vs_coil)
 
-with open(join(MATRIX_DIR,'helix_vs_strand.txt'), 'r') as f:
-  helix_vs_strand_table = f.read()
-  helix_vs_strand = parse_interaction_table(helix_vs_strand_table)
-  strand_vs_helix = transpose_interaction_dict(helix_vs_strand)
+with open(join(MATRIX_DIR, 'helix_vs_strand.txt'), 'r') as f:
+    helix_vs_strand_table = f.read()
+    helix_vs_strand = parse_interaction_table(helix_vs_strand_table)
+    strand_vs_helix = transpose_interaction_dict(helix_vs_strand)
 
 with open(join(MATRIX_DIR, 'helix_vs_coil.txt'), 'r') as f:
-  helix_vs_coil_table = f.read()
-  helix_vs_coil = parse_interaction_table(helix_vs_coil_table)
-  coil_vs_helix = transpose_interaction_dict(helix_vs_coil)
+    helix_vs_coil_table = f.read()
+    helix_vs_coil = parse_interaction_table(helix_vs_coil_table)
+    coil_vs_helix = transpose_interaction_dict(helix_vs_coil)
 
 
-
-def parse_blosum_table(table, coeff_type = int, key_type='row'):
+def parse_blosum_table(table, coeff_type=int, key_type='row'):
     """
     Parse a table of pairwise amino acid coefficient (e.g. BLOSUM50)
     """
@@ -559,8 +556,8 @@ def parse_blosum_table(table, coeff_type = int, key_type='row'):
 
     assert len(labels) >= 20, \
         "Expected 20+ amino acids but first line '%s' has %d fields" % (
-        lines[0],
-        len(labels)
+          lines[0],
+          len(labels)
         )
     coeffs = {}
     for line in lines[1:]:
@@ -568,16 +565,15 @@ def parse_blosum_table(table, coeff_type = int, key_type='row'):
         fields = line.split()
         assert len(fields) >= 21, \
             "Expected AA and 20+ coefficients but '%s' has %d fields" % (
-                line, len(fields)
-            )
+                line, len(fields))
         x = fields[0]
         for i, coeff_str in enumerate(fields[1:]):
             y = labels[i]
             coeff = coeff_type(coeff_str)
             if key_type == 'pair':
-                coeffs[(x,y)] = coeff
+                coeffs[(x, y)] = coeff
             elif key_type == 'pair_string':
-                coeffs[x+y] = coeff
+                coeffs[x + y] = coeff
             else:
                 assert key_type == 'row', "Unknown key type: %s" % key_type
                 if x not in coeffs:
@@ -587,11 +583,11 @@ def parse_blosum_table(table, coeff_type = int, key_type='row'):
 
 
 with open(join(MATRIX_DIR, 'BLOSUM30'), 'r') as f:
-  blosum30 = parse_blosum_table(f.read())
+    blosum30 = parse_blosum_table(f.read())
 
-with open(join(MATRIX_DIR,'BLOSUM50'), 'r') as f:
-  blosum50 = parse_blosum_table(f.read())
+with open(join(MATRIX_DIR, 'BLOSUM50'), 'r') as f:
+    blosum50 = parse_blosum_table(f.read())
 
-with open(join(MATRIX_DIR,'BLOSUM62'), 'r') as f:
-  blosum62 = parse_blosum_table(f.read())
+with open(join(MATRIX_DIR, 'BLOSUM62'), 'r') as f:
+    blosum62 = parse_blosum_table(f.read())
 

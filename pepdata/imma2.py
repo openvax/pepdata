@@ -25,27 +25,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from os.path  import join
-
-import pandas as pd
-import numpy as np
-
+from os.path import join
 
 from features import make_ngram_dataset_from_args
 from reduced_alphabet import make_alphabet_transformer
 from static_data import DATA_DIR
 
-def load_imm_list(reduced_alphabet = None):
+def load_imm_list(reduced_alphabet=None):
     path = join(DATA_DIR, 'IMMA2_imm.txt')
     if reduced_alphabet:
         transformer = make_alphabet_transformer(reduced_alphabet)
     else:
         transformer = lambda x: x
+
     with open(path) as f:
         imm = [transformer(line.strip()) for line in f]
     return imm
 
-def load_non_list(reduced_alphabet = None):
+def load_non_list(reduced_alphabet=None):
     path = join(DATA_DIR, 'IMMA2_non.txt')
     if reduced_alphabet:
         transformer = make_alphabet_transformer(reduced_alphabet)
@@ -56,7 +53,7 @@ def load_non_list(reduced_alphabet = None):
         non = [transformer(line.strip()) for line in f]
     return non
 
-def load_classes(reduced_alphabet = None):
+def load_classes(reduced_alphabet=None):
     imm = load_imm_list(reduced_alphabet)
     non = load_non_list(reduced_alphabet)
     return set(imm), set(non)
@@ -84,6 +81,4 @@ def load_ngrams(*args, **kwargs):
         Default True
     """
     return make_ngram_dataset_from_args(load_classes, *args, **kwargs)
-
-
 

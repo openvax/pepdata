@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import re
 
 import pandas as pd
 import numpy as np
@@ -36,7 +35,7 @@ def open_maf(filename):
         sep="\t",
         low_memory=False)
 
-def _load_maf_files(sources_dict, cancer_type = None):
+def _load_maf_files(sources_dict, cancer_type=None):
     """
     Given a dictionary mapping cancer types to download urls,
     get all the source MAFs, load them as DataFrames, and then
@@ -57,18 +56,18 @@ def _load_maf_files(sources_dict, cancer_type = None):
         maf_url = sources_dict[key]
         maf_filename = key + ".maf"
         path = fetch_file(
-            download_url = maf_url, 
-            filename = maf_filename, 
-            subdir = "epitopes")
+            download_url=maf_url,
+            filename=maf_filename,
+            subdir="epitopes")
         df = open_maf(path)
         df['Cancer Type'] = key
         data_frames.append(df)
-    return pd.concat(data_frames, ignore_index = True)
+    return pd.concat(data_frames, ignore_index=True)
 
-def load_dataframe(cancer_type = None):
+def load_dataframe(cancer_type=None):
     return _load_maf_files(TCGA_SOURCES, cancer_type)
 
-def _build_refseq_id_to_protein(refseq_path, predicted_proteins = False):
+def _build_refseq_id_to_protein(refseq_path, predicted_proteins=False):
     """
     Given the path to a local FASTA file containing
     RefSeq ID's and their protein transcripts,
@@ -104,21 +103,24 @@ SINGLE_AMINO_ACID_SUBSTITUTION = "p.([A-Z])([0-9]+)([A-Z])"
 DELETION = "p.([A-Z])([0-9]+)del"
 
 def load_peptide_counts(
-        peptide_length = [8,9,10,11],
-        cancer_type = None,
-        verbose = False):
+        peptide_length=[8, 9, 10, 11],
+        cancer_type=None,
+        verbose=False):
     """
     Call given functions for mutation type
         subst_fn(protein, position, mutant_aa)
     """
     peptide_lengths = int_or_seq(peptide_length)
 
-    combined_df = load_dataframe(cancer_type = cancer_type)
+    combined_df = load_dataframe(cancer_type=cancer_type)
     filtered = combined_df[["Refseq_prot_Id", "Protein_Change"]].dropna()
 
     # discard indices of NA entries
     filtered.index = np.arange(len(filtered))
-    refseq_path = fetch_file(REFSEQ_PROTEIN_URL, filename = 'refseq_protein.faa', subdir = "epitopes")
+    refseq_path = fetch_file(
+        REFSEQ_PROTEIN_URL,
+        filename='refseq_protein.faa',
+        subdir="epitopes")
     refseq_ids_to_protein = _build_refseq_id_to_protein(refseq_path)
     refseq_ids = filtered.Refseq_prot_Id
 
@@ -136,7 +138,7 @@ def load_peptide_counts(
     #
     subst_count = len(subst_matches)
     print "Simple substitutions (%d)" % subst_count
-    pbar = ProgressBar(maxval = np.array(subst_matches.index).max() ).start()
+    pbar = ProgressBar(maxval=np.array(subst_matches.index).max()).start()
     for match_num, wildtype, str_position, mutation in \
             subst_matches.itertuples():
         if wildtype == mutation:
@@ -178,16 +180,15 @@ def load_peptide_counts(
                 stop = start + n
                 if start >= 0 and stop <= m:
                     substr = \
-                        protein[start:start+i] + \
+                        protein[start:start + i] + \
                         mutation + \
-                        protein[start+i+1:stop]
+                        protein[start + i + 1:stop]
                     if substr in peptide_counts:
                         peptide_counts[substr] += 1
                     else:
                         peptide_counts[substr] = 1
         pbar.update(match_num)
     pbar.finish()
-
 
     del_matches = \
         filtered.Protein_Change.str.extract(DELETION)
@@ -200,7 +201,7 @@ def load_peptide_counts(
     #
     del_count = len(del_matches)
     print "Simple deletions (%d)" % del_count
-    pbar = ProgressBar(maxval = np.array(del_matches.index).max()).start()
+    pbar = ProgressBar(maxval=np.array(del_matches.index).max()).start()
     for match_num, wildtype, str_position in \
             del_matches.itertuples():
         refseq_id = refseq_ids[match_num]
@@ -221,13 +222,13 @@ def load_peptide_counts(
         if old_aa != wildtype:
             if verbose:
                 print \
-                    "Expected %s but got %s at position %s in %s (%s%sdel)" % \
-                    (wildtype,
-                    old_aa,
-                    str_position,
-                    refseq_id,
-                    wildtype,
-                    str_position,
+                    "Expected %s but got %s at position %s in %s (%s%sdel)" % (
+                        wildtype,
+                        old_aa,
+                        str_position,
+                        refseq_id,
+                        wildtype,
+                        str_position,
                     )
             n_failed += 1
             continue
@@ -240,8 +241,8 @@ def load_peptide_counts(
                 stop = start + n + 1
                 if start >= 0 and stop <= m:
                     substr = \
-                        protein[start:start+i] + \
-                        protein[start+i+1:stop]
+                        protein[start:start + i] + \
+                        protein[start + i + 1:stop]
                     if substr in peptide_counts:
                         peptide_counts[substr] += 1
                     else:
@@ -252,9 +253,9 @@ def load_peptide_counts(
     return dataframe_from_counts(peptide_counts)
 
 def load_peptide_set(
-        peptide_length = [8,9,10,11],
-        cancer_type = None):
+        peptide_length=[8, 9, 10, 11],
+        cancer_type=None):
     counts = load_peptide_counts(
-        peptide_length = peptide_length,
-        cancer_type = cancer_type)
+        peptide_length=peptide_length,
+        cancer_type=cancer_type)
     return set(counts.Peptide)

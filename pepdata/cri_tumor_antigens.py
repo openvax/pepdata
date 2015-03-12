@@ -20,13 +20,12 @@ http://cancerimmunity.org/peptide/mutations/
 from os.path import join
 
 import pandas as pd
-import numpy as np
 
 from static_data import DATA_DIR
 
 def load_dataframe(
-        mhc_class = None,
-        hla_type = None):
+        mhc_class=None,
+        hla_type=None):
     path = join(DATA_DIR, 'cri_mutations.csv')
     df = pd.read_csv(path)
     mhc2 = df.HLA.str.startswith('D')

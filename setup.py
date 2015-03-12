@@ -34,7 +34,7 @@ from setuptools import setup
 if __name__ == '__main__':
     setup(
         name='pepdata',
-        version="0.4.1",
+        version="0.5.0",
         description="Python interface to IEDB and other immune epitope data",
         author="Alex Rubinsteyn",
         author_email="alex {dot} rubinsteyn {at} mssm {dot} edu",

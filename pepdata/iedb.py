@@ -12,44 +12,39 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-from os.path import join
-
-import numpy as np
 import pandas as pd
-
 
 from reduced_alphabet import make_alphabet_transformer
 from features import (
-    make_ngram_dataset, make_ngram_dataset_from_args,
-    make_unlabeled_ngram_dataset, make_unlabeled_ngram_dataset_from_args
+     make_ngram_dataset_from_args,
 )
 from common import (
     split_classes, bad_amino_acids, fetch_file, delete_old_file
 )
 
-
 def _load_dataframe(
         filename,
-        human = True,
-        mhc_class = None, # 1, 2, or None for both
-        hla = None, # regex pattern i.e. '(HLA-A2)|(HLA-A\*02)'
-        exclude_hla = None, # regex pattern i.e. '(HLA-A2)|(HLA-A\*02)'
-        peptide_length = None,
+        human=True,
+        mhc_class=None,  # 1, 2, or None for both
+        hla=None,  # regex pattern i.e. '(HLA-A2)|(HLA-A\*02)'
+        exclude_hla=None,  # regex pattern i.e. '(HLA-A2)|(HLA-A\*02)'
+        peptide_length=None,
         assay_method=None,
         assay_group=None,
-        nrows = None,
-        reduced_alphabet = None,
-        verbose= False):
+        nrows=None,
+        reduced_alphabet=None,
+        verbose=False):
     """
     Load an IEDB csv into a pandas dataframe and filter using the
     criteria given as function arguments
     """
     df = pd.read_csv(
             filename,
+            header=[0, 1],
             skipinitialspace=True,
-            nrows = nrows,
-            low_memory=False)
+            nrows=nrows,
+            low_memory=False,
+            error_bad_lines=False)
 
     # Sometimes the IEDB seems to put in an extra comma in the
     # header line, which creates an unnamed column of NaNs.
@@ -58,8 +53,7 @@ def _load_dataframe(
 
     n = len(df)
 
-    epitopes = df['Epitope Linear Sequence'].str.upper()
-    df['Epitope Linear Sequence'] = epitopes
+    epitopes = df['Epitope']['Description'].str.upper()
 
     null_epitope_seq = epitopes.isnull()
 
@@ -74,8 +68,7 @@ def _load_dataframe(
     mask = ~(bad_epitope_seq | null_epitope_seq)
 
     if human:
-        organism = df['Host Organism Name']
-        mask &= organism.str.startswith('Homo sapiens', na=False).astype('bool')
+        mask &= df['MHC']['Allele Name'].str.startswith('HLA').astype('bool')
 
     # Match known alleles such as 'HLA-A*02:01',
     # broader groupings such as 'HLA-A2'
@@ -84,30 +77,26 @@ def _load_dataframe(
     #  or
     #  'Class I,allele undetermined'
 
-    mhc = df['MHC Allele Name']
-
     if mhc_class == 1:
-        mhc1_pattern = 'Class I,|HLA-[A-C](?:[0-9]|\*)'
-        mask &= mhc.str.contains(mhc1_pattern, na=False).astype('bool')
+        mask &= df['MHC']['MHC allele class'] == 'I'
     elif mhc_class == 2:
-        mhc2_pattern = "Class II,|HLA-D(?:P|M|O|Q|R)"
-        mask &= mhc.str.contains(mhc2_pattern, na=False).astype('bool')
+        mask &= df['MHC']['MHC allele class'] == 'II'
 
     if hla:
-        mask &= df['MHC Allele Name'].str.contains(hla, na=False)
+        mask &= df['MHC']['MHC Allele'].str.contains(hla, na=False)
 
     if exclude_hla:
-        mask &= ~df['MHC Allele Name'].str.contains(exclude_hla, na=False)
+        mask &= ~(df['MHC']['MHC Allele'].str.contains(exclude_hla, na=False))
 
     if assay_group:
-        mask &= df['Assay Group'].str.contains(assay_group)
+        mask &= df['Assay']['Assay Group'].str.contains(assay_group)
 
     if assay_method:
-        mask &= df['Method/Technique'].str.contains(assay_method)
+        mask &= df['Assay']['Method/Technique'].str.contains(assay_method)
 
     if peptide_length:
         assert peptide_length > 0
-        mask &=  df['Epitope Linear Sequence'].str.len() == peptide_length
+        mask &= df['Epitope Linear Sequence'].str.len() == peptide_length
 
     df = df[mask]
 
@@ -115,27 +104,27 @@ def _load_dataframe(
         print "Returning %d / %d entries after filtering" % (len(df), n)
 
     if reduced_alphabet:
-        epitopes = df['Epitope Linear Sequence']
-        df['Epitope Linear Sequence']  = \
+        epitopes = df['Epitope']['Description']
+        df['Epitope']['Description'] = \
             epitopes.map(make_alphabet_transformer(reduced_alphabet))
 
     return df
 
 def _group_epitopes(
         df,
-        unique_sequences = True,
-        min_count = 0,
-        group_by_allele = False,
-        verbose = False):
+        unique_sequences=True,
+        min_count=0,
+        group_by_allele=False,
+        verbose=False):
     """
     Given a dataframe of epitopes and qualitative measures,
     group the epitope strings (optionally also grouping by allele),
     and associate each group with its percentage of Positive
     Qualitative Measure results.
     """
-    epitopes = df['Epitope Linear Sequence']
-    measure = df['Qualitative Measure']
-    mhc = df['MHC Allele Name']
+    epitopes = df['Epitope']['Description']
+    measure = df['Assay']['Qualitative Measure']
+    mhc = df['MHC']['Allele Name']
     pos_mask = measure.str.startswith('Positive').astype('bool')
 
     if group_by_allele:
@@ -156,35 +145,36 @@ def _group_epitopes(
         neg_counts = neg_counts[mask]
 
     result = pd.DataFrame(
-        data = {
-            'value' : values,
+        data={
+            'value': values,
             'count': counts,
-            'pos' : pos_counts,
-            'neg' : neg_counts,
+            'pos': pos_counts,
+            'neg': neg_counts,
         },
-        index = values.index)
+        index=values.index)
     return result
 
 def _tcell_local_path():
     return fetch_file(
-        filename = "tcell_compact.csv",
-        download_url = "http://www.iedb.org/doc/tcell_compact.zip",
-        decompress = True)
+        filename="tcell_compact.csv",
+        download_url="http://www.iedb.org/doc/tcell_compact.zip",
+        decompress=True,
+        subdir="pepdata")
 
 def clear_tcell_cache():
     delete_old_file(_tcell_local_path())
 
 def load_tcell(
-        mhc_class = None, # 1, 2, or None for neither
-        hla = None,
-        exclude_hla = None,
-        human = True,
-        peptide_length = None,
+        mhc_class=None,  # 1, 2, or None for neither
+        hla=None,
+        exclude_hla=None,
+        human=True,
+        peptide_length=None,
         assay_method=None,
         assay_group=None,
-        reduced_alphabet = None, # 20 letter AA strings -> simpler alphabet
-        nrows = None,
-        verbose= False):
+        reduced_alphabet=None,  # 20 letter AA strings -> simpler alphabet
+        nrows=None,
+        verbose=False):
     """
     Load IEDB T-cell data without aggregating multiple entries for same epitope
 
@@ -238,18 +228,18 @@ def load_tcell(
 
 
 def load_tcell_values(
-        mhc_class = None, # 1, 2, or None for neither
-        hla = None,
-        exclude_hla = None,
-        human = True,
-        peptide_length = None,
+        mhc_class=None,  # 1, 2, or None for neither
+        hla=None,
+        exclude_hla=None,
+        human=True,
+        peptide_length=None,
         assay_method=None,
         assay_group=None,
-        reduced_alphabet = None, # 20 letter AA strings -> simpler alphabet
-        nrows = None,
-        min_count = 0,
-        group_by_allele = False,
-        verbose= False):
+        reduced_alphabet=None,  # 20 letter AA strings -> simpler alphabet
+        nrows=None,
+        min_count=0,
+        group_by_allele=False,
+        verbose=False):
     """
     Load the T-cell response data from IEDB, collect into a dataframe mapping
     epitopes to percentage positive results.
@@ -307,9 +297,9 @@ def load_tcell_values(
 
     return _group_epitopes(
             df,
-            group_by_allele = group_by_allele,
-            min_count = min_count,
-            verbose = verbose)
+            group_by_allele=group_by_allele,
+            min_count=min_count,
+            verbose=verbose)
 
 def load_tcell_classes(*args, **kwargs):
     """
@@ -327,8 +317,8 @@ def load_tcell_classes(*args, **kwargs):
     tcell_values = load_tcell_values(*args, **kwargs)
     return split_classes(
         tcell_values.value,
-        noisy_labels = noisy_labels,
-        verbose = verbose)
+        noisy_labels=noisy_labels,
+        verbose=verbose)
 
 def load_tcell_ngrams(*args, **kwargs):
     """
@@ -361,24 +351,25 @@ def load_tcell_ngrams(*args, **kwargs):
 
 def _mhc_local_path():
     return fetch_file(
-        filename = "elution_compact.csv",
-        download_url = "http://www.iedb.org/doc/mhc_ligand_compact.zip",
-        decompress = True)
+        filename="mhc_ligand_full.csv",
+        download_url="http://www.iedb.org/doc/mhc_ligand_full.zip",
+        decompress=True,
+        subdir="pepdata")
 
 def clear_mhc_cache():
     delete_old_file(_mhc_local_path())
 
 def load_mhc(
-        mhc_class = None, # 1, 2, or None for neither
-        hla = None,
-        exclude_hla = None,
-        human = True,
-        peptide_length = None,
+        mhc_class=None,  # 1, 2, or None for neither
+        hla=None,
+        exclude_hla=None,
+        human=True,
+        peptide_length=None,
         assay_method=None,
         assay_group=None,
-        reduced_alphabet = None, # 20 letter AA strings -> simpler alphabet
-        nrows = None,
-        verbose = False,
+        reduced_alphabet=None,  # 20 letter AA strings -> simpler alphabet
+        nrows=None,
+        verbose=False,
         cache_download=True):
     """
     Load IEDB MHC data without aggregating multiple entries for the same epitope
@@ -433,14 +424,14 @@ def load_mhc(
 
 
 def load_mhc_values(
-        mhc_class=None, # 1, 2, or None for neither
+        mhc_class=None,  # 1, 2, or None for neither
         hla=None,
         exclude_hla=None,
         human=True,
         peptide_length=None,
         assay_method=None,
         assay_group=None,
-        reduced_alphabet=None, # 20 letter AA strings -> simpler alphabet
+        reduced_alphabet=None,  # 20 letter AA strings -> simpler alphabet
         nrows=None,
         group_by_allele=False,
         min_count=0,
@@ -554,7 +545,7 @@ def load_mhc_ngrams(*args, **kwargs):
     return make_ngram_dataset_from_args(load_mhc_classes, *args, **kwargs)
 
 def load_tcell_vs_mhc(
-        mhc_class=None, # 1, 2, or None for neither
+        mhc_class=None,  # 1, 2, or None for neither
         hla=None,
         exclude_hla=None,
         peptide_length=None,
@@ -579,21 +570,20 @@ def load_tcell_vs_mhc(
             assay_method=mhc_assay_method,
             assay_group=mhc_assay_group,
             nrows=nrows,
-            min_count = min_count,
-            group_by_allele = group_by_allele,
-            verbose = verbose)
+            min_count=min_count,
+            group_by_allele=group_by_allele,
+            verbose=verbose)
     tcell = load_tcell_values(
-                mhc_class = mhc_class,
-                hla = hla,
-                exclude_hla = exclude_hla,
+                mhc_class=mhc_class,
+                hla=hla,
+                exclude_hla=exclude_hla,
                 assay_method=tcell_assay_method,
                 assay_group=tcell_assay_group,
-                peptide_length = peptide_length,
-                nrows = nrows,
-                min_count = min_count,
-                group_by_allele = group_by_allele,
-                verbose = verbose)
-    df_combined = pd.DataFrame({'mhc':mhc.value, 'tcell':tcell.value})
+                peptide_length=peptide_length,
+                nrows=nrows,
+                min_count=min_count,
+                group_by_allele=group_by_allele,
+                verbose=verbose)
+    df_combined = pd.DataFrame({'mhc': mhc.value, 'tcell': tcell.value})
     both = ~(df_combined.mhc.isnull() | df_combined.tcell.isnull())
     return df_combined[both]
-

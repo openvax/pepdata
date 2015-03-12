@@ -18,19 +18,21 @@ Peptide response data from:
 http://www.hiv.lanl.gov/content/immunology/hlatem/study1/index.html
 """
 
-import numpy as np
 import pandas as pd
 
 from common import fetch_file
 
-def load_dataframe(min_count = None, max_count = None):
+def load_dataframe(min_count=None, max_count=None):
     url = \
         "http://www.hiv.lanl.gov/content/immunology/hlatem/study1/peptides.html"
-    local_path = fetch_file(download_url = url, filename = 'frahm.csv', subdir = "epitopes")
-    df = pd.read_csv(local_path, names = [
+    local_path = fetch_file(
+        download_url=url,
+        filename='frahm.csv',
+        subdir="peptdata")
+    df = pd.read_csv(local_path, names=[
         "Peptide",
-        "Sequence", 
-        "Protein", 
+        "Sequence",
+        "Protein",
         "HXB2",
         "HXB2 loc",
         "Ref",
@@ -46,9 +48,9 @@ def load_dataframe(min_count = None, max_count = None):
     reactions = df['Reactions']
     entropy = df['Entropy']
     df = pd.DataFrame({
-        'Peptide' : peptides,
-        'Reactions' : reactions,
-        'Entropy' : entropy
+        'Peptide': peptides,
+        'Reactions': reactions,
+        'Entropy': entropy
     })
     if min_count is not None:
         df = df.ix[df.Reactions >= min_count]
@@ -59,5 +61,3 @@ def load_dataframe(min_count = None, max_count = None):
 def load_set(*args, **kwargs):
     df = load_dataframe(*args, **kwargs)
     return set(df.Peptide)
-
-
