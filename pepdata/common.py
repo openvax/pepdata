@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
 from os import remove
 from os.path import getmtime, exists
 import time
@@ -20,18 +19,7 @@ import time
 import pandas as pd
 import datacache
 
-def fix_subidr_arg(f):
-    """
-    Functions from datacache take an optional 'subdir' argument
-    which we want to make always "epitopes".
-    """
-    def new_function(*args, **kwargs):
-        kwargs['subdir'] = 'epitopes'
-        return f(*args, **kwargs)
-    return new_function
-
-fetch_file = fix_subidr_arg(datacache.fetch_file)
-fetch_and_transform = fix_subidr_arg(datacache.fetch_and_transform)
+cache = datacache.Cache("pepdata")
 
 bad_amino_acids = 'U|X|J|B|Z'
 
@@ -42,15 +30,15 @@ def int_or_seq(x):
         return list(x)
 
 def dataframe_from_counts(counts):
-    invert =  {
+    invert = {
         'Peptide': counts.keys(),
-        'Count' : counts.values()
+        'Count': counts.values()
     }
 
     df = pd.DataFrame(invert)
     return df.sort("Count", ascending=False)
 
-def delete_old_file(path, delete_after_seconds = 10):
+def delete_old_file(path, delete_after_seconds=10):
     assert exists(path)
     then = getmtime(path)
     now = time.time()
@@ -60,9 +48,9 @@ def delete_old_file(path, delete_after_seconds = 10):
 
 def split_classes(
         values,
-        noisy_labels = 'majority',
-        unique_sequences = True,
-        verbose = False):
+        noisy_labels='majority',
+        unique_sequences=True,
+        verbose=False):
     """
     Given a dataframe mapping epitope strings to percentages in [0,1],
     split them into two sets (positive and negative examples.
@@ -97,7 +85,7 @@ def split_classes(
     if verbose:
         print "# unique positive", len(pos_set)
         print "# unique negative", len(neg_set)
-        print "# overlap %d (%0.4f)" % (len(noisy_set), \
+        print "# overlap %d (%0.4f)" % (len(noisy_set),
           float(len(noisy_set)) / len(pos_set))
 
     if noisy_labels != 'majority':

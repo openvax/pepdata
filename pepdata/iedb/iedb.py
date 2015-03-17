@@ -14,12 +14,10 @@
 
 import pandas as pd
 
-from reduced_alphabet import make_alphabet_transformer
-from features import (
-     make_ngram_dataset_from_args,
-)
-from common import (
-    split_classes, bad_amino_acids, fetch_file, delete_old_file
+from .. reduced_alphabet import make_alphabet_transformer
+from .. features import make_ngram_dataset_from_args
+from .. common import (
+    split_classes, bad_amino_acids, cache, delete_old_file
 )
 
 def _load_dataframe(
@@ -154,15 +152,14 @@ def _group_epitopes(
         index=values.index)
     return result
 
-def _tcell_local_path():
-    return fetch_file(
+def tcell_local_path():
+    return cache.fetch_file(
         filename="tcell_compact.csv",
         download_url="http://www.iedb.org/doc/tcell_compact.zip",
-        decompress=True,
-        subdir="pepdata")
+        decompress=True)
 
 def clear_tcell_cache():
-    delete_old_file(_tcell_local_path())
+    delete_old_file(tcell_local_path())
 
 def load_tcell(
         mhc_class=None,  # 1, 2, or None for neither
@@ -211,7 +208,7 @@ def load_tcell(
         Print debug output
     """
 
-    data_path = _tcell_local_path()
+    data_path = tcell_local_path()
 
     return _load_dataframe(
             data_path,
@@ -349,15 +346,14 @@ def load_tcell_ngrams(*args, **kwargs):
     kwargs['training_already_reduced'] = True
     return make_ngram_dataset_from_args(load_tcell_classes, *args, **kwargs)
 
-def _mhc_local_path():
-    return fetch_file(
+def mhc_local_path():
+    return cache.fetch_file(
         filename="mhc_ligand_full.csv",
         download_url="http://www.iedb.org/doc/mhc_ligand_full.zip",
-        decompress=True,
-        subdir="pepdata")
+        decompress=True)
 
 def clear_mhc_cache():
-    delete_old_file(_mhc_local_path())
+    delete_old_file(mhc_local_path())
 
 def load_mhc(
         mhc_class=None,  # 1, 2, or None for neither
@@ -407,7 +403,7 @@ def load_mhc(
     verbose : bool
         Print debug output
     """
-    data_path = _mhc_local_path()
+    data_path = mhc_local_path()
 
     return _load_dataframe(
                 data_path,
