@@ -12,14 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from os import remove
-from os.path import getmtime, exists
-import time
+from functools import wraps
 
 import pandas as pd
 import datacache
 
 cache = datacache.Cache("pepdata")
+
+def memoize(fn):
+    cache = {}
+
+    @wraps(fn)
+    def wrapped_fn(*args, **kwargs):
+        key = tuple(args) + tuple(sorted(kwargs.values()))
+        if key not in cache:
+            cache[key] = fn(*args, **kwargs)
+        return cache[key]
+
+    return wrapped_fn
 
 bad_amino_acids = 'U|X|J|B|Z'
 
@@ -37,14 +47,6 @@ def dataframe_from_counts(counts):
 
     df = pd.DataFrame(invert)
     return df.sort("Count", ascending=False)
-
-def delete_old_file(path, delete_after_seconds=10):
-    assert exists(path)
-    then = getmtime(path)
-    now = time.time()
-    if now - then > delete_after_seconds:
-        print "Deleting old file:", path
-        remove(path)
 
 def split_classes(
         values,

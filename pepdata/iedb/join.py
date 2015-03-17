@@ -12,12 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""
+Construct DataFrames which join multiple IEDB datasets
+"""
 
 import pandas as pd
 
+from ..common import memoize
 from .mhc import load_mhc_values
 from .tcell import load_tcell_values
 
+@memoize
 def load_tcell_vs_mhc(
         mhc_class=None,  # 1, 2, or None for neither
         hla=None,

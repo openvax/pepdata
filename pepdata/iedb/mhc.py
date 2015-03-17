@@ -12,13 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
 import os
 
 import pandas as pd
 
 from ..reduced_alphabet import make_alphabet_transformer
 from ..features import make_ngram_dataset_from_args
-from ..common import split_classes, bad_amino_acids, cache
+from ..common import split_classes, bad_amino_acids, cache, memoize
 from .common import group_peptides
 
 
@@ -47,95 +48,8 @@ def local_path():
 def delete():
     os.remove(local_path())
 
-def _load_dataframe(
-        filename,
-        human=True,
-        mhc_class=None,  # 1, 2, or None for both
-        hla=None,  # regex pattern i.e. '(HLA-A2)|(HLA-A\*02)'
-        exclude_hla=None,  # regex pattern i.e. '(HLA-A2)|(HLA-A\*02)'
-        peptide_length=None,
-        assay_method=None,
-        assay_group=None,
-        nrows=None,
-        reduced_alphabet=None,
-        verbose=False):
-    """
-    Load a CSV of IEDB's full MHC data into a Pandas DataFrame and filter
-    using the criteria given as function arguments
-    """
-    df = pd.read_csv(
-            filename,
-            header=[0, 1],
-            skipinitialspace=True,
-            nrows=nrows,
-            low_memory=False,
-            error_bad_lines=False)
-
-    # Sometimes the IEDB seems to put in an extra comma in the
-    # header line, which creates an unnamed column of NaNs.
-    # To deal with this, drop any columns which are all NaN
-    df = df.dropna(axis=1, how='all')
-
-    n = len(df)
-
-    epitopes = df['Epitope']['Description'].str.upper()
-
-    null_epitope_seq = epitopes.isnull()
-
-    # if have rare or unknown amino acids, drop the sequence
-    bad_epitope_seq = \
-        epitopes.str.contains(bad_amino_acids, na=False).astype('bool')
-
-    if verbose:
-        print "Dropping %d null sequences" % null_epitope_seq.sum()
-        print "Dropping %d bad sequences" % bad_epitope_seq.sum()
-
-    mask = ~(bad_epitope_seq | null_epitope_seq)
-
-    if human:
-        mask &= df['MHC']['Allele Name'].str.startswith('HLA').astype('bool')
-
-    # Match known alleles such as 'HLA-A*02:01',
-    # broader groupings such as 'HLA-A2'
-    # and unknown alleles of the MHC-1 listed either as
-    #  'HLA-Class I,allele undetermined'
-    #  or
-    #  'Class I,allele undetermined'
-
-    if mhc_class == 1:
-        mask &= df['MHC']['MHC allele class'] == 'I'
-    elif mhc_class == 2:
-        mask &= df['MHC']['MHC allele class'] == 'II'
-
-    if hla:
-        mask &= df['MHC']['MHC Allele'].str.contains(hla, na=False)
-
-    if exclude_hla:
-        mask &= ~(df['MHC']['MHC Allele'].str.contains(exclude_hla, na=False))
-
-    if assay_group:
-        mask &= df['Assay']['Assay Group'].str.contains(assay_group)
-
-    if assay_method:
-        mask &= df['Assay']['Method/Technique'].str.contains(assay_method)
-
-    if peptide_length:
-        assert peptide_length > 0
-        mask &= df['Epitope Linear Sequence'].str.len() == peptide_length
-
-    df = df[mask]
-
-    if verbose:
-        print "Returning %d / %d entries after filtering" % (len(df), n)
-
-    if reduced_alphabet:
-        epitopes = df['Epitope']['Description']
-        df['Epitope']['ReducedAlphabet'] = \
-            epitopes.map(make_alphabet_transformer(reduced_alphabet))
-    return df
-
-
-def load_full(
+@memoize
+def load_dataframe(
         mhc_class=None,  # 1, 2, or None for neither
         hla=None,
         exclude_hla=None,
@@ -145,7 +59,6 @@ def load_full(
         assay_group=None,
         reduced_alphabet=None,  # 20 letter AA strings -> simpler alphabet
         nrows=None,
-        verbose=False,
         cache_download=True):
     """
     Load IEDB MHC data without aggregating multiple entries for the same epitope
@@ -177,40 +90,94 @@ def load_full(
         Remap amino acid letters to some other alphabet
 
     nrows : int, optional
-        Don't load the full IEDB dataset but instead read only the first nrows
-
-    verbose : bool
-        Print debug output
+        Don"t load the full IEDB dataset but instead read only the first nrows
     """
-    return _load_dataframe(
-                local_path(),
-                mhc_class=mhc_class,
-                hla=hla,
-                exclude_hla=exclude_hla,
-                human=human,
-                peptide_length=peptide_length,
-                assay_method=assay_method,
-                assay_group=assay_group,
-                reduced_alphabet=reduced_alphabet,
-                nrows=nrows,
-                verbose=verbose)
+    df = pd.read_csv(
+            local_path(),
+            header=[0, 1],
+            skipinitialspace=True,
+            nrows=nrows,
+            low_memory=False,
+            error_bad_lines=False)
+
+    # Sometimes the IEDB seems to put in an extra comma in the
+    # header line, which creates an unnamed column of NaNs.
+    # To deal with this, drop any columns which are all NaN
+    df = df.dropna(axis=1, how="all")
+
+    n = len(df)
+
+    epitopes = df["Epitope"]["Description"].str.upper()
+
+    null_epitope_seq = epitopes.isnull()
+    n_null = null_epitope_seq.sum()
+    if n_null > 0:
+        logging.info("Dropping %d null sequences", n_null)
+
+    # if have rare or unknown amino acids, drop the sequence
+    bad_epitope_seq = \
+        epitopes.str.contains(bad_amino_acids, na=False).astype("bool")
+    n_bad = bad_epitope_seq.sum()
+    if n_bad > 0:
+        logging.info("Dropping %d bad sequences", n_bad)
+
+    mask = ~(bad_epitope_seq | null_epitope_seq)
+
+    if human:
+        mask &= df["MHC"]["Allele Name"].str.startswith("HLA").astype("bool")
+
+    # Match known alleles such as "HLA-A*02:01",
+    # broader groupings such as "HLA-A2"
+    # and unknown alleles of the MHC-1 listed either as
+    #  "HLA-Class I,allele undetermined"
+    #  or
+    #  "Class I,allele undetermined"
+
+    if mhc_class == 1:
+        mask &= df["MHC"]["MHC allele class"] == "I"
+    elif mhc_class == 2:
+        mask &= df["MHC"]["MHC allele class"] == "II"
+
+    if hla:
+        mask &= df["MHC"]["MHC Allele"].str.contains(hla, na=False)
+
+    if exclude_hla:
+        mask &= ~(df["MHC"]["MHC Allele"].str.contains(exclude_hla, na=False))
+
+    if assay_group:
+        mask &= df["Assay"]["Assay Group"].str.contains(assay_group)
+
+    if assay_method:
+        mask &= df["Assay"]["Method/Technique"].str.contains(assay_method)
+
+    if peptide_length:
+        assert peptide_length > 0
+        mask &= df["Epitope"]["Description"].str.len() == peptide_length
+
+    df = df[mask]
+
+    logging.info("Returning %d / %d entries after filtering", len(df), n)
+
+    if reduced_alphabet:
+        epitopes = df["Epitope"]["Description"]
+        df["Epitope"]["ReducedAlphabet"] = \
+            epitopes.map(make_alphabet_transformer(reduced_alphabet))
+    return df
 
 def _group_mhc_peptides(
         df,
-        unique_sequences=True,
         min_count=0,
-        group_by_allele=False,
-        verbose=False):
+        group_by_allele=False):
     """
     Given a dataframe of epitopes and qualitative measures,
     group the epitope strings (optionally also grouping by allele),
     and associate each group with its percentage of Positive
     Qualitative Measure results.
     """
-    epitopes = df['Epitope']['Description']
-    measure = df['Assay']['Qualitative Measure']
-    pos_mask = measure.str.startswith('Positive').astype('bool')
-    mhc = df['MHC']['Allele Name']
+    epitopes = df["Epitope"]["Description"]
+    measure = df["Assay"]["Qualitative Measure"]
+    pos_mask = measure.str.startswith("Positive").astype("bool")
+    mhc = df["MHC"]["Allele Name"]
     return group_peptides(
         epitopes,
         mhc,
@@ -218,6 +185,7 @@ def _group_mhc_peptides(
         group_by_allele=group_by_allele,
         min_count=min_count)
 
+@memoize
 def load_groups(
         mhc_class=None,  # 1, 2, or None for neither
         hla=None,
@@ -229,8 +197,7 @@ def load_groups(
         reduced_alphabet=None,  # 20 letter AA strings -> simpler alphabet
         nrows=None,
         group_by_allele=False,
-        min_count=0,
-        verbose=False):
+        min_count=0):
     """
     Load the MHC binding results from IEDB, collect into a dataframe mapping
     epitopes to percentage positive results.
@@ -262,18 +229,16 @@ def load_groups(
         Remap amino acid letters to some other alphabet
 
     nrows: int, optional
-        Don't load the full IEDB dataset but instead read only the first nrows
+        Don"t load the full IEDB dataset but instead read only the first nrows
 
     group_by_allele:
-        Don't combine epitopes across multiple HLA types
+        Don"t combine epitopes across multiple HLA types
 
     min_count: int, optional
         Exclude epitopes which appear fewer times than min_count
 
-    verbose: bool
-        Print debug output
     """
-    df = load_full(
+    df = load_dataframe(
         mhc_class=mhc_class,
         hla=hla,
         exclude_hla=exclude_hla,
@@ -282,11 +247,57 @@ def load_groups(
         assay_method=assay_method,
         assay_group=assay_group,
         reduced_alphabet=reduced_alphabet,
-        nrows=nrows,
-        verbose=verbose)
+        nrows=nrows)
 
     return _group_mhc_peptides(
             df,
             group_by_allele=group_by_allele,
-            min_count=min_count,
-            verbose=verbose)
+            min_count=min_count)
+
+@memoize
+def load_classes(*args, **kwargs):
+    """
+    Split the MHC binding assay results into positive and negative sets.
+
+    Parameters
+    ----------
+    noisy_labels : "majority" | "negative" | "positive"
+        Which class do we assign an epitope with contradictory labels?
+
+    *args, **kwargs : same as "load_groups"
+    """
+    noisy_labels = kwargs.pop("noisy_labels", "majority")
+    mhc_values = load_groups(*args, **kwargs)
+    return split_classes(
+        mhc_values.value,
+        noisy_labels=noisy_labels)
+
+@memoize
+def load_ngrams(*args, **kwargs):
+    """
+    Construct n-gram input features X and output labels Y for MHC binding
+
+    Parameters:
+    ----------
+    max_ngram : int
+        Order of n-grams to consider when constructing X.
+        For example, when ngram = 1, the vector space is the individual
+        frequencies of letters in the amino acid strings.
+
+    normalize_row : bool, optional
+        If True (default), then return frequencies, else raw counts.
+
+    subsample_bigger_class: bool, optional
+        When the number of samples in both classes are unbalanced,
+        randomly drop some samples from the larger class (default = False).
+
+    return_transformer: bool
+        Return `X, Y, f` instead of just `X, Y`,
+        where f can be used to transform new amino acid strings into
+        the same space as the training data.
+
+
+    *args, **kwargs : same as `load_classes`
+    """
+    kwargs["training_already_reduced"] = True
+    return make_ngram_dataset_from_args(load_classes, *args, **kwargs)
