@@ -16,9 +16,10 @@ import os
 
 import pandas as pd
 
-from .. reduced_alphabet import make_alphabet_transformer
-from .. features import make_ngram_dataset_from_args
-from .. common import split_classes, bad_amino_acids, cache
+from ..reduced_alphabet import make_alphabet_transformer
+from ..features import make_ngram_dataset_from_args
+from ..common import split_classes, bad_amino_acids, cache
+from .common import group_peptides
 
 
 MHC_URL = "http://www.iedb.org/doc/mhc_ligand_full.zip"
@@ -193,3 +194,99 @@ def load_full(
                 reduced_alphabet=reduced_alphabet,
                 nrows=nrows,
                 verbose=verbose)
+
+def _group_mhc_peptides(
+        df,
+        unique_sequences=True,
+        min_count=0,
+        group_by_allele=False,
+        verbose=False):
+    """
+    Given a dataframe of epitopes and qualitative measures,
+    group the epitope strings (optionally also grouping by allele),
+    and associate each group with its percentage of Positive
+    Qualitative Measure results.
+    """
+    epitopes = df['Epitope']['Description']
+    measure = df['Assay']['Qualitative Measure']
+    pos_mask = measure.str.startswith('Positive').astype('bool')
+    mhc = df['MHC']['Allele Name']
+    return group_peptides(
+        epitopes,
+        mhc,
+        pos_mask,
+        group_by_allele=group_by_allele,
+        min_count=min_count)
+
+def load_groups(
+        mhc_class=None,  # 1, 2, or None for neither
+        hla=None,
+        exclude_hla=None,
+        human=True,
+        peptide_length=None,
+        assay_method=None,
+        assay_group=None,
+        reduced_alphabet=None,  # 20 letter AA strings -> simpler alphabet
+        nrows=None,
+        group_by_allele=False,
+        min_count=0,
+        verbose=False):
+    """
+    Load the MHC binding results from IEDB, collect into a dataframe mapping
+    epitopes to percentage positive results.
+
+    Parameters
+    ----------
+    mhc_class: {None, 1, 2}
+        Restrict to MHC Class I or Class II (or None for neither)
+
+    hla: regex pattern, optional
+        Restrict results to specific HLA type used in assay
+
+    exclude_hla: regex pattern, optional
+        Exclude certain HLA types
+
+    human: bool
+        Restrict to human samples (default True)
+
+    peptide_length: int, optional
+        Restrict epitopes to amino acid strings of given length
+
+    assay_method string, optional
+        Only collect results with assay methods containing the given string
+
+    assay_group: string, optional
+        Only collect results with assay groups containing the given string
+
+    reduced_alphabet: dictionary, optional
+        Remap amino acid letters to some other alphabet
+
+    nrows: int, optional
+        Don't load the full IEDB dataset but instead read only the first nrows
+
+    group_by_allele:
+        Don't combine epitopes across multiple HLA types
+
+    min_count: int, optional
+        Exclude epitopes which appear fewer times than min_count
+
+    verbose: bool
+        Print debug output
+    """
+    df = load_full(
+        mhc_class=mhc_class,
+        hla=hla,
+        exclude_hla=exclude_hla,
+        human=human,
+        peptide_length=peptide_length,
+        assay_method=assay_method,
+        assay_group=assay_group,
+        reduced_alphabet=reduced_alphabet,
+        nrows=nrows,
+        verbose=verbose)
+
+    return _group_mhc_peptides(
+            df,
+            group_by_allele=group_by_allele,
+            min_count=min_count,
+            verbose=verbose)

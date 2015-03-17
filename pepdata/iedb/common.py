@@ -15,7 +15,6 @@
 import pandas as pd
 
 def group_peptides(peptides, mhc_alleles, pos_mask, group_by_allele, min_count):
-
     if group_by_allele:
         groups = pos_mask.groupby([peptides, mhc_alleles])
     else:
