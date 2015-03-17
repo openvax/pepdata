@@ -18,8 +18,8 @@ import numpy as np
 import Bio.SeqIO
 from progressbar import ProgressBar
 
-from common import int_or_seq, dataframe_from_counts, fetch_file
-from tcga_sources import TCGA_SOURCES, REFSEQ_PROTEIN_URL
+from .common import int_or_seq, dataframe_from_counts, cache
+from .tcga_sources import TCGA_SOURCES, REFSEQ_PROTEIN_URL
 
 def open_maf(filename):
     """
@@ -55,10 +55,9 @@ def _load_maf_files(sources_dict, cancer_type=None):
         assert key in sources_dict, "Unknown cancer type %s" % key
         maf_url = sources_dict[key]
         maf_filename = key + ".maf"
-        path = fetch_file(
-            download_url=maf_url,
-            filename=maf_filename,
-            subdir="epitopes")
+        path = cache.fetch(
+            url=maf_url,
+            filename=maf_filename)
         df = open_maf(path)
         df['Cancer Type'] = key
         data_frames.append(df)
@@ -117,10 +116,9 @@ def load_peptide_counts(
 
     # discard indices of NA entries
     filtered.index = np.arange(len(filtered))
-    refseq_path = fetch_file(
+    refseq_path = cache.fetch(
         REFSEQ_PROTEIN_URL,
-        filename='refseq_protein.faa',
-        subdir="epitopes")
+        filename="refseq_protein.faa")
     refseq_ids_to_protein = _build_refseq_id_to_protein(refseq_path)
     refseq_ids = filtered.Refseq_prot_Id
 

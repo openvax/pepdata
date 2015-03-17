@@ -38,7 +38,7 @@ def local_path():
         filename=TCELL_COMPACT_FILENAME,
         url=TCELL_COMPACT_URL,
         decompress=TCELL_COMPACT_DECOMPRESS)
-    if not os.exists(path):
+    if not os.path.exists(path):
         raise ValueError(
             ("Local file %s does not exist, call"
             " pepdata.iedb.tcell.download()") % path)

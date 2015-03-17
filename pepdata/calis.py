@@ -20,17 +20,17 @@ http://www.ploscompbiol.org/article/info%3Adoi%2F10.1371%2Fjournal.pcbi.1003266#
 from os.path import join
 
 import pandas as pd
-import numpy as np
+
 
 from static_data import DATA_DIR
 from common import bad_amino_acids
-from features import make_ngram_dataset, make_ngram_dataset_from_args
+from features import make_ngram_dataset_from_args
 
 def load_s1(
-        human = True,
-        peptide_length = None,
-        hla_type = None,
-        exclude_hla_type = None):
+        human=True,
+        peptide_length=None,
+        hla_type=None,
+        exclude_hla_type=None):
     """
     Immunogenic and non-immunogenic pMHCs that were found in the IEDB,
     Vaccinia, Arena and Coxiella data sets.
@@ -45,7 +45,8 @@ def load_s1(
     if hla_type:
         mask &= df.MHC.str.contains(hla_type, na=False).astype('bool')
     if exclude_hla_type:
-        mask &= ~(df.MHC.str.contains(exclude_hla, na=False).astype('bool'))
+        contains_hla_type = df.MHC.str.contains(exclude_hla_type, na=False)
+        mask &= ~(contains_hla_type.astype('bool'))
     return df[mask]
 
 def load_s1_values(*args, **kwargs):
@@ -70,9 +71,9 @@ def load_s1_ngrams(*args, **kwargs):
     return make_ngram_dataset_from_args(load_s1_classes, *args, **kwargs)
 
 def load_s2(
-        human = True,
-        hla_type = None,
-        exclude_hla_type = None):
+        human=True,
+        hla_type=None,
+        exclude_hla_type=None):
     """
     Non-redundant murine and human Dengue epitopes and non-epitopes
     """

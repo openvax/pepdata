@@ -14,7 +14,7 @@
 
 
 REFSEQ_PROTEIN_URL = \
-'ftp://ftp.ncbi.nlm.nih.gov/refseq/H_sapiens/mRNA_Prot/human.protein.faa.gz'
+    "ftp://ftp.ncbi.nlm.nih.gov/refseq/H_sapiens/mRNA_Prot/human.protein.faa.gz"
 
 TCGA_SOURCES = {}
 
@@ -87,4 +87,3 @@ TCGA_SOURCES['ucec'] = \
 
 TCGA_SOURCES['ucs'] = \
     "https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/ucs/gsc/broad.mit.edu/illuminaga_dnaseq_curated/mutations/broad.mit.edu_UCS.IlluminaGA_DNASeq_curated.Level_2.1.0.0/AN_TCGA_UCS_PAIR_Capture_56.aggregated.capture.tcga.uuid.curated.somatic.maf"
-

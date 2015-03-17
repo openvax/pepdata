@@ -19,8 +19,8 @@ Construct DataFrames which join multiple IEDB datasets
 import pandas as pd
 
 from ..common import memoize
-from .mhc import load_mhc_values
-from .tcell import load_tcell_values
+from .mhc import load_groups as load_mhc_values
+from .tcell import load_groups as load_tcell_values
 
 @memoize
 def load_tcell_vs_mhc(
@@ -34,8 +34,7 @@ def load_tcell_vs_mhc(
         tcell_assay_method=None,
         tcell_assay_group=None,
         nrows=None,
-        group_by_allele=False,
-        verbose=False):
+        group_by_allele=False):
     """
     Percentage positive results for both T-cell response assays
     and MHC binding assays (keyed by epitopes for which we have data
@@ -50,8 +49,7 @@ def load_tcell_vs_mhc(
             assay_group=mhc_assay_group,
             nrows=nrows,
             min_count=min_count,
-            group_by_allele=group_by_allele,
-            verbose=verbose)
+            group_by_allele=group_by_allele)
 
     tcell = load_tcell_values(
                 mhc_class=mhc_class,
@@ -62,8 +60,7 @@ def load_tcell_vs_mhc(
                 peptide_length=peptide_length,
                 nrows=nrows,
                 min_count=min_count,
-                group_by_allele=group_by_allele,
-                verbose=verbose)
+                group_by_allele=group_by_allele)
 
     df_combined = pd.DataFrame({'mhc': mhc.value, 'tcell': tcell.value})
     both = ~(df_combined.mhc.isnull() | df_combined.tcell.isnull())

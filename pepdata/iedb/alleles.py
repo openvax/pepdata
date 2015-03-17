@@ -60,31 +60,42 @@ def load_dict():
         name_element = allele.find("DisplayedRestriction")
         mhc_class_element = allele.find("Class")
         # need at least a name and an HLA class
-        if not name_element or not mhc_class_element:
+        if name_element is None or mhc_class_element is None:
             continue
         name = name_element.text
+
         synonyms = set([])
         for synonym_element in allele.iterfind("Synonyms"):
-            for name in synonym_element.text.split(","):
-                synonyms.add(name.strip())
-
+            for synonym in synonym_element.text.split(","):
+                synonyms.add(synonym.strip())
         mhc_class = mhc_class_element.text
         organism_element = allele.find("Organsim")
-        organism = organism_element.text if organism_element else None
+        if organism_element is None:
+            organism = None
+        else:
+            organism = organism_element.text
+
         locus_element = allele.find("Locus")
-        locus = locus_element.text if locus_element else None
+
+        if locus_element is None:
+            locus = None
+        else:
+            locus = locus_element.text
 
         names = {name}.union(synonyms)
-        for name in names:
+        if name == "HLA-DRA*01:01/DRB1*04:04":
+            print names
+            print "HLA-DRA*01:01/DRB1*04:04" in names
+        for curr_name in names:
             curr_synonyms = {
                 other_name for other_name in names
-                if name != other_name
+                if curr_name != other_name
             }
             allele_object = Allele(
-                name=name,
+                name=curr_name,
                 mhc_class=mhc_class,
                 locus=locus,
                 organism=organism,
                 synonyms=curr_synonyms)
-            result[name] = allele_object
+            result[curr_name] = allele_object
     return result

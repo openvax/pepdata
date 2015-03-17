@@ -20,16 +20,15 @@ http://www.hiv.lanl.gov/content/immunology/hlatem/study1/index.html
 
 import pandas as pd
 
-from common import fetch_file
+from .common import cache
+
+URL = "http://www.hiv.lanl.gov/content/immunology/hlatem/study1/peptides.html"
 
 def load_dataframe(min_count=None, max_count=None):
-    url = \
-        "http://www.hiv.lanl.gov/content/immunology/hlatem/study1/peptides.html"
-    local_path = fetch_file(
-        download_url=url,
-        filename='frahm.csv',
-        subdir="peptdata")
-    df = pd.read_csv(local_path, names=[
+    local_csv_path = cache.fetch(
+        url=URL,
+        filename="frahm.html")
+    df = pd.read_csv(local_csv_path, names=[
         "Peptide",
         "Sequence",
         "Protein",

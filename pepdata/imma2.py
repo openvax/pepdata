@@ -27,16 +27,17 @@
 
 from os.path import join
 
-from features import make_ngram_dataset_from_args
-from reduced_alphabet import make_alphabet_transformer
-from static_data import DATA_DIR
+from .features import make_ngram_dataset_from_args
+from .reduced_alphabet import make_alphabet_transformer
+from .static_data import DATA_DIR
 
 def load_imm_list(reduced_alphabet=None):
     path = join(DATA_DIR, 'IMMA2_imm.txt')
     if reduced_alphabet:
         transformer = make_alphabet_transformer(reduced_alphabet)
     else:
-        transformer = lambda x: x
+        def transformer(x):
+            return x
 
     with open(path) as f:
         imm = [transformer(line.strip()) for line in f]
@@ -47,7 +48,8 @@ def load_non_list(reduced_alphabet=None):
     if reduced_alphabet:
         transformer = make_alphabet_transformer(reduced_alphabet)
     else:
-        transformer = lambda x: x
+        def transformer(x):
+            return x
 
     with open(path) as f:
         non = [transformer(line.strip()) for line in f]
@@ -81,4 +83,3 @@ def load_ngrams(*args, **kwargs):
         Default True
     """
     return make_ngram_dataset_from_args(load_classes, *args, **kwargs)
-

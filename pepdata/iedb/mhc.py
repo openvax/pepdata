@@ -39,7 +39,7 @@ def local_path():
         filename=MHC_LOCAL_FILENAME,
         url=MHC_URL,
         decompress=MHC_DECOMPRESS)
-    if not os.exists(path):
+    if not os.path.exists(path):
         raise ValueError(
             ("MHC data file %s does not exist locally,"
              " call pepdata.mhc.download() to get a copy from IEDB") % path)
@@ -125,13 +125,6 @@ def load_dataframe(
 
     if human:
         mask &= df["MHC"]["Allele Name"].str.startswith("HLA").astype("bool")
-
-    # Match known alleles such as "HLA-A*02:01",
-    # broader groupings such as "HLA-A2"
-    # and unknown alleles of the MHC-1 listed either as
-    #  "HLA-Class I,allele undetermined"
-    #  or
-    #  "Class I,allele undetermined"
 
     if mhc_class == 1:
         mask &= df["MHC"]["MHC allele class"] == "I"
