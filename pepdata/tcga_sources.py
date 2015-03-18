@@ -12,10 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-REFSEQ_PROTEIN_URL = \
-    "ftp://ftp.ncbi.nlm.nih.gov/refseq/H_sapiens/mRNA_Prot/human.protein.faa.gz"
-
 TCGA_SOURCES = {}
 
 # Bladder Urothelial Carcinoma

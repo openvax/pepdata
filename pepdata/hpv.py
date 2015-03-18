@@ -21,8 +21,8 @@ from os.path import join
 
 import pandas as pd
 
-
-from .common import bad_amino_acids, make_unlabeled_ngram_dataset_from_args
+from .common import bad_amino_acids
+from .features import make_unlabeled_ngram_dataset_from_args
 from .reduced_alphabet import make_alphabet_transformer
 from .static_data import DATA_DIR
 

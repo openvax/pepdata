@@ -15,12 +15,14 @@
 import logging
 import os
 
+import numpy as np
 import pandas as pd
 
-from ..common import split_classes, bad_amino_acids, cache, memoize
+from ..common import bad_amino_acids, cache, memoize
 from ..features import make_ngram_dataset_from_args
 from ..reduced_alphabet import make_alphabet_transformer
-from .common import group_peptides
+from . import alleles
+from .common import split_classes, group_peptides
 
 TCELL_COMPACT_FILENAME = "tcell_compact.csv"
 TCELL_COMPACT_URL = "http://www.iedb.org/doc/tcell_compact.zip"
@@ -33,12 +35,14 @@ def download(force=False):
         decompress=TCELL_COMPACT_DECOMPRESS,
         force=force)
 
-def local_path():
+def local_path(auto_download=True):
     path = cache.local_path(
         filename=TCELL_COMPACT_FILENAME,
         url=TCELL_COMPACT_URL,
         decompress=TCELL_COMPACT_DECOMPRESS)
     if not os.path.exists(path):
+        if auto_download:
+            return download()
         raise ValueError(
             ("Local file %s does not exist, call"
             " pepdata.iedb.tcell.download()") % path)
@@ -133,29 +137,34 @@ def load_dataframe(
     #  "Class I,allele undetermined"
     mhc = df['MHC Allele Name']
 
-    if mhc_class == 1:
-        mhc1_pattern = 'Class I,|HLA-[A-C](?:[0-9]|\*)'
-        mask &= mhc.str.contains(mhc1_pattern, na=False).astype('bool')
-    elif mhc_class == 2:
-        mhc2_pattern = "Class II,|HLA-D(?:P|M|O|Q|R)"
-        mask &= mhc.str.contains(mhc2_pattern, na=False).astype('bool')
-
-    if mhc_class == 1:
-        mask &= df["MHC"]["MHC allele class"] == "I"
-    elif mhc_class == 2:
-        mask &= df["MHC"]["MHC allele class"] == "II"
+    if mhc_class is not None:
+        # since MHC classes can be specified as either strings ("I") or integers
+        # standard them to be strings
+        if mhc_class == 1:
+            mhc_class = "I"
+        elif mhc_class == 2:
+            mhc_class = "II"
+        if mhc_class not in {"I", "II"}:
+            raise ValueError("Invalid MHC class: %s" % mhc_class)
+        allele_dict = alleles.load_dict()
+        mhc_class_mask = [False] * len(df)
+        for i, allele_name in enumerate(mhc):
+            allele_object = allele_dict.get(allele_name)
+            if allele_object and allele_object.mhc_class == mhc_class:
+                mhc_class_mask[i] = True
+        mask &= np.array(mhc_class_mask)
 
     if hla:
-        mask &= df["MHC"]["MHC Allele"].str.contains(hla, na=False)
+        mask &= df["MHC Allele Name"].str.contains(hla, na=False)
 
     if exclude_hla:
-        mask &= ~(df["MHC"]["MHC Allele"].str.contains(exclude_hla, na=False))
+        mask &= ~(df["MHC Allele Name"].str.contains(exclude_hla, na=False))
 
     if assay_group:
-        mask &= df["Assay"]["Assay Group"].str.contains(assay_group)
+        mask &= df["Assay Group"].str.contains(assay_group)
 
     if assay_method:
-        mask &= df["Assay"]["Method/Technique"].str.contains(assay_method)
+        mask &= df["Method/Technique"].str.contains(assay_method)
 
     if peptide_length:
         assert peptide_length > 0
@@ -166,9 +175,10 @@ def load_dataframe(
     logging.info("Returning %d / %d entries after filtering", len(df), n)
 
     if reduced_alphabet:
-        epitopes = df["Epitope"]["Description"]
-        df["Epitope"]["ReducedAlphabet"] = \
+        epitopes = df["Epitope Linear Sequence"]
+        df["Epitope Linear Sequence"] = \
             epitopes.map(make_alphabet_transformer(reduced_alphabet))
+        df["Epitope Original Sequence"] = epitopes
     return df
 
 @memoize
@@ -183,8 +193,7 @@ def load_groups(
         reduced_alphabet=None,  # 20 letter AA strings -> simpler alphabet
         nrows=None,
         min_count=0,
-        group_by_allele=False,
-        verbose=False):
+        group_by_allele=False):
     """
     Load the T-cell response data from IEDB, collect into a dataframe mapping
     epitopes to percentage positive results.
@@ -223,9 +232,6 @@ def load_groups(
 
     min_count: int, optional
         Exclude epitopes which appear fewer times than min_count
-
-    verbose: bool
-        Print debug output
     """
 
     df = load_dataframe(
@@ -237,14 +243,18 @@ def load_groups(
         assay_method=assay_method,
         assay_group=assay_group,
         reduced_alphabet=reduced_alphabet,
-        nrows=nrows,
-        verbose=verbose)
+        nrows=nrows)
 
+    peptides = df["Epitope Linear Sequence"]
+    print peptides
+    pos_mask = df["Qualitative Measure"].str.startswith("Positive")
+    mhc_alleles = df["MHC Allele Name"]
     return group_peptides(
-            df,
-            group_by_allele=group_by_allele,
-            min_count=min_count,
-            verbose=verbose)
+                peptides=peptides,
+                mhc_alleles=mhc_alleles,
+                pos_mask=pos_mask,
+                group_by_allele=group_by_allele,
+                min_count=min_count)
 
 @memoize
 def load_classes(*args, **kwargs):

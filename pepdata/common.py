@@ -19,15 +19,37 @@ import datacache
 
 cache = datacache.Cache("pepdata")
 
+def _prepare_memoization_key(args, kwargs):
+    """
+    Make a tuple of arguments which can be used as a key
+    for a memoized function's lookup_table. If some object can't be hashed
+    then used its __repr__ instead.
+    """
+    key_list = []
+    for arg in args:
+        try:
+            hash(arg)
+            key_list.append(arg)
+        except:
+            key_list.append(repr(arg))
+    for (k, v) in kwargs.iteritems():
+        try:
+            hash(k)
+            hash(v)
+            key_list.append((k, v))
+        except:
+            key_list.append((repr(k), repr(v)))
+    return tuple(key_list)
+
 def memoize(fn):
-    cache = {}
+    lookup_table = {}
 
     @wraps(fn)
     def wrapped_fn(*args, **kwargs):
-        key = tuple(args) + tuple(sorted(kwargs.values()))
-        if key not in cache:
-            cache[key] = fn(*args, **kwargs)
-        return cache[key]
+        key = _prepare_memoization_key(args, kwargs)
+        if key not in lookup_table:
+            lookup_table[key] = fn(*args, **kwargs)
+        return lookup_table[key]
 
     return wrapped_fn
 

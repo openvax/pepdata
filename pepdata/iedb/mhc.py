@@ -19,8 +19,8 @@ import pandas as pd
 
 from ..reduced_alphabet import make_alphabet_transformer
 from ..features import make_ngram_dataset_from_args
-from ..common import split_classes, bad_amino_acids, cache, memoize
-from .common import group_peptides
+from ..common import bad_amino_acids, cache, memoize
+from .common import split_classes, group_peptides
 
 
 MHC_URL = "http://www.iedb.org/doc/mhc_ligand_full.zip"
@@ -34,12 +34,14 @@ def download(force=False):
         decompress=MHC_DECOMPRESS,
         force=force)
 
-def local_path():
+def local_path(auto_download=True):
     path = cache.local_path(
         filename=MHC_LOCAL_FILENAME,
         url=MHC_URL,
         decompress=MHC_DECOMPRESS)
     if not os.path.exists(path):
+        if auto_download:
+            return download()
         raise ValueError(
             ("MHC data file %s does not exist locally,"
              " call pepdata.mhc.download() to get a copy from IEDB") % path)
@@ -107,7 +109,10 @@ def load_dataframe(
 
     n = len(df)
 
-    epitopes = df["Epitope"]["Description"].str.upper()
+    epitope_column_key = ("Epitope", "Description")
+    mhc_allele_column_key = ("MHC", "Allele Name")
+
+    epitopes = df[epitope_column_key] = df[epitope_column_key].str.upper()
 
     null_epitope_seq = epitopes.isnull()
     n_null = null_epitope_seq.sum()
@@ -124,7 +129,7 @@ def load_dataframe(
     mask = ~(bad_epitope_seq | null_epitope_seq)
 
     if human:
-        mask &= df["MHC"]["Allele Name"].str.startswith("HLA").astype("bool")
+        mask &= df[mhc_allele_column_key].str.startswith("HLA").astype("bool")
 
     if mhc_class == 1:
         mask &= df["MHC"]["MHC allele class"] == "I"
@@ -132,10 +137,10 @@ def load_dataframe(
         mask &= df["MHC"]["MHC allele class"] == "II"
 
     if hla:
-        mask &= df["MHC"]["MHC Allele"].str.contains(hla, na=False)
+        mask &= df[mhc_allele_column_key].str.contains(hla, na=False)
 
     if exclude_hla:
-        mask &= ~(df["MHC"]["MHC Allele"].str.contains(exclude_hla, na=False))
+        mask &= ~(df[mhc_allele_column_key].str.contains(exclude_hla, na=False))
 
     if assay_group:
         mask &= df["Assay"]["Assay Group"].str.contains(assay_group)
@@ -145,16 +150,18 @@ def load_dataframe(
 
     if peptide_length:
         assert peptide_length > 0
-        mask &= df["Epitope"]["Description"].str.len() == peptide_length
+        mask &= df[epitope_column_key].str.len() == peptide_length
 
-    df = df[mask]
+    df = df[mask].copy()
 
     logging.info("Returning %d / %d entries after filtering", len(df), n)
 
     if reduced_alphabet:
-        epitopes = df["Epitope"]["Description"]
-        df["Epitope"]["ReducedAlphabet"] = \
-            epitopes.map(make_alphabet_transformer(reduced_alphabet))
+        epitopes = df[epitope_column_key]
+        df["Epitope"]["Original Sequence"] = epitopes
+        reduced_epitopes = epitopes.map(
+            make_alphabet_transformer(reduced_alphabet))
+        df[epitope_column_key] = reduced_epitopes
     return df
 
 def _group_mhc_peptides(
