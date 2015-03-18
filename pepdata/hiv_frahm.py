@@ -25,9 +25,14 @@ from .common import cache
 URL = "http://www.hiv.lanl.gov/content/immunology/hlatem/study1/peptides.html"
 
 def load_dataframe(min_count=None, max_count=None):
+    # super non-obvious behavior by datacache:
+    # if you fetch an HTML file then it will pull out the first
+    # table and save its contents as a CSV
+    #
+    # TODO: change datacache to be less magical
     local_csv_path = cache.fetch(
         url=URL,
-        filename="frahm.html")
+        filename="frahm.csv")
     df = pd.read_csv(local_csv_path, names=[
         "Peptide",
         "Sequence",

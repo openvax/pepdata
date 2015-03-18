@@ -59,9 +59,10 @@ def load_dataframe(
         peptide_length=None,
         assay_method=None,
         assay_group=None,
+        only_standard_amino_acids=True,
         reduced_alphabet=None,  # 20 letter AA strings -> simpler alphabet
-        nrows=None,
-        cache_download=True):
+        warn_bad_lines=True,
+        nrows=None):
     """
     Load IEDB MHC data without aggregating multiple entries for the same epitope
 
@@ -88,11 +89,20 @@ def load_dataframe(
     assay_group : string, optional
         Limit to assay groups which contain the given string
 
+    only_standard_amino_acids : bool, optional
+        Drop sequences which use non-standard amino acids, anything outside
+        the core 20, such as X or U (default = True)
+
     reduced_alphabet : dictionary, optional
         Remap amino acid letters to some other alphabet
 
+    warn_bad_lines : bool, optional
+        The full MHC ligand dataset seems to contain several dozen lines with
+        too many fields. This currently results in a lot of warning messages
+        from Pandas, which you can turn off with this option (default = True)
+
     nrows : int, optional
-        Don"t load the full IEDB dataset but instead read only the first nrows
+        Don't load the full IEDB dataset but instead read only the first nrows
     """
     df = pd.read_csv(
             local_path(),
@@ -100,7 +110,8 @@ def load_dataframe(
             skipinitialspace=True,
             nrows=nrows,
             low_memory=False,
-            error_bad_lines=False)
+            error_bad_lines=False,
+            warn_bad_lines=warn_bad_lines)
 
     # Sometimes the IEDB seems to put in an extra comma in the
     # header line, which creates an unnamed column of NaNs.
@@ -119,14 +130,17 @@ def load_dataframe(
     if n_null > 0:
         logging.info("Dropping %d null sequences", n_null)
 
-    # if have rare or unknown amino acids, drop the sequence
-    bad_epitope_seq = \
-        epitopes.str.contains(bad_amino_acids, na=False).astype("bool")
-    n_bad = bad_epitope_seq.sum()
-    if n_bad > 0:
-        logging.info("Dropping %d bad sequences", n_bad)
+    mask = ~null_epitope_seq
 
-    mask = ~(bad_epitope_seq | null_epitope_seq)
+    if only_standard_amino_acids:
+        # if have rare or unknown amino acids, drop the sequence
+        bad_epitope_seq = \
+            epitopes.str.contains(bad_amino_acids, na=False).astype("bool")
+        n_bad = bad_epitope_seq.sum()
+        if n_bad > 0:
+            logging.info("Dropping %d bad sequences", n_bad)
+
+        mask &= ~bad_epitope_seq
 
     if human:
         mask &= df[mhc_allele_column_key].str.startswith("HLA").astype("bool")

@@ -47,13 +47,12 @@ Allele = namedtuple("Allele", [
 ])
 
 @memoize
-def load_dict():
+def load_alleles():
+    """Parses the IEDB MhcAlleleName XML file and returns a list of Allele
+    namedtuple objects containing information about that each allele's HLA
+    class and source organism.
     """
-    Parses the IEDB MhcAlleleName XML file and returns a dictionary mapping
-    each allele name in IEDB to a namedtuple containing information about that
-    allele's HLA class and source organism.
-    """
-    result = {}
+    result = []
     path = local_path()
     etree = xml.etree.ElementTree.parse(path)
     for allele in etree.iterfind("MhcAlleleName"):
@@ -82,20 +81,23 @@ def load_dict():
         else:
             locus = locus_element.text
 
-        names = {name}.union(synonyms)
-        if name == "HLA-DRA*01:01/DRB1*04:04":
-            print names
-            print "HLA-DRA*01:01/DRB1*04:04" in names
-        for curr_name in names:
-            curr_synonyms = {
-                other_name for other_name in names
-                if curr_name != other_name
-            }
-            allele_object = Allele(
-                name=curr_name,
-                mhc_class=mhc_class,
-                locus=locus,
-                organism=organism,
-                synonyms=curr_synonyms)
-            result[curr_name] = allele_object
+        allele_object = Allele(
+            name=name,
+            mhc_class=mhc_class,
+            locus=locus,
+            organism=organism,
+            synonyms=synonyms)
+        result.append(allele_object)
+    return result
+
+@memoize
+def load_alleles_dict():
+    """Create a dictionary mapping each unique allele name to a namedtuple
+    containing information about that alleles class, locus, species, &c.
+    """
+    alleles = load_alleles()
+    result = {}
+    for allele in alleles:
+        for name in {allele.name}.union(allele.synonyms):
+            result[name] = allele
     return result

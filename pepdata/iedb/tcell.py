@@ -21,7 +21,7 @@ import pandas as pd
 from ..common import bad_amino_acids, cache, memoize
 from ..features import make_ngram_dataset_from_args
 from ..reduced_alphabet import make_alphabet_transformer
-from . import alleles
+from .alleles import load_alleles_dict
 from .common import split_classes, group_peptides
 
 TCELL_COMPACT_FILENAME = "tcell_compact.csv"
@@ -60,6 +60,7 @@ def load_dataframe(
         peptide_length=None,
         assay_method=None,
         assay_group=None,
+        only_standard_amino_acids=True,
         reduced_alphabet=None,  # 20 letter AA strings -> simpler alphabet
         nrows=None):
     """
@@ -88,11 +89,15 @@ def load_dataframe(
     assay_group: string, optional
         Only collect results with assay groups containing the given string
 
-    nrows: int, optional
-        Don"t load the full IEDB dataset but instead read only the first nrows
+    only_standard_amino_acids : bool, optional
+        Drop sequences which use non-standard amino acids, anything outside
+        the core 20, such as X or U (default = True)
 
     reduced_alphabet: dictionary, optional
         Remap amino acid letters to some other alphabet
+
+    nrows: int, optional
+        Don't load the full IEDB dataset but instead read only the first nrows
     """
     df = pd.read_csv(
             local_path(),
@@ -116,14 +121,17 @@ def load_dataframe(
     if n_null > 0:
         logging.info("Dropping %d null sequences", n_null)
 
-    # if have rare or unknown amino acids, drop the sequence
-    bad_epitope_seq = \
-        epitopes.str.contains(bad_amino_acids, na=False).astype("bool")
-    n_bad = bad_epitope_seq.sum()
-    if n_bad > 0:
-        logging.info("Dropping %d bad sequences", n_bad)
+    mask = ~null_epitope_seq
 
-    mask = ~(bad_epitope_seq | null_epitope_seq)
+    if only_standard_amino_acids:
+        # if have rare or unknown amino acids, drop the sequence
+        bad_epitope_seq = \
+            epitopes.str.contains(bad_amino_acids, na=False).astype("bool")
+        n_bad = bad_epitope_seq.sum()
+        if n_bad > 0:
+            logging.info("Dropping %d bad sequences", n_bad)
+
+        mask &= ~bad_epitope_seq
 
     if human:
         organism = df['Host Organism Name']
@@ -146,7 +154,7 @@ def load_dataframe(
             mhc_class = "II"
         if mhc_class not in {"I", "II"}:
             raise ValueError("Invalid MHC class: %s" % mhc_class)
-        allele_dict = alleles.load_dict()
+        allele_dict = load_alleles_dict()
         mhc_class_mask = [False] * len(df)
         for i, allele_name in enumerate(mhc):
             allele_object = allele_dict.get(allele_name)
@@ -246,7 +254,6 @@ def load_groups(
         nrows=nrows)
 
     peptides = df["Epitope Linear Sequence"]
-    print peptides
     pos_mask = df["Qualitative Measure"].str.startswith("Positive")
     mhc_alleles = df["MHC Allele Name"]
     return group_peptides(
