@@ -20,7 +20,6 @@ Peterson, Kondev, et al.
 http://www.rpgroup.caltech.edu/publications/Peterson2008.pdf
 """
 
-
 def dict_from_list(groups):
     result = {}
     for i, group in enumerate(groups):
@@ -29,22 +28,22 @@ def dict_from_list(groups):
             result[c.lower()] = i
     return result
 
-
 gbmr4 = dict_from_list(["ADKERNTSQ", "YFLIVMCWH", "G", "P"])
 
 sdm12 = dict_from_list(
-  ["A", "D", "KER", "N",  "TSQ", "YF", "LIVM", "C", "W", "H", "G", "P"]
+  ["A", "D", "KER", "N", "TSQ", "YF", "LIVM", "C", "W", "H", "G", "P"]
 )
 
 hsdm17 = dict_from_list(
-  ["A", "D", "KE", "R", "N", "T", "S", "Q", "Y", "F", "LIV", "M", "C", "W", "H", "G", "P"])
+  ["A", "D", "KE", "R", "N", "T", "S", "Q", "Y",
+   "F", "LIV", "M", "C", "W", "H", "G", "P"])
 
 """
 Other alphabets from
 http://bio.math-inf.uni-greifswald.de/viscose/html/alphabets.html
 """
 
-#hydrophilic vs. hydrophobic
+# hydrophilic vs. hydrophobic
 hp2 = dict_from_list(["AGTSNQDEHRKP", "CMFILVWY"])
 
 murphy10 = dict_from_list(
@@ -71,7 +70,7 @@ class AlphabetTransformer(object):
         return ''.join([chr(48 + d[char]) for char in s])
 
     def __getstate__(self):
-        return {'reduced_alphabet':self.reduced_alphabet}
+        return {'reduced_alphabet': self.reduced_alphabet}
 
 def make_alphabet_transformer(reduced_alphabet):
     if isinstance(reduced_alphabet, (str, unicode)):

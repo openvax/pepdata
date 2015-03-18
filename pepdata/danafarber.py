@@ -19,7 +19,7 @@ http://bio.dfci.harvard.edu/DFRMLI/HTML/TCellEpitopes.php
 
 import pandas as pd
 
-from common import bad_amino_acids, fetch_file
+from .common import bad_amino_acids, fetch_file
 
 def load_tumor(
         peptide_length=None,

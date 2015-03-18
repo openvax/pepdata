@@ -12,63 +12,59 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from functools import wraps
-
 import pandas as pd
-import datacache
 
-cache = datacache.Cache("pepdata")
+def group_peptides(
+        peptides,
+        pos_mask,
+        mhc_alleles=None,
+        min_count=1):
+    """Takes three series of equal length and returns a DataFrame.
 
-def _prepare_memoization_key(args, kwargs):
+    Parameters
+    ----------
+    peptides : Series
+        Amino acid sequences, will serve as unique key for entries in the
+        result DataFrame
+
+    pos_mask : Series
+        Boolean series indicating whether assay result was positive.
+
+    mhc_alleles : Series, optional
+        MHC allele names, if present then results are pairs of
+        (peptide, mhc_allele) entries, otherwise just use peptide sequences
+
+    min_count : int, optional
+        Minimum count per group to be included in the result
     """
-    Make a tuple of arguments which can be used as a key
-    for a memoized function's lookup_table. If some object can't be hashed
-    then used its __repr__ instead.
-    """
-    key_list = []
-    for arg in args:
-        try:
-            hash(arg)
-            key_list.append(arg)
-        except:
-            key_list.append(repr(arg))
-    for (k, v) in kwargs.iteritems():
-        try:
-            hash(k)
-            hash(v)
-            key_list.append((k, v))
-        except:
-            key_list.append((repr(k), repr(v)))
-    return tuple(key_list)
 
-def memoize(fn):
-    lookup_table = {}
-
-    @wraps(fn)
-    def wrapped_fn(*args, **kwargs):
-        key = _prepare_memoization_key(args, kwargs)
-        if key not in lookup_table:
-            lookup_table[key] = fn(*args, **kwargs)
-        return lookup_table[key]
-
-    return wrapped_fn
-
-bad_amino_acids = 'U|X|J|B|Z'
-
-def int_or_seq(x):
-    if isinstance(x, int):
-        return [x]
+    if mhc_alleles is not None:
+        groups = pos_mask.groupby([peptides, mhc_alleles])
     else:
-        return list(x)
+        groups = pos_mask.groupby(peptides)
 
-def dataframe_from_counts(counts):
-    invert = {
-        'Peptide': counts.keys(),
-        'Count': counts.values()
-    }
+    values = groups.mean()
+    counts = groups.count()
+    pos_counts = groups.sum()
+    neg_counts = counts - pos_counts
 
-    df = pd.DataFrame(invert)
-    return df.sort("Count", ascending=False)
+    if min_count > 1:
+        mask = counts >= min_count
+        values = values[mask]
+        counts = counts[mask]
+        pos_counts = pos_counts[mask]
+        neg_counts = neg_counts[mask]
+
+    result = pd.DataFrame(
+        data={
+            'value': values,
+            'count': counts,
+            'pos': pos_counts,
+            'neg': neg_counts,
+        },
+        index=values.index)
+    return result
+
 
 def split_classes(
         values,

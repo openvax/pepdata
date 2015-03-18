@@ -16,14 +16,12 @@ import cPickle
 from gzip import GzipFile
 import re
 
+from datacache import fetch_and_transform
 import Bio.SeqIO
 import pandas as pd
 from progressbar import ProgressBar
 
-from common import (
-    int_or_seq, dataframe_from_counts, bad_amino_acids, 
-    fetch_file, fetch_and_transform
-)
+from .common import int_or_seq, dataframe_from_counts, cache
 
 BASE_URL = "ftp://ftp.ensembl.org"
 FTP_DIR = "/pub/release-75/fasta/homo_sapiens/pep/"
@@ -40,7 +38,7 @@ def load_dataframe():
         - gene_id
         - transcript_id
     """
-    filename = fetch_file(FASTA_FILENAME, FULL_URL)
+    filename = cache.fetch(filename=FASTA_FILENAME, url=FULL_URL)
     sequences = []
     protein_ids = []
     gene_ids = []
@@ -66,35 +64,31 @@ def load_dataframe():
                 transcript_id = None
             transcript_ids.append(transcript_id)
     df = pd.DataFrame({
-        'protein' : sequences,
-        'gene_id' : gene_ids,
-        'protein_id' : protein_ids,
+        'protein': sequences,
+        'gene_id': gene_ids,
+        'protein_id': protein_ids,
         'transcript_id': transcript_ids})
     return df
-    #if filter_amino_acids:
-    #    return df.ix[df.protein.str.contains(bad_amino_acids)]
-    #else:
-    #    return df
+
 
 def _generate_counts(src_filename, peptide_lengths, nrows):
     epitope_counts = {}
-    get_count = epitope_counts.get
     with open(src_filename, 'r') as f:
         seqs = [str(record.seq) for record in Bio.SeqIO.parse(f, "fasta")]
         print "Generating substrings of length %s" % (peptide_lengths,)
-        pbar = ProgressBar(maxval = len(seqs)).start()
+        pbar = ProgressBar(maxval=len(seqs)).start()
         for seq_num, seq in enumerate(seqs):
             seq_len = len(seq)
             if nrows and seq_num > nrows:
                 break
             for size in peptide_lengths:
                 for i in xrange(seq_len - size + 1):
-                    epitope = seq[i:i+size]
+                    epitope = seq[i:i + size]
                     if epitope in epitope_counts:
                         epitope_counts[epitope] += 1
                     else:
                         epitope_counts[epitope] = 1
-            pbar.update(seq_num+1)
+            pbar.update(seq_num + 1)
         pbar.finish()
     return dataframe_from_counts(epitope_counts)
 
@@ -103,20 +97,19 @@ def _generate_set(src_filename, peptide_lengths, nrows):
     with open(src_filename, 'r') as f:
         seqs = [str(record.seq) for record in Bio.SeqIO.parse(f, "fasta")]
         print "Generating substrings of length %s" % (peptide_lengths,)
-        pbar = ProgressBar(maxval = len(seqs)).start()
+        pbar = ProgressBar(maxval=len(seqs)).start()
         for seq_num, seq in enumerate(seqs):
             if nrows and seq_num > nrows:
                 break
             for size in peptide_lengths:
                 for i in xrange(len(seq) - size + 1):
-                    peptides.add(seq[i:i+size])
-            pbar.update(seq_num+1)
+                    peptides.add(seq[i:i + size])
+            pbar.update(seq_num + 1)
         pbar.finish()
     return peptides
 
 
-
-def load_peptide_counts(peptide_length = [8,9,10,11], nrows = None):
+def load_peptide_counts(peptide_length=[8, 9, 10, 11], nrows=None):
     """
     List of all reference peptides encoded in a reference human exome
     """
@@ -132,13 +125,14 @@ def load_peptide_counts(peptide_length = [8,9,10,11], nrows = None):
         return counts
 
     return fetch_and_transform(
-        transformed_filename = cache_filename,
-        transformer = save_counts,
-        loader = pd.read_csv,
-        source_filename = FASTA_FILENAME,
-        source_url = FULL_URL)
+        transformed_filename=cache_filename,
+        transformer=save_counts,
+        loader=pd.read_csv,
+        source_filename=FASTA_FILENAME,
+        source_url=FULL_URL,
+        subdir=cache.subdir)
 
-def load_peptide_set(peptide_length = [8,9,10,11], nrows = None):
+def load_peptide_set(peptide_length=[8, 9, 10, 11], nrows=None):
     peptide_lengths = int_or_seq(peptide_length)
     lens = "_".join(str(n) for n in peptide_lengths)
     cache_filename = \
@@ -157,9 +151,9 @@ def load_peptide_set(peptide_length = [8,9,10,11], nrows = None):
         return result
 
     return fetch_and_transform(
-        transformed_filename = cache_filename,
-        transformer = save_set,
-        loader = load_set,
-        source_filename = FASTA_FILENAME,
-        source_url = FULL_URL)
-
+        transformed_filename=cache_filename,
+        transformer=save_set,
+        loader=load_set,
+        source_filename=FASTA_FILENAME,
+        source_url=FULL_URL,
+        subdir=cache.subdir)

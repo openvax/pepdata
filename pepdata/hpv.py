@@ -21,19 +21,21 @@ from os.path import join
 
 import pandas as pd
 
-from static_data import DATA_DIR
-from common import bad_amino_acids
+from .common import bad_amino_acids
+from .features import make_unlabeled_ngram_dataset_from_args
+from .reduced_alphabet import make_alphabet_transformer
+from .static_data import DATA_DIR
 
 def _load_dataframe(
         path,
         epitope_column_name,
-        mhc_class = None,
-        hla_type = None,
-        exclude_hla_type = None, # regex pattern i.e. '(HLA-A2)|(HLA-A\*02)'
-        peptide_length = None,
-        reduced_alphabet = None,
-        nrows = None):
-    df = pd.read_csv(path, skipinitialspace=True, nrows = nrows)
+        mhc_class=None,
+        hla_type=None,
+        exclude_hla_type=None,  # regex pattern i.e. '(HLA-A2)|(HLA-A\*02)'
+        peptide_length=None,
+        reduced_alphabet=None,
+        nrows=None):
+    df = pd.read_csv(path, skipinitialspace=True, nrows=nrows)
     epitopes = df[epitope_column_name]
     hla = df['HLA allele']
     mask = ~(epitopes.str.contains(bad_amino_acids, na=False).astype('bool'))

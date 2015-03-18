@@ -17,11 +17,12 @@ Cancer Research Institute's
 Table of Tumor Antigens Resulting from Mutations
 http://cancerimmunity.org/peptide/mutations/
 """
+
 from os.path import join
 
 import pandas as pd
 
-from static_data import DATA_DIR
+from .static_data import DATA_DIR
 
 def load_dataframe(
         mhc_class=None,
