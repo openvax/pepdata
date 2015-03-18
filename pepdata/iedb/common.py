@@ -14,8 +14,31 @@
 
 import pandas as pd
 
-def group_peptides(peptides, mhc_alleles, pos_mask, group_by_allele, min_count):
-    if group_by_allele:
+def group_peptides(
+        peptides,
+        pos_mask,
+        mhc_alleles=None,
+        min_count=1):
+    """Takes three series of equal length and returns a DataFrame.
+
+    Parameters
+    ----------
+    peptides : Series
+        Amino acid sequences, will serve as unique key for entries in the
+        result DataFrame
+
+    pos_mask : Series
+        Boolean series indicating whether assay result was positive.
+
+    mhc_alleles : Series, optional
+        MHC allele names, if present then results are pairs of
+        (peptide, mhc_allele) entries, otherwise just use peptide sequences
+
+    min_count : int, optional
+        Minimum count per group to be included in the result
+    """
+
+    if mhc_alleles is not None:
         groups = pos_mask.groupby([peptides, mhc_alleles])
     else:
         groups = pos_mask.groupby(peptides)
@@ -25,7 +48,7 @@ def group_peptides(peptides, mhc_alleles, pos_mask, group_by_allele, min_count):
     pos_counts = groups.sum()
     neg_counts = counts - pos_counts
 
-    if min_count:
+    if min_count > 1:
         mask = counts >= min_count
         values = values[mask]
         counts = counts[mask]

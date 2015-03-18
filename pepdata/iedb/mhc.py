@@ -191,13 +191,15 @@ def _group_mhc_peptides(
     epitopes = df["Epitope"]["Description"]
     measure = df["Assay"]["Qualitative Measure"]
     pos_mask = measure.str.startswith("Positive").astype("bool")
-    mhc = df["MHC"]["Allele Name"]
+    if group_by_allele:
+        mhc = df["MHC"]["Allele Name"]
+    else:
+        mhc = None
     return group_peptides(
-        epitopes,
-        mhc,
-        pos_mask,
-        group_by_allele=group_by_allele,
-        min_count=min_count)
+      epitopes,
+      pos_mask,
+      mhc_alleles=mhc,
+      min_count=min_count)
 
 @memoize
 def load_groups(

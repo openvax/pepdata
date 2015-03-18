@@ -255,12 +255,14 @@ def load_groups(
 
     peptides = df["Epitope Linear Sequence"]
     pos_mask = df["Qualitative Measure"].str.startswith("Positive")
-    mhc_alleles = df["MHC Allele Name"]
+    if group_by_allele:
+        mhc_alleles = df["MHC Allele Name"]
+    else:
+        mhc_alleles = None
     return group_peptides(
                 peptides=peptides,
-                mhc_alleles=mhc_alleles,
                 pos_mask=pos_mask,
-                group_by_allele=group_by_allele,
+                mhc_alleles=mhc_alleles,
                 min_count=min_count)
 
 @memoize
