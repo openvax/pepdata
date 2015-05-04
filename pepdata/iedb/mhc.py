@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from __future__ import print_function, division, absolute_import
 import logging
 import os
@@ -113,6 +112,7 @@ def load_dataframe(
             nrows=nrows,
             low_memory=False,
             error_bad_lines=False,
+            encoding="latin-1",
             warn_bad_lines=warn_bad_lines)
 
     # Sometimes the IEDB seems to put in an extra comma in the

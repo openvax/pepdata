@@ -1,7 +1,9 @@
-import alleles
-import join
-import mhc
-import tcell
+from . import (
+    alleles,
+    join,
+    mhc,
+    tcell
+)
 
 __all__ = [
     "alleles",

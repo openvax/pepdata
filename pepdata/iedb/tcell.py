@@ -101,12 +101,14 @@ def load_dataframe(
     nrows: int, optional
         Don't load the full IEDB dataset but instead read only the first nrows
     """
+    path = local_path()
     df = pd.read_csv(
-            local_path(),
+            path,
             skipinitialspace=True,
             nrows=nrows,
             low_memory=False,
-            error_bad_lines=True)
+            error_bad_lines=False,
+            encoding="latin-1")
 
     # Sometimes the IEDB seems to put in an extra comma in the
     # header line, which creates an unnamed column of NaNs.

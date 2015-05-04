@@ -36,7 +36,7 @@ except:
 if __name__ == '__main__':
     setup(
         name='pepdata',
-        version="0.6.1",
+        version="0.6.2",
         description="Python interface to IEDB and other immune epitope data",
         author="Alex Rubinsteyn",
         author_email="alex {dot} rubinsteyn {at} mssm {dot} edu",

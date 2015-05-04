@@ -159,7 +159,7 @@ def parse_table(table_string):
 
 def aa_value_dict_to_positional_list(value_dict):
     value_list = [None] * 20
-    for letter, value in value_dict.iteritems():
+    for letter, value in value_dict.items():
         idx = letter_to_index(letter)
         assert idx >= 0
         assert idx < 20

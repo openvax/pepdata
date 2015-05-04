@@ -34,7 +34,7 @@ def _prepare_memoization_key(args, kwargs):
             key_list.append(arg)
         except:
             key_list.append(repr(arg))
-    for (k, v) in kwargs.iteritems():
+    for (k, v) in kwargs.items():
         try:
             hash(k)
             hash(v)

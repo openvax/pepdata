@@ -18,7 +18,6 @@ Datasets from Calis, et al. "Properties of MHC Class I Presented Peptides That E
 http://www.ploscompbiol.org/article/info%3Adoi%2F10.1371%2Fjournal.pcbi.1003266#s5
 """
 
-
 from __future__ import print_function, division, absolute_import
 from os.path import join
 
