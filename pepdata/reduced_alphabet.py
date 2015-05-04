@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 """
 Amino acid groupings from
 'Reduced amino acid alphabets improve the sensitivity...' by
 Peterson, Kondev, et al.
 http://www.rpgroup.caltech.edu/publications/Peterson2008.pdf
 """
+from __future__ import print_function, division, absolute_import
 
 def dict_from_list(groups):
     result = {}

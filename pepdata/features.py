@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import print_function, division, absolute_import
+
 import numpy as np
 
 from .amino_acid import peptide_to_indices
@@ -91,7 +93,7 @@ def make_ngram_dataset(
     Y[n_imm:] = 0
 
     if verbose:
-        print "Dataset size", X.shape
+        print("Dataset size", X.shape)
 
     if return_transformer:
         return X, Y, V
@@ -181,7 +183,7 @@ def make_kmer_dataset(imm_strings, non_strings, verbose=True):
     Y = np.ones(len(X), dtype='bool')
     Y[len(X_imm):] = 0
     if verbose:
-        print "[make_kmer_dataset] X.shape = %s" % (X.shape,)
+        print("[make_kmer_dataset] X.shape = %s" % (X.shape,))
     return X, Y
 
 amino_acid_features = [

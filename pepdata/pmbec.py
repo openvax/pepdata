@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import print_function, division, absolute_import
 from os.path import join
 
 from .static_data import MATRIX_DIR
@@ -58,11 +59,11 @@ def read_coefficients(
         lines = [line for line in f.read().split('\n') if len(line) > 0]
         header = lines[0]
         if verbose:
-            print header
+            print(header)
         residues = [x for x in header.split(' ') if len(x) == 1 and x != ' ' and x != '\t']
         assert len(residues) == 20
         if verbose:
-            print residues
+            print(residues)
         for line in lines[1:]:
             cols = [
                 x
@@ -81,6 +82,6 @@ def read_coefficients(
 
 if __name__ == '__main__':
     d = read_coefficients(key_type='pair_string')
-    print "PMBEC matrix"
+    print("PMBEC matrix")
     for k in sorted(d):
-        print k, d[k]
+        print(k, d[k])

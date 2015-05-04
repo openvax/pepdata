@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+from __future__ import print_function, division, absolute_import
+
 from nose.tools import eq_
 
 from pepdata import iedb
@@ -24,10 +27,6 @@ def test_iedb_human_class1_allele():
 
 def test_iedb_human_class2_allele():
     allele_dict = iedb.alleles.load_alleles_dict()
-    print set(sorted({
-        key for key in allele_dict.keys()
-        if key.startswith("HLA-DRA*01")}))
-
     allele = allele_dict["HLA-DRA*01:01/DRB1*04:04"]
     eq_(allele.mhc_class, "II")
     eq_(allele.locus, "DR")

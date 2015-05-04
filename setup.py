@@ -12,24 +12,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+from __future__ import print_function, division, absolute_import
+from setuptools import setup
 import os
 
-readme_filename = os.path.join(os.path.dirname(__file__), 'README.md')
+readme_dir = os.path.dirname(__file__)
+readme_filename = os.path.join(readme_dir, 'README.md')
 
 try:
     with open(readme_filename, 'r') as f:
         readme = f.read()
 except:
-    print "Failed to load README file"
+    print("Failed to load README file")
     readme = ""
 
 try:
     import pypandoc
     readme = pypandoc.convert(readme, to='rst', format='md')
 except:
-    print "Conversion of long_description from markdown to reStructuredText failed, skipping..."
-
-from setuptools import setup
+    print("Conversion of long_description from markdown to reStructuredText failed, skipping...")
 
 if __name__ == '__main__':
     setup(
@@ -54,12 +56,12 @@ if __name__ == '__main__':
             'scipy>=0.9',
             'pandas>=0.13.1',
             'scikit-learn>=0.14.1',
-            'progressbar>=2.2',
+            'progressbar33',
             'biopython>=1.65',
             'datacache>=0.4.4',
         ],
         long_description=readme,
         packages=['pepdata'],
-        package_data = { 'pepdata' : ['data/*csv', 'matrices/*'] },
-        include_package_data = True
+        package_data={'pepdata': ['data/*csv', 'matrices/*']},
+        include_package_data=True
     )

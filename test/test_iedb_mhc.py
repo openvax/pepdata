@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import print_function, division, absolute_import
+
 from pepdata import iedb, reduced_alphabet
 
 def test_mhc_hla_a2():
@@ -34,6 +36,4 @@ def test_mhc_reduced_alphabet():
     pos2, neg2 = iedb.mhc.load_classes(
         nrows=100,
         reduced_alphabet=reduced_alphabet.hp2)
-    print pos
-    print pos2
     assert len(pos) + len(neg) > len(pos2) + len(neg2)

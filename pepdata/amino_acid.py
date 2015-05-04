@@ -12,16 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from os.path import join
-
-from static_data import MATRIX_DIR
-
-import numpy as np
-
 
 """
 Quantify amino acids by their physical/chemical properties
 """
+
+from __future__ import print_function, division, absolute_import
+from os.path import join
+
+import numpy as np
+
+from .static_data import MATRIX_DIR
+
 
 long_amino_acid_names = [
     "Alanine",

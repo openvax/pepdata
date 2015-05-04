@@ -17,6 +17,7 @@ T-cell epitopes from Dana-Farber Repository for Machine Learning in Immunology
 http://bio.dfci.harvard.edu/DFRMLI/HTML/TCellEpitopes.php
 """
 
+from __future__ import print_function, division, absolute_import
 import pandas as pd
 
 from .common import bad_amino_acids, fetch_file

@@ -18,6 +18,7 @@ Peptide response data from:
 http://www.hiv.lanl.gov/content/immunology/hlatem/study1/index.html
 """
 
+from __future__ import print_function, division, absolute_import
 import pandas as pd
 
 from .common import cache

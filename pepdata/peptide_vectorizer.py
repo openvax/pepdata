@@ -12,11 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+from __future__ import print_function, division, absolute_import
+
 import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.preprocessing import normalize
 
-from reduced_alphabet import make_alphabet_transformer
+from .reduced_alphabet import make_alphabet_transformer
 
 def make_count_vectorizer(reduced_alphabet, max_ngram):
     if reduced_alphabet is None:

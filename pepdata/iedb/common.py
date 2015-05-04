@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import print_function, division, absolute_import
 import pandas as pd
 
 def group_peptides(
@@ -97,16 +98,16 @@ def split_classes(
     neg_set = set(neg)
 
     if verbose:
-        print "# positive sequences", len(pos)
-        print "# negative sequences", len(neg)
+        print("# positive sequences", len(pos))
+        print("# negative sequences", len(neg))
 
     noisy_set = pos_set.intersection(neg_set)
 
     if verbose:
-        print "# unique positive", len(pos_set)
-        print "# unique negative", len(neg_set)
-        print "# overlap %d (%0.4f)" % (len(noisy_set),
-          float(len(noisy_set)) / len(pos_set))
+        print("# unique positive", len(pos_set))
+        print("# unique negative", len(neg_set))
+        print("# overlap %d (%0.4f)" % (len(noisy_set),
+          float(len(noisy_set)) / len(pos_set)))
 
     if noisy_labels != 'majority':
         if (noisy_labels == 'drop') or (noisy_labels == 'negative'):

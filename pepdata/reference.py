@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+from __future__ import print_function, division, absolute_import
 import cPickle
 from gzip import GzipFile
 import re
@@ -75,7 +77,7 @@ def _generate_counts(src_filename, peptide_lengths, nrows):
     epitope_counts = {}
     with open(src_filename, 'r') as f:
         seqs = [str(record.seq) for record in Bio.SeqIO.parse(f, "fasta")]
-        print "Generating substrings of length %s" % (peptide_lengths,)
+        print("Generating substrings of length %s" % (peptide_lengths,))
         pbar = ProgressBar(maxval=len(seqs)).start()
         for seq_num, seq in enumerate(seqs):
             seq_len = len(seq)
@@ -96,7 +98,7 @@ def _generate_set(src_filename, peptide_lengths, nrows):
     peptides = set([])
     with open(src_filename, 'r') as f:
         seqs = [str(record.seq) for record in Bio.SeqIO.parse(f, "fasta")]
-        print "Generating substrings of length %s" % (peptide_lengths,)
+        print("Generating substrings of length %s" % (peptide_lengths,))
         pbar = ProgressBar(maxval=len(seqs)).start()
         for seq_num, seq in enumerate(seqs):
             if nrows and seq_num > nrows:
@@ -120,7 +122,7 @@ def load_peptide_counts(peptide_length=[8, 9, 10, 11], nrows=None):
 
     def save_counts(src_path, dst_path):
         counts = _generate_counts(src_path, peptide_lengths, nrows)
-        print "Saving %s" % dst_path
+        print("Saving %s" % dst_path)
         counts.to_csv(dst_path)
         return counts
 

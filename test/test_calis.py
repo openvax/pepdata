@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import print_function, division, absolute_import
+
 from pepdata import calis
 
 def test_calis_s1():
@@ -34,7 +36,7 @@ def test_calis_s1_ngrams():
     """
     Calis S1: Number of samples in ngram dataset should be same as strings
     """
-    X,Y = calis.load_s1_ngrams()
+    X, Y = calis.load_s1_ngrams()
     imm, non = calis.load_s1_classes()
     assert len(X) == len(Y)
     assert len(X) == len(imm) + len(non)
@@ -43,7 +45,7 @@ def test_calis_s2_ngrams():
     """
     Calis S2: Number of samples in ngram dataset should be same as strings
     """
-    X,Y = calis.load_s2_ngrams()
+    X, Y = calis.load_s2_ngrams()
     imm, non = calis.load_s2_classes()
     assert len(X) == len(Y)
     assert len(X) == len(imm) + len(non)

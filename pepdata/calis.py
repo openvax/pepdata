@@ -17,14 +17,16 @@
 Datasets from Calis, et al. "Properties of MHC Class I Presented Peptides That Enhance Immunogenicity"
 http://www.ploscompbiol.org/article/info%3Adoi%2F10.1371%2Fjournal.pcbi.1003266#s5
 """
+
+
+from __future__ import print_function, division, absolute_import
 from os.path import join
 
 import pandas as pd
 
-
-from static_data import DATA_DIR
-from common import bad_amino_acids
-from features import make_ngram_dataset_from_args
+from .static_data import DATA_DIR
+from .common import bad_amino_acids
+from .features import make_ngram_dataset_from_args
 
 def load_s1(
         human=True,
