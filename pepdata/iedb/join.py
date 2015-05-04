@@ -16,7 +16,6 @@
 Construct DataFrames which join multiple IEDB datasets
 """
 
-
 from __future__ import print_function, division, absolute_import
 
 import pandas as pd

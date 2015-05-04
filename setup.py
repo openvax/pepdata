@@ -14,8 +14,9 @@
 
 
 from __future__ import print_function, division, absolute_import
-from setuptools import setup
 import os
+
+from setuptools import setup, find_packages
 
 readme_dir = os.path.dirname(__file__)
 readme_filename = os.path.join(readme_dir, 'README.md')
@@ -36,7 +37,7 @@ except:
 if __name__ == '__main__':
     setup(
         name='pepdata',
-        version="0.6.2",
+        version="0.6.3",
         description="Python interface to IEDB and other immune epitope data",
         author="Alex Rubinsteyn",
         author_email="alex {dot} rubinsteyn {at} mssm {dot} edu",
@@ -61,7 +62,7 @@ if __name__ == '__main__':
             'datacache>=0.4.4',
         ],
         long_description=readme,
-        packages=['pepdata'],
+        packages=find_packages(exclude="test"),
         package_data={'pepdata': ['data/*csv', 'matrices/*']},
         include_package_data=True
     )
