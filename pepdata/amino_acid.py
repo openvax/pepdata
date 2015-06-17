@@ -48,6 +48,11 @@ long_amino_acid_names = [
     "Valine",
 ]
 
+
+long_amino_acid_name_indices = {
+    name: i for (i, name) in enumerate(long_amino_acid_names)
+}
+
 short_amino_acid_names = [
     "Ala",
     "Arg",
@@ -71,6 +76,10 @@ short_amino_acid_names = [
     "Val"
 ]
 
+short_amino_acid_name_indices = {
+    name: i for (i, name) in enumerate(short_amino_acid_names)
+}
+
 amino_acid_letters = [
     "A",
     "R",
@@ -93,6 +102,8 @@ amino_acid_letters = [
     "Y",
     "V"
 ]
+
+amino_acid_letter_indices = {c: i for (i, c) in enumerate(amino_acid_letters)}
 
 
 amino_acid_letter_pairs = [
@@ -164,7 +175,8 @@ def aa_value_dict_to_positional_list(value_dict):
         assert idx >= 0
         assert idx < 20
         value_list[idx] = value
-    assert all(elt is not None for elt in value_list), "Missing amino acids in:\n%s" % value_dict.keys()
+    assert all(elt is not None for elt in value_list), \
+        "Missing amino acids in:\n%s" % value_dict.keys()
     return value_list
 
 def get_idx(x):
@@ -592,4 +604,3 @@ with open(join(MATRIX_DIR, 'BLOSUM50'), 'r') as f:
 
 with open(join(MATRIX_DIR, 'BLOSUM62'), 'r') as f:
     blosum62 = parse_blosum_table(f.read())
-
