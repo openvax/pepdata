@@ -37,7 +37,7 @@ except:
 if __name__ == '__main__':
     setup(
         name='pepdata',
-        version="0.6.6",
+        version="0.6.8",
         description="Immunological peptide datasets and amino acid properties",
         author="Alex Rubinsteyn",
         author_email="alex {dot} rubinsteyn {at} mssm {dot} edu",
@@ -64,6 +64,5 @@ if __name__ == '__main__':
         ],
         long_description=readme,
         packages=find_packages(exclude="test"),
-        package_data={'pepdata': ['data/*csv', 'matrices/*']},
         include_package_data=True
     )
