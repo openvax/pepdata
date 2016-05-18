@@ -37,7 +37,7 @@ except:
 if __name__ == '__main__':
     setup(
         name='pepdata',
-        version="0.6.5",
+        version="0.6.6",
         description="Immunological peptide datasets and amino acid properties",
         author="Alex Rubinsteyn",
         author_email="alex {dot} rubinsteyn {at} mssm {dot} edu",
@@ -51,15 +51,16 @@ if __name__ == '__main__':
             'License :: OSI Approved :: Apache Software License',
             'Programming Language :: Python',
             'Topic :: Scientific/Engineering :: Bio-Informatics',
-             ],
+        ],
         install_requires=[
             'numpy>=1.7',
             'scipy>=0.9',
-            'pandas>=0.13.1',
+            'pandas>=0.17',
             'scikit-learn>=0.14.1',
             'progressbar33',
             'biopython>=1.65',
             'datacache>=0.4.4',
+            'lxml',
         ],
         long_description=readme,
         packages=find_packages(exclude="test"),

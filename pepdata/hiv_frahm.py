@@ -1,4 +1,4 @@
-# Copyright (c) 2014. Mount Sinai School of Medicine
+# Copyright (c) 2014-2016. Mount Sinai School of Medicine
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,7 +14,8 @@
 
 """
 Peptide response data from:
-"Consistent CTL targeting of immunodominant regions in HIV across different ethnicities." by Frahm et al.
+"Consistent CTL targeting of immunodominant regions in HIV across different ethnicities."
+by Frahm et al.
 http://www.hiv.lanl.gov/content/immunology/hlatem/study1/index.html
 """
 

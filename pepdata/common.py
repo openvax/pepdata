@@ -1,4 +1,4 @@
-# Copyright (c) 2014. Mount Sinai School of Medicine
+# Copyright (c) 2014-2016. Mount Sinai School of Medicine
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -65,8 +65,8 @@ def int_or_seq(x):
 
 def dataframe_from_counts(counts):
     invert = {
-        'Peptide': counts.keys(),
-        'Count': counts.values()
+        'Peptide': list(counts.keys()),
+        'Count': list(counts.values()),
     }
 
     df = pd.DataFrame(invert)

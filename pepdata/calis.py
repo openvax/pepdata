@@ -1,4 +1,4 @@
-# Copyright (c) 2014. Mount Sinai School of Medicine
+# Copyright (c) 2014-2016. Mount Sinai School of Medicine
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,7 +14,8 @@
 
 
 """
-Datasets from Calis, et al. "Properties of MHC Class I Presented Peptides That Enhance Immunogenicity"
+Datasets from:
+Calis, et al. "Properties of MHC Class I Presented Peptides That Enhance Immunogenicity"
 http://www.ploscompbiol.org/article/info%3Adoi%2F10.1371%2Fjournal.pcbi.1003266#s5
 """
 

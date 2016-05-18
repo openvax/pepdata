@@ -1,4 +1,4 @@
-# Copyright (c) 2014. Mount Sinai School of Medicine
+# Copyright (c) 2014-2016. Mount Sinai School of Medicine
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ http://bio.dfci.harvard.edu/DFRMLI/HTML/TCellEpitopes.php
 """
 
 from __future__ import print_function, division, absolute_import
+
 import pandas as pd
 
 from .common import bad_amino_acids, cache

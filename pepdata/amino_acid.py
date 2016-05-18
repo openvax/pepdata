@@ -1,4 +1,4 @@
-# Copyright (c) 2014. Mount Sinai School of Medicine
+# Copyright (c) 2014-2016. Mount Sinai School of Medicine
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -107,7 +107,9 @@ amino_acid_letter_indices = {c: i for (i, c) in enumerate(amino_acid_letters)}
 
 
 amino_acid_letter_pairs = [
-  "%s%s" % (x, y) for y in amino_acid_letters for x in amino_acid_letters
+    "%s%s" % (x, y)
+    for y in amino_acid_letters
+    for x in amino_acid_letters
 ]
 
 amino_acid_pair_positions = {
@@ -519,7 +521,7 @@ def parse_interaction_table(table):
     for i, line in enumerate(lines):
         coeff_strings = line.split(" ")
         assert len(coeff_strings) == 20, \
-          "Malformed row in amino acid interaction table"
+            "Malformed row in amino acid interaction table"
         x = amino_acid_letters[i]
         d[x] = {}
         for j, coeff_str in enumerate(coeff_strings):
@@ -568,11 +570,11 @@ def parse_blosum_table(table, coeff_type=int, key_type='row'):
 
     labels = lines[0].split()
 
-    assert len(labels) >= 20, \
-        "Expected 20+ amino acids but first line '%s' has %d fields" % (
-          lines[0],
-          len(labels)
-        )
+    if len(labels) < 20:
+        raise ValueError(
+            "Expected 20+ amino acids but first line '%s' has %d fields" % (
+                lines[0],
+                len(labels)))
     coeffs = {}
     for line in lines[1:]:
 

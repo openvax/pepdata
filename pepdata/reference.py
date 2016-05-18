@@ -14,7 +14,7 @@
 
 
 from __future__ import print_function, division, absolute_import
-import cPickle
+
 from gzip import GzipFile
 import re
 
@@ -22,6 +22,8 @@ from datacache import fetch_and_transform
 import Bio.SeqIO
 import pandas as pd
 from progressbar import ProgressBar
+from six.moves import cPickle as pickle
+from six.moves import range
 
 from .common import int_or_seq, dataframe_from_counts, cache
 
@@ -84,7 +86,7 @@ def _generate_counts(src_filename, peptide_lengths, nrows):
             if nrows and seq_num > nrows:
                 break
             for size in peptide_lengths:
-                for i in xrange(seq_len - size + 1):
+                for i in range(seq_len - size + 1):
                     epitope = seq[i:i + size]
                     if epitope in epitope_counts:
                         epitope_counts[epitope] += 1
@@ -104,7 +106,7 @@ def _generate_set(src_filename, peptide_lengths, nrows):
             if nrows and seq_num > nrows:
                 break
             for size in peptide_lengths:
-                for i in xrange(len(seq) - size + 1):
+                for i in range(len(seq) - size + 1):
                     peptides.add(seq[i:i + size])
             pbar.update(seq_num + 1)
         pbar.finish()
@@ -143,13 +145,13 @@ def load_peptide_set(peptide_length=[8, 9, 10, 11], nrows=None):
     def save_set(src_path, dst_path):
         string_set = _generate_set(src_path, peptide_lengths, nrows)
         with GzipFile(dst_path, 'w') as out_file:
-            out_file.write(cPickle.dumps(string_set))
+            out_file.write(pickle.dumps(string_set))
         return string_set
 
     def load_set(path):
         result = None
         with GzipFile(path, 'r') as in_file:
-            result = cPickle.loads(in_file.read())
+            result = pickle.loads(in_file.read())
         return result
 
     return fetch_and_transform(

@@ -15,7 +15,7 @@ from . import (
 )
 from .amino_acid import peptide_to_indices
 from .features import (
-  make_ngram_dataset, transform_rows, toxin_features
+    make_ngram_dataset, transform_rows, toxin_features
 )
 
 __all__ = [
