@@ -447,6 +447,33 @@ refractivity = transformation_from_table("""
 13.9200 V VAL
 """)
 
+###
+# Amino acid residue masses copied from:
+# "Table 1. Amino acid residues sorted by name."
+# http://www1.bioinfor.com/peaks/downloads/masstable.html
+
+mass = dict(
+    A=71.08,
+    R=156.2,
+    N=114.1,
+    D=115.1,
+    C=103.1,
+    E=129.1,
+    Q=128.1,
+    G=57.05,
+    H=137.1,
+    I=113.2,
+    L=113.2,
+    K=128.2,
+    M=131.2,
+    F=147.2,
+    P=97.12,
+    S=87.08,
+    T=101.1,
+    W=186.2,
+    Y=163.2,
+    V=99.13,
+)
 
 # Chou-Fasman of structural properties from
 # http://prowl.rockefeller.edu/aainfo/chou.htm
@@ -553,6 +580,61 @@ with open(join(MATRIX_DIR, 'helix_vs_coil.txt'), 'r') as f:
     helix_vs_coil_table = f.read()
     helix_vs_coil = parse_interaction_table(helix_vs_coil_table)
     coil_vs_helix = transpose_interaction_dict(helix_vs_coil)
+
+###
+# Values copied from:
+# "Solvent accessibility of AA in known protein structures"
+# http://prowl.rockefeller.edu/aainfo/access.htm
+###
+"""
+Solvent accessibility of AA in known protein structures
+
+Figure 1.
+
+S   0.70    0.20    0.10
+T   0.71    0.16    0.13
+A   0.48    0.35    0.17
+G   0.51    0.36    0.13
+P   0.78    0.13    0.09
+C   0.32    0.54    0.14
+D   0.81    0.09    0.10
+E   0.93    0.04    0.03
+Q   0.81    0.10    0.09
+N   0.82    0.10    0.08
+L   0.41    0.49    0.10
+I   0.39    0.47    0.14
+V   0.40    0.50    0.10
+M   0.44    0.20    0.36
+F   0.42    0.42    0.16
+Y   0.67    0.20    0.13
+W   0.49    0.44    0.07
+K   0.93    0.02    0.05
+R   0.84    0.05    0.11
+H   0.66    0.19    0.15
+"""
+
+solvent_exposed_area = dict(
+    S=0.70,
+    T=0.71,
+    A=0.48,
+    G=0.51,
+    P=0.78,
+    C=0.32,
+    D=0.81,
+    E=0.93,
+    Q=0.81,
+    N=0.82,
+    L=0.41,
+    I=0.39,
+    V=0.40,
+    M=0.44,
+    F=0.42,
+    Y=0.67,
+    W=0.49,
+    K=0.93,
+    R=0.84,
+    H=0.66,
+)
 
 
 def parse_blosum_table(table, coeff_type=int, key_type='row'):
