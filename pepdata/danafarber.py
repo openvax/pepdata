@@ -38,16 +38,15 @@ def load_tumor(
     """
     path = cache.fetch(
         filename="tumor_epitopes.csv",
-        download_url="http://bio.dfci.harvard.edu/DFRMLI/datasets/tumor_epitopes.htm",
-        subdir="pepdata")
+        url="http://projects.met-hilab.org/DFRMLI/datasets/tumor_epitopes.htm")
     df = pd.read_csv(path, skipinitialspace=True, nrows=nrows)
-    mask = ~df.Peptide.str.contains(bad_amino_acids)
+    mask = ~df.Epitope.str.contains(bad_amino_acids)
     if peptide_length:
-        mask &= df.Peptide.str.len() == peptide_length
+        mask &= df.Epitope.str.len() == peptide_length
     if hla_type:
         mask &= df.Allele.str.contains(hla_type)
     if source_protein:
-        mask &= df.Protein.str.contains(source_protein)
+         mask &= df["Tumor antigen"].str.contains(source_protein)
     return df[mask]
 
 def load_tumor_set(*args, **kwargs):
@@ -70,8 +69,7 @@ def load_virus(
     """
     path = cache.fetch(
         filename="virus_epitopes_A2.csv",
-        download_url="http://bio.dfci.harvard.edu/DFRMLI/datasets/virus_epitopes_A2.htm",
-        subdir="pepdata")
+        url="http://projects.met-hilab.org/DFRMLI/datasets/virus_epitopes_A2.htm")
     df = pd.read_csv(path, skipinitialspace=True, nrows=nrows)
     mask = ~df.Epitope.str.contains(bad_amino_acids)
     if peptide_length:
@@ -99,7 +97,7 @@ def load_cef(
     """
     path = cache.fetch(
         filename="CEF.csv",
-        download_url="http://bio.dfci.harvard.edu/DFRMLI/datasets/CEF.htm")
+        url="http://projects.met-hilab.org/DFRMLI/datasets/CEF.htm")
     df = pd.read_csv(path, skipinitialspace=True, nrows=nrows)
     mask = ~df.Peptide.str.contains(bad_amino_acids)
     if peptide_length:
