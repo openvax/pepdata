@@ -17,7 +17,9 @@ from os.path import join
 
 from .static_data import MATRIX_DIR
 
-def read_coefficients(
+from .amino_acid import dict_to_amino_acid_matrix
+
+def read_pmbec_coefficients(
         key_type='row',
         verbose=True,
         filename=join(MATRIX_DIR, 'pmbec.mat')):
@@ -44,7 +46,6 @@ def read_coefficients(
                 d[row_letter] = {}
             d[row_letter][col_letter] = value
     elif key_type == 'pair':
-
         def add_pair(row_letter, col_letter, value):
             d[(row_letter, col_letter)] = value
 
@@ -60,7 +61,10 @@ def read_coefficients(
         header = lines[0]
         if verbose:
             print(header)
-        residues = [x for x in header.split(' ') if len(x) == 1 and x != ' ' and x != '\t']
+        residues = [
+            x for x in header.split()
+            if len(x) == 1 and x != ' ' and x != '\t'
+        ]
         assert len(residues) == 20
         if verbose:
             print(residues)
@@ -77,11 +81,9 @@ def read_coefficients(
                 assert col_letter != ' ' and col_letter != '\t'
                 value = float(col)
                 add_pair(row_letter, col_letter, value)
-
     return d
 
-if __name__ == '__main__':
-    d = read_coefficients(key_type='pair_string')
-    print("PMBEC matrix")
-    for k in sorted(d):
-        print(k, d[k])
+# dictionary of PMBEC coefficient accessed like pmbec_dict["V"]["R"]
+pmbec_dict = read_pmbec_coefficients(key_type="row")
+
+pmbec_matrix = dict_to_amino_acid_matrix(pmbec_dict)
