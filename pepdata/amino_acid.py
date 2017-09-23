@@ -17,6 +17,8 @@ Quantify amino acids by their physical/chemical properties
 
 from __future__ import print_function, division, absolute_import
 
+import numpy as np
+
 class AminoAcid(object):
     def __init__(self, full_name, short_name, letter, contains=None):
         self.letter = letter
@@ -143,13 +145,14 @@ def peptide_to_short_amino_acid_names(xs):
     xs = xs.upper()
     return [amino_acid_letter_indices[x] for x in xs]
 
-def aa_value_dict_to_positional_list(value_dict):
-    value_list = [None] * 20
-    for letter, value in value_dict.items():
-        idx = letter_to_index(letter)
-        assert idx >= 0
-        assert idx < 20
-        value_list[idx] = value
-    assert all(elt is not None for elt in value_list), \
-        "Missing amino acids in:\n%s" % value_dict.keys()
-    return value_list
+def dict_to_amino_acid_matrix(d):
+    n_aa = len(d)
+    pmbec_matrix = np.zeros((n_aa, n_aa), dtype="float32")
+    for aa_row in d.keys():
+        row_idx = amino_acid_letter_indices[aa_row]
+        d_row = d[aa_row]
+        for aa_col in d_row.keys():
+            col_idx = amino_acid_letter_indices[aa_col]
+            pmbec_matrix[row_idx, col_idx] = d_row[aa_col]
+    return pmbec_matrix
+
