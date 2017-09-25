@@ -63,13 +63,13 @@ def parse_blosum_table(table, coeff_type=int, key_type='row'):
 
 with open(join(MATRIX_DIR, 'BLOSUM30'), 'r') as f:
     blosum30_dict = parse_blosum_table(f.read())
-    blosum30_array = dict_to_amino_acid_matrix(blosum30_dict)
+    blosum30_matrix = dict_to_amino_acid_matrix(blosum30_dict)
 
 with open(join(MATRIX_DIR, 'BLOSUM50'), 'r') as f:
     blosum50_dict = parse_blosum_table(f.read())
-    blosum50_array = dict_to_amino_acid_matrix(blosum50_dict)
+    blosum50_matrix = dict_to_amino_acid_matrix(blosum50_dict)
 
 with open(join(MATRIX_DIR, 'BLOSUM62'), 'r') as f:
     blosum62_dict = parse_blosum_table(f.read())
-    blosum62_array = dict_to_amino_acid_matrix(blosum62_dict)
+    blosum62_matrix = dict_to_amino_acid_matrix(blosum62_dict)
 

@@ -39,13 +39,13 @@ def test_tcell_hla_exclude_a0201():
     that allele
     """
     df_all = iedb.tcell.load_dataframe(nrows=1000)
-    assert (df_all['MHC']['MHC Allele Name'] == "HLA-A*02:01").any()
+    assert (df_all['MHC']['Allele Name'] == "HLA-A*02:01").any()
 
     df_exclude = iedb.tcell.load_dataframe(
         nrows=1000,
         exclude_hla="HLA-A\*02:01")
 
-    n_A0201_entries = (df_exclude['MHC']['MHC Allele Name'] == "HLA-A*02:01").sum()
+    n_A0201_entries = (df_exclude['MHC']['Allele Name'] == "HLA-A*02:01").sum()
     assert n_A0201_entries == 0, \
         ("Not supposed to contain HLA-A*02:01, "
          " but found %d rows of that allele") % n_A0201_entries
