@@ -14,7 +14,7 @@
 
 from __future__ import print_function, division, absolute_import
 
-from pepdata import iedb, reduced_alphabet
+from pepdata import iedb
 
 def test_mhc_hla_a2():
     """
@@ -30,10 +30,3 @@ def test_mhc_hla_a2():
     assert len(df_a2_combined) <= len(df_a2_1) + len(df_a2_2), \
         "Expected %d <= %d + %d" % \
         (len(df_a2_combined), len(df_a2_1), len(df_a2_2))
-
-def test_mhc_reduced_alphabet():
-    pos, neg = iedb.mhc.load_classes(nrows=100)
-    pos2, neg2 = iedb.mhc.load_classes(
-        nrows=100,
-        reduced_alphabet=reduced_alphabet.hp2)
-    assert len(pos) + len(neg) > len(pos2) + len(neg2)

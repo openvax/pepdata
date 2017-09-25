@@ -12,67 +12,44 @@
 
 from __future__ import print_function, division, absolute_import
 
-import numpy as np
-
-from .amino_acid import letter_to_index
+from .amino_acid_alphabet import letter_to_index
 
 """
 Quantify amino acids by their physical/chemical properties
 """
 
 
-class AminoAcidPropertyTable(object):
-    @classmethod
-    def _aa_dict_to_positional_list(value_dict):
-        value_list = [None] * 20
-        for letter, value in value_dict.items():
-            idx = letter_to_index(letter)
-            assert idx >= 0
-            assert idx < 20
-            value_list[idx] = value
-        assert all(elt is not None for elt in value_list), \
-            "Missing amino acids in:\n%s" % value_dict.keys()
-        return value_list
+def aa_dict_to_positional_list(aa_property_dict):
+    value_list = [None] * 20
+    for letter, value in aa_property_dict.items():
+        idx = letter_to_index(letter)
+        assert idx >= 0
+        assert idx < 20
+        value_list[idx] = value
+    assert all(elt is not None for elt in value_list), \
+        "Missing amino acids in:\n%s" % aa_property_dict.keys()
+    return value_list
 
+def parse_property_table(table_string):
+    value_dict = {}
+    for line in table_string.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        fields = line.split(" ")
+        fields = [f for f in fields if len(f.strip()) > 0]
+        assert len(fields) >= 2
+        value, letter = fields[:2]
+        assert letter not in value_dict, "Repeated amino acid " + line
+        value_dict[letter] = float(value)
+    return value_dict
 
-    @classmethod
-    def _parse_table(cls, table_string):
-        value_dict = {}
-        for line in table_string.splitlines():
-            line = line.strip()
-            if not line:
-                continue
-            fields = line.split(" ")
-            fields = [f for f in fields if len(f.strip()) > 0]
-            assert len(fields) >= 2
-            value, letter = fields[:2]
-            assert letter not in value_dict, "Repeated amino acid " + line
-            value_dict[letter] = float(value)
-        return value_dict
-
-    def __init__(self, table):
-        self.table = table
-        self.value_dict = self._parse_table(self.table)
-        self.value_list = self._aa_dict_to_positional_list(self.value_dict)
-
-    def __call__(self, letter):
-        return self.value_dict[letter]
-
-    def __getitem__(self, letter):
-        return self.value_dict[letter]
-
-    def transform_string(self, letters):
-        return np.array([self.value_dict[amino_acid] for amino_acid in letters])
-
-    def transform_strings(self, strings):
-        d = self.value_dict
-        return np.array([[d[x] for x in strings] for x in strings])
 
 """
 Amino acids property tables copied from CRASP website
 """
 
-hydropathy = AminoAcidPropertyTable("""
+hydropathy = parse_property_table("""
 1.80000 A ALA
 -4.5000 R ARG
 -3.5000 N ASN
@@ -95,7 +72,7 @@ hydropathy = AminoAcidPropertyTable("""
 4.20000 V VAL
 """)
 
-volume = AminoAcidPropertyTable("""
+volume = parse_property_table("""
 91.5000 A ALA
 202.0000 R ARG
 135.2000 N ASN
@@ -118,7 +95,7 @@ volume = AminoAcidPropertyTable("""
 141.7000 V VAL
 """)
 
-polarity = AminoAcidPropertyTable("""
+polarity = parse_property_table("""
 0.0000 A ALA
 52.000 R ARG
 3.3800 N ASN
@@ -141,7 +118,7 @@ polarity = AminoAcidPropertyTable("""
 0.1300 V VAL
 """)
 
-pK_side_chain = AminoAcidPropertyTable("""
+pK_side_chain = parse_property_table("""
 0.0000 A ALA
 12.480 R ARG
 0.0000 N ASN
@@ -164,7 +141,7 @@ pK_side_chain = AminoAcidPropertyTable("""
 0.0000 V VAL
 """)
 
-prct_exposed_residues = AminoAcidPropertyTable("""
+prct_exposed_residues = parse_property_table("""
 15.0000 A ALA
 67.0000 R ARG
 49.0000 N ASN
@@ -187,7 +164,7 @@ prct_exposed_residues = AminoAcidPropertyTable("""
 14.0000 V VAL
 """)
 
-hydrophilicity = AminoAcidPropertyTable("""
+hydrophilicity = parse_property_table("""
 -0.5000 A ALA
 3.00000 R ARG
 0.20000 N ASN
@@ -210,7 +187,7 @@ hydrophilicity = AminoAcidPropertyTable("""
 -1.5000 V VAL
 """)
 
-accessible_surface_area = AminoAcidPropertyTable("""
+accessible_surface_area = parse_property_table("""
 27.8000 A ALA
 94.7000 R ARG
 60.1000 N ASN
@@ -233,7 +210,7 @@ accessible_surface_area = AminoAcidPropertyTable("""
 23.7000 V VAL
 """)
 
-local_flexibility = AminoAcidPropertyTable("""
+local_flexibility = parse_property_table("""
 705.42000 A ALA
 1484.2800 R ARG
 513.46010 N ASN
@@ -256,7 +233,7 @@ local_flexibility = AminoAcidPropertyTable("""
 4474.4199 V VAL
 """)
 
-accessible_surface_area_folded = AminoAcidPropertyTable("""
+accessible_surface_area_folded = parse_property_table("""
 31.5000 A ALA
 93.8000 R ARG
 62.2000 N ASN
@@ -279,7 +256,7 @@ accessible_surface_area_folded = AminoAcidPropertyTable("""
 23.5000 V VAL
 """)
 
-refractivity = AminoAcidPropertyTable("""
+refractivity = parse_property_table("""
 4.34000 A ALA
 26.6600 R ARG
 13.2800 N ASN
@@ -302,94 +279,29 @@ refractivity = AminoAcidPropertyTable("""
 13.9200 V VAL
 """)
 
-###
-# Amino acid residue masses copied from:
-# "Table 1. Amino acid residues sorted by name."
-# http://www1.bioinfor.com/peaks/downloads/masstable.html
 
-mass = dict(
-    A=71.08,
-    R=156.2,
-    N=114.1,
-    D=115.1,
-    C=103.1,
-    E=129.1,
-    Q=128.1,
-    G=57.05,
-    H=137.1,
-    I=113.2,
-    L=113.2,
-    K=128.2,
-    M=131.2,
-    F=147.2,
-    P=97.12,
-    S=87.08,
-    T=101.1,
-    W=186.2,
-    Y=163.2,
-    V=99.13)
-
-# Chou-Fasman of structural properties from
-# http://prowl.rockefeller.edu/aainfo/chou.htm
-chou_fasman_table = """
-Alanine        142     83       66      0.06    0.076   0.035   0.058
-Arginine        98     93       95      0.070   0.106   0.099   0.085
-Aspartic Acid  101     54      146      0.147   0.110   0.179   0.081
-Asparagine      67     89      156      0.161   0.083   0.191   0.091
-Cysteine        70    119      119      0.149   0.050   0.117   0.128
-Glutamic Acid  151    037       74      0.056   0.060   0.077   0.064
-Glutamine      111    110       98      0.074   0.098   0.037   0.098
-Glycine         57     75      156      0.102   0.085   0.190   0.152
-Histidine      100     87       95      0.140   0.047   0.093   0.054
-Isoleucine     108    160       47      0.043   0.034   0.013   0.056
-Leucine        121    130       59      0.061   0.025   0.036   0.070
-Lysine         114     74      101      0.055   0.115   0.072   0.095
-Methionine     145    105       60      0.068   0.082   0.014   0.055
-Phenylalanine  113    138       60      0.059   0.041   0.065   0.065
-Proline         57     55      152      0.102   0.301   0.034   0.068
-Serine          77     75      143      0.120   0.139   0.125   0.106
-Threonine       83    119       96      0.086   0.108   0.065   0.079
-Tryptophan     108    137       96      0.077   0.013   0.064   0.167
-Tyrosine        69    147      114      0.082   0.065   0.114   0.125
-Valine         106    170       50      0.062   0.048   0.028   0.053
-"""
-
-
-def parse_chou_fasman(table):
-    alpha_helix_score_dict = {}
-    beta_sheet_score_dict = {}
-    turn_score_dict = {}
-
-    for line in table.split("\n"):
-        fields = [field for field in line.split(" ") if len(field.strip()) > 0]
-        if len(fields) == 0:
-            continue
-
-        if fields[1] == 'Acid':
-            name = fields[0] + " " + fields[1]
-            fields = fields[1:]
-        else:
-            name = fields[0]
-
-        assert name in long_amino_acid_names, "Invalid amino acid name %s" % name
-        idx = long_amino_acid_names.index(name)
-        letter = amino_acid_letters[idx]
-        alpha = int(fields[1])
-        beta = int(fields[2])
-        turn = int(fields[3])
-        alpha_helix_score_dict[letter] = alpha
-        beta_sheet_score_dict[letter] = beta
-        turn_score_dict[letter] = turn
-
-    assert len(alpha_helix_score_dict) == 20
-    assert len(beta_sheet_score_dict) == 20
-    assert len(turn_score_dict) == 20
-    return alpha_helix_score_dict, beta_sheet_score_dict, turn_score_dict
-
-alpha_helix_score, beta_sheet_score, turn_score = \
-    parse_chou_fasman(chou_fasman_table)
-
-
+mass = parse_property_table("""
+70.079 A ALA
+156.188 R ARG
+114.104 N ASN
+115.089 D ASP
+103.144 C CYS
+128.131 Q GLN
+129.116 E GLU
+57.052 G GLY
+137.142 H HIS
+113.160 I ILE
+113.160 L LEU
+128.174 K LYS
+131.198 M MET
+147.177 F PHE
+97.177 P PRO
+87.078 S SER
+101.105 T THR
+186.213 W TRP
+163.170 Y TYR
+99.133 V VAL
+""")
 
 ###
 # Values copied from:

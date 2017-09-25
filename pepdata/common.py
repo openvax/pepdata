@@ -14,60 +14,14 @@
 
 
 from __future__ import print_function, division, absolute_import
-from functools import wraps
 
-import pandas as pd
-import datacache
+import numpy as np
 
-cache = datacache.Cache("pepdata")
+def transform_peptide(peptide, property_dict):
+    return np.array([property_dict[amino_acid] for amino_acid in peptide])
 
-def _prepare_memoization_key(args, kwargs):
-    """
-    Make a tuple of arguments which can be used as a key
-    for a memoized function's lookup_table. If some object can't be hashed
-    then used its __repr__ instead.
-    """
-    key_list = []
-    for arg in args:
-        try:
-            hash(arg)
-            key_list.append(arg)
-        except:
-            key_list.append(repr(arg))
-    for (k, v) in kwargs.items():
-        try:
-            hash(k)
-            hash(v)
-            key_list.append((k, v))
-        except:
-            key_list.append((repr(k), repr(v)))
-    return tuple(key_list)
+def transform_peptides(peptides, property_dict):
+    return np.array([
+        [property_dict[aa] for aa in peptide]
+        for peptide in peptides])
 
-def memoize(fn):
-    lookup_table = {}
-
-    @wraps(fn)
-    def wrapped_fn(*args, **kwargs):
-        key = _prepare_memoization_key(args, kwargs)
-        if key not in lookup_table:
-            lookup_table[key] = fn(*args, **kwargs)
-        return lookup_table[key]
-
-    return wrapped_fn
-
-bad_amino_acids = 'U|X|J|B|Z'
-
-def int_or_seq(x):
-    if isinstance(x, int):
-        return [x]
-    else:
-        return list(x)
-
-def dataframe_from_counts(counts):
-    invert = {
-        'Peptide': list(counts.keys()),
-        'Count': list(counts.values()),
-    }
-
-    df = pd.DataFrame(invert)
-    return df.sort("Count", ascending=False)

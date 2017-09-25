@@ -17,7 +17,7 @@ from os.path import join
 
 from .static_data import MATRIX_DIR
 
-from .amino_acid import dict_to_amino_acid_matrix
+from .amino_acid_alphabet import dict_to_amino_acid_matrix
 
 def read_pmbec_coefficients(
         key_type='row',
