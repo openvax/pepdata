@@ -37,7 +37,7 @@ except:
 if __name__ == '__main__':
     setup(
         name='pepdata',
-        version="0.7.0",
+        version="1.0.0",
         description="Immunological peptide datasets and amino acid properties",
         author="Alex Rubinsteyn",
         author_email="alex.rubinsteyn@mssm.edu",
