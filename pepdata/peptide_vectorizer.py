@@ -19,13 +19,11 @@ import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.preprocessing import normalize
 
-from .reduced_alphabet import make_alphabet_transformer
-
 def make_count_vectorizer(reduced_alphabet, max_ngram):
     if reduced_alphabet is None:
         preprocessor = None
     else:
-        preprocessor = make_alphabet_transformer(reduced_alphabet)
+        preprocessor = lambda s: "".join([reduced_alphabet[si] for si in s])
 
     return CountVectorizer(
         analyzer='char',
@@ -34,6 +32,9 @@ def make_count_vectorizer(reduced_alphabet, max_ngram):
         preprocessor=preprocessor)
 
 class PeptideVectorizer(object):
+    """
+    Make n-gram frequency vectors from peptide sequences
+    """
     def __init__(
             self,
             max_ngram=1,

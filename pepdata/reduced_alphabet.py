@@ -20,15 +20,12 @@ http://www.rpgroup.caltech.edu/publications/Peterson2008.pdf
 """
 from __future__ import print_function, division, absolute_import
 
-from six import string_types
-
 def dict_from_list(groups):
-    result = {}
+    aa_to_group = {}
     for i, group in enumerate(groups):
         for c in group:
-            result[c.upper()] = i
-            result[c.lower()] = i
-    return result
+            aa_to_group[c] = group[0]
+    return aa_to_group
 
 gbmr4 = dict_from_list(["ADKERNTSQ", "YFLIVMCWH", "G", "P"])
 
@@ -58,28 +55,3 @@ alex6 = dict_from_list(["C", "G", "P", "FYW", "AVILM", "STNQRHKDE"])
 aromatic2 = dict_from_list(["FHWY", "ADKERNTSQLIVMCGP"])
 
 hp_vs_aromatic = dict_from_list(["H", "CMILV", "FWY", "ADKERNTSQGP"])
-
-class AlphabetTransformer(object):
-    def __init__(self, reduced_alphabet_dict):
-        if not isinstance(reduced_alphabet_dict, dict):
-            raise TypeError("Expected dictionary, got %s" % (
-                type(reduced_alphabet_dict),))
-        self.reduced_alphabet_dict = reduced_alphabet_dict
-
-    def __call__(self, s):
-        return self.transform(s)
-
-    def __str__(self):
-        return "AlphabetTransformer(%s)" % (self.reduced_alphabet_dict,)
-
-    def transform(self, s):
-        d = self.reduced_alphabet_dict
-        return ''.join([chr(48 + d[char]) for char in s])
-
-    def __getstate__(self):
-        return {'reduced_alphabet': self.reduced_alphabet_dict}
-
-def make_alphabet_transformer(reduced_alphabet_dict):
-    if isinstance(reduced_alphabet_dict, string_types):
-        reduced_alphabet_dict = globals()[reduced_alphabet_dict]
-    return AlphabetTransformer(reduced_alphabet_dict)

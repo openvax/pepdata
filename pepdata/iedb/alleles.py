@@ -1,5 +1,3 @@
-# Copyright (c) 2014. Mount Sinai School of Medicine
-#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,7 +15,8 @@ from collections import namedtuple
 import os
 import xml
 
-from ..common import memoize, cache
+from .common import cache
+from .memoize import memoize
 
 ALLELE_XML_FILENAME = "MhcAlleleNames.xml"
 ALLELE_XML_URL = "http://www.iedb.org/doc/MhcAlleleNameList.zip"

@@ -1,39 +1,23 @@
-from . import (
-    amino_acid,
-    reduced_alphabet,
-    features,
-    iedb,
-    imma2,
-    calis,
-    toxin,
-    tantigen,
-    fritsch_neoepitopes,
-    pmbec,
-    hiv_frahm,
-    danafarber,
-    cri_tumor_antigens
+from .amino_acid_alphabet import (
+    AminoAcid,
+    canonical_amino_acids,
+    canonical_amino_acid_letters,
+    extended_amino_acids,
+    extended_amino_acid_letters,
+    amino_acid_letter_indices,
+    amino_acid_name_indices,
 )
-from .amino_acid import peptide_to_indices
-from .features import (
-    make_ngram_dataset, transform_rows, toxin_features
-)
+from .peptide_vectorizer import PeptideVectorizer
+from . import iedb
 
 __all__ = [
-    "amino_acid",
-    "peptide_to_indices",
-    "reduced_alphabet",
-    "make_ngram_dataset",
-    "transform_rows",
-    "features",
-    "toxin_features",
     "iedb",
-    "imma2",
-    "calis",
-    "toxin",
-    "fritsch_neoepitopes",
-    "tantigen",
-    "pmbec",
-    "hiv_frahm",
-    "danafarber",
-    "cri_tumor_antigens"
+    "AminoAcid",
+    "canonical_amino_acids",
+    "canonical_amino_acid_letters",
+    "extended_amino_acids",
+    "extended_amino_acid_letters",
+    "amino_acid_letter_indices",
+    "amino_acid_name_indices",
+    "PeptideVectorizer",
 ]

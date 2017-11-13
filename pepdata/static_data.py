@@ -1,5 +1,3 @@
-# Copyright (c) 2014. Mount Sinai School of Medicine
-#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,5 +15,4 @@ from __future__ import print_function, division, absolute_import
 from os.path import dirname, realpath, join
 
 PACKAGE_DIR = dirname(realpath(__file__))
-DATA_DIR = join(PACKAGE_DIR, 'data')
 MATRIX_DIR = join(PACKAGE_DIR, 'matrices')
