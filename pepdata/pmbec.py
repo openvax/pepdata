@@ -85,5 +85,4 @@ def read_pmbec_coefficients(
 
 # dictionary of PMBEC coefficient accessed like pmbec_dict["V"]["R"]
 pmbec_dict = read_pmbec_coefficients(key_type="row")
-
 pmbec_matrix = dict_to_amino_acid_matrix(pmbec_dict)

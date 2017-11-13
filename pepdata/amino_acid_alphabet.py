@@ -19,26 +19,7 @@ from __future__ import print_function, division, absolute_import
 
 import numpy as np
 
-class AminoAcid(object):
-    def __init__(self, full_name, short_name, letter, contains=None):
-        self.letter = letter
-        self.full_name = full_name
-        self.short_name = short_name
-        if not contains:
-            contains = [letter]
-        self.contains = contains
-
-    def __str__(self):
-        return (
-            ("AminoAcid(full_name='%s', short_name='%s', letter='%s', "
-             "contains=%s)") % (
-            self.letter, self.full_name, self.short_name, self.contains))
-
-    def __repr__(self):
-        return str(self)
-
-    def __eq__(self, other):
-        return other.__class__ is AminoAcid and self.letter == other.letter
+from .amino_acid import AminoAcid
 
 canonical_amino_acids = [
     AminoAcid("Alanine", "Ala", "A"),
@@ -64,6 +45,22 @@ canonical_amino_acids = [
 ]
 
 canonical_amino_acid_letters = [aa.letter for aa in canonical_amino_acids]
+
+###
+# Post-translation modifications commonly detected by mass-spec
+###
+
+# TODO: figure out three letter codes for modified AAs
+
+modified_amino_acids = [
+    AminoAcid("Phospho-Serine", "Sep", "s"),
+    AminoAcid("Phospho-Threonine", "???", "t"),
+    AminoAcid("Phospho-Tyrosine", "???", "y"),
+    AminoAcid("Cystine", "???", "c"),
+    AminoAcid("Methionine sulfoxide", "???", "m"),
+    AminoAcid("Pyroglutamate", "???", "q"),
+    AminoAcid("Pyroglutamic acid", "???", "n"),
+]
 
 ###
 # Amino acid tokens which represent multiple canonical amino acids
@@ -106,7 +103,7 @@ extended_amino_acids_with_unknown_names = [
 
 amino_acid_letter_indices = {
     c: i for (i, c) in
-    enumerate(extended_amino_acids)
+    enumerate(extended_amino_acid_letters)
 }
 
 
@@ -139,19 +136,16 @@ def letter_to_index(x):
     """
     Convert from an amino acid's letter code to its position index
     """
-    x = x.upper()
     assert x in amino_acid_letter_indices, "Unknown amino acid: %s" % x
     return amino_acid_letter_indices[x]
 
 def peptide_to_indices(xs):
-    xs = xs.upper()
     return [amino_acid_letter_indices[x] for x in xs]
 
 def letter_to_short_name(x):
     return index_to_short_name(letter_to_index(x))
 
 def peptide_to_short_amino_acid_names(xs):
-    xs = xs.upper()
     return [amino_acid_letter_indices[x] for x in xs]
 
 def dict_to_amino_acid_matrix(d, alphabet=canonical_amino_acids):
