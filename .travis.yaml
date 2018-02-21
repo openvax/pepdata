@@ -1,0 +1,47 @@
+sudo: false  # Use container-based infrastructure
+language: python
+python:
+  - "2.7"
+  - "3.6"
+env:
+  - KERAS_BACKEND=theano
+before_install:
+  # Commands below copied from: http://conda.pydata.org/docs/travis.html
+  # We do this conditionally because it saves us some downloading if the
+  # version is the same.
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+      wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh;
+    else
+      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+    fi
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  # reset the shell's lookup table for program name to path mappings
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  # Useful for debugging any issues with conda
+  - conda info -a
+install:
+  - >
+      conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION
+      numpy scipy nose pandas keras theano pandoc
+  - source activate test-environment
+  - pip install pypandoc pylint
+  - pip install -r requirements.txt
+  - pip install .
+  - pip install coveralls
+script:
+  - ./lint.sh
+  - nosetests test --with-coverage --cover-package=pepnet
+after_success:
+  coveralls
+deploy:
+  provider: pypi
+  user: openvax
+  distributions: sdist
+  password:
+    secure: "JOgvBbzGsq6Vq926yUUZRqizKvDE8jgVoTpQoj5oDkXj/PczK8A7p1quKvNMiAez2YDWKRiuQi1/wrwocoH5rGgI5gCTPl+cm1Wl+sNBTMyP76crdHT3opgDXyWemr8aF49iXVM2WFqGnlCxIJ29GApITA+kF58RAJkm0a5vZlQVKtKSUMmvMkZIab5m/pdiUfPJbCChWBphm+dCZVMqQCYsJV6Nk6QMqH+Ad66rQQYG513/HSaceE7MYaS9J1QKOiF1Mq0koO/fhR2Sw5FLa4lmIUxDOphszDWzMa30XGBpCOFXzB4W/hCUMCUJP7dUS4mTs3chZLbBLeO7knlgGdjxlm8r7Tjd1G8M2sKgjHqhAlYA2h49sHmeEhpBIy0EjpZgA0nLZNomya3mCaEoCkcm73o9LIcaX+OOp/uZYgQ4nrYUamdHz7N0UYr1EchqYBX2Mb+1Nku4fiRHiOPk0tOslrKX+9UpYo08TQsFM9mDWkg52BzSvLnbOpbMPaMQ8OQeIDWLgXuM2K3/mLq5aeZ8zt/HKb6hrdbIRrs+LCEcr0rkDCBovRHChRzLONUu/9Sff8vUXnW9Eo+8BgjyMZNIfFJfHjlnsUgQIHR4iJnAvidoKw8PkluhlD/r9YugXaoooWeU6kurQBDua6cA/A9xvI2QhPKFriuAc5+msFY="
+  on:
+    branch: master
+    condition: $TRAVIS_PYTHON_VERSION = "2.7"
