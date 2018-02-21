@@ -11,7 +11,7 @@
 PepData
 =======
 
-Currently an amalgam of IEDB interfaces and amino acid properties. This package
+Formerly a repository for diverse peptide datasets, now only contains the [Immune Epitope Database](http://www.iedb.org) and a variety of amino acid property matrices. This package
 will probably be eventually split and the IEDB portions placed into something
 named `pyiedb`.
 
@@ -47,4 +47,5 @@ Pairwise interaction dictionaries:
 - `blosum62`
 
 There is also a function to parse the coefficients of the [PMBEC similarity matrix](http://www.biomedcentral.com/1471-2105/10/394), though this currently lives in the separate `pmbec` module.
+
 
