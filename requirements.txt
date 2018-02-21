@@ -2,7 +2,7 @@ numpy>=1.7
 scipy>=0.9
 pandas>=0.17
 scikit-learn>=0.14.1
-progressbar33',
+progressbar33
 biopython>=1.65
 datacache>=0.4.4
 lxml
