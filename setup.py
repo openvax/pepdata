@@ -15,14 +15,15 @@
 
 from __future__ import print_function, division, absolute_import
 import os
+import re
 
 from setuptools import setup, find_packages
 
 readme_dir = os.path.dirname(__file__)
-readme_filename = os.path.join(readme_dir, 'README.md')
+readme_path = os.path.join(readme_dir, 'README.md')
 
 try:
-    with open(readme_filename, 'r') as f:
+    with open(readme_path, 'r') as f:
         readme = f.read()
 except:
     print("Failed to load README file")
@@ -30,18 +31,26 @@ except:
 
 try:
     import pypandoc
-    readme = pypandoc.convert(readme, to='rst', format='md')
+    readme_restructured = pypandoc.convert(readme, to='rst', format='md')
+    with open(readme_path.replace(".md", ".rst"), "w") as f:
+        f.write(readme_restructured)
 except:
     print("Conversion of long_description from markdown to reStructuredText failed, skipping...")
+
+with open('pepdata/__init__.py', 'r') as f:
+    version = re.search(
+        r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
+        f.read(),
+        re.MULTILINE).group(1)
 
 if __name__ == '__main__':
     setup(
         name='pepdata',
-        version="1.0.0",
+        version=version,
         description="Immunological peptide datasets and amino acid properties",
         author="Alex Rubinsteyn",
         author_email="alex.rubinsteyn@mssm.edu",
-        url="https://github.com/hammerlab/pepdata",
+        url="https://github.com/openvax/pepdata",
         license="http://www.apache.org/licenses/LICENSE-2.0.html",
         classifiers=[
             'Development Status :: 3 - Alpha',
@@ -62,7 +71,7 @@ if __name__ == '__main__':
             'datacache>=0.4.4',
             'lxml',
         ],
-        long_description=readme,
+        long_description=readme_restructured,
         packages=find_packages(exclude="test"),
         include_package_data=True
     )
