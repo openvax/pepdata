@@ -1,7 +1,7 @@
 #!/bin/bash
 set -o errexit
 
-find pepnet test -name '*.py' \
+find pepdata test -name '*.py' \
   | xargs pylint \
   --errors-only \
   --disable=print-statement
