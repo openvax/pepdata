@@ -14,7 +14,7 @@ from __future__ import print_function, division, absolute_import
 
 from os.path import join
 
-from .amino_acids import amino_acid_letters, dict_to_amino_acid_matrix
+from .amino_acid_alphabet import canonical_amino_acid_letters, dict_to_amino_acid_matrix
 from .static_data import MATRIX_DIR
 
 
@@ -41,9 +41,9 @@ def parse_interaction_table(table, amino_acid_order="ARNDCQEGHILKMFPSTWYV"):
 
 def transpose_interaction_dict(d):
     transposed = {}
-    for x in amino_acid_letters:
+    for x in canonical_amino_acid_letters:
         transposed[x] = {}
-        for y in amino_acid_letters:
+        for y in canonical_amino_acid_letters:
             transposed[x][y] = d[y][x]
     return transposed
 
@@ -74,4 +74,3 @@ with open(join(MATRIX_DIR, 'helix_vs_coil.txt'), 'r') as f:
     # Coil vs. Helix
     coil_vs_helix_dict = transpose_interaction_dict(helix_vs_coil_dict)
     coil_vs_helix_array = dict_to_amino_acid_matrix(coil_vs_helix_dict)
-
