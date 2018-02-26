@@ -10,7 +10,7 @@ from .amino_acid_alphabet import (
 from .peptide_vectorizer import PeptideVectorizer
 from . import iedb
 
-__version__ = "1.0.6"
+__version__ = "1.0.7"
 
 __all__ = [
     "iedb",
