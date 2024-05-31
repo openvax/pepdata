@@ -105,7 +105,7 @@ def load_dataframe(
             skipinitialspace=True,
             nrows=nrows,
             low_memory=False,
-            error_bad_lines=False,
+            on_bad_lines='warn',
             encoding="latin-1")
 
     print(df.head())

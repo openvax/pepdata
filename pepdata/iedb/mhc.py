@@ -107,9 +107,8 @@ def load_dataframe(
             skipinitialspace=True,
             nrows=nrows,
             low_memory=False,
-            error_bad_lines=False,
-            encoding="latin-1",
-            warn_bad_lines=warn_bad_lines)
+            on_bad_lines='warn' if warn_bad_lines else 'skip',
+            encoding="latin-1")
 
     # Sometimes the IEDB seems to put in an extra comma in the
     # header line, which creates an unnamed column of NaNs.
