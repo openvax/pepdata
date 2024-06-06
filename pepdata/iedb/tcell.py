@@ -116,8 +116,8 @@ def load_dataframe(
     df = df.dropna(axis=1, how="all")
 
     n = len(df)
-    epitope_column_key = ("Epitope", "Description")
-    mhc_allele_column_key = ("MHC", "Allele Name")
+    epitope_column_key = ("Epitope", "Name")
+    mhc_allele_column_key = ("MHC Restriction", "Name")
     assay_group_column_key = ("Assay", "Assay Group")
     assay_method_column_key = ("Assay", "Method/Technique")
 

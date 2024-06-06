@@ -1,5 +1,3 @@
-# Copyright (c) 2014. Mount Sinai School of Medicine
-#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -22,9 +20,9 @@ def test_tcell_hla_restrict_a24():
     """
     df_all = iedb.tcell.load_dataframe(nrows=1000)
     df_a24_1 = iedb.tcell.load_dataframe(hla='HLA-A24', nrows=1000)
-    df_a24_2 = iedb.tcell.load_dataframe(hla='HLA-A\*24', nrows=1000)
+    df_a24_2 = iedb.tcell.load_dataframe(hla=r'HLA-A\*24', nrows=1000)
     df_a24_combined = \
-        iedb.tcell.load_dataframe(hla='HLA-A24|HLA-A\*24', nrows=1000)
+        iedb.tcell.load_dataframe(hla=r'HLA-A24|HLA-A\*24', nrows=1000)
     assert len(df_a24_1) < len(df_all)
     assert len(df_a24_2) < len(df_all)
     assert len(df_a24_combined) <= \

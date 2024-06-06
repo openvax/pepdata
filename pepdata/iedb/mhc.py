@@ -20,7 +20,7 @@ from .memoize import  memoize
 from .common import bad_amino_acids, cache
 
 
-MHC_URL = "http://www.iedb.org/downloader.php?file_name=doc/mhc_ligand_full.zip"
+MHC_URL = "https://www.iedb.org/downloader.php?file_name=doc/mhc_ligand_full_single_file.zip"
 MHC_LOCAL_FILENAME = "mhc_ligand_full.csv"
 MHC_DECOMPRESS = True
 
@@ -57,7 +57,6 @@ def load_dataframe(
         assay_method=None,
         assay_group=None,
         only_standard_amino_acids=True,
-        reduced_alphabet=None,  # 20 letter AA strings -> simpler alphabet
         warn_bad_lines=True,
         nrows=None):
     """
@@ -90,9 +89,6 @@ def load_dataframe(
         Drop sequences which use non-standard amino acids, anything outside
         the core 20, such as X or U (default = True)
 
-    reduced_alphabet : dictionary, optional
-        Remap amino acid letters to some other alphabet
-
     warn_bad_lines : bool, optional
         The full MHC ligand dataset seems to contain several dozen lines with
         too many fields. This currently results in a lot of warning messages
@@ -115,10 +111,16 @@ def load_dataframe(
     # To deal with this, drop any columns which are all NaN
     df = df.dropna(axis=1, how="all")
 
+    print(df.head())
+
     n = len(df)
 
-    epitope_column_key = ("Epitope", "Description")
-    mhc_allele_column_key = ("MHC", "Allele Name")
+    mhc_group_key = "MHC Restriction"
+    epitope_group_key = "Epitope"
+    epitope_column_key = (epitope_group_key, "Name")
+
+    print(df["Epitope"].head())
+    mhc_allele_column_key = (mhc_group_key, "Name")
 
     epitopes = df[epitope_column_key] = df[epitope_column_key].str.upper()
 
@@ -143,9 +145,9 @@ def load_dataframe(
         mask &= df[mhc_allele_column_key].str.startswith("HLA").astype("bool")
 
     if mhc_class == 1:
-        mask &= df["MHC"]["MHC allele class"] == "I"
+        mask &= df[mhc_group_key]["Class"] == "I"
     elif mhc_class == 2:
-        mask &= df["MHC"]["MHC allele class"] == "II"
+        mask &= df[mhc_group_key]["Class"] == "II"
 
     if hla:
         mask &= df[mhc_allele_column_key].str.contains(hla, na=False)
@@ -157,7 +159,7 @@ def load_dataframe(
         mask &= df["Assay"]["Assay Group"].str.contains(assay_group)
 
     if assay_method:
-        mask &= df["Assay"]["Method/Technique"].str.contains(assay_method)
+        mask &= df["Assay"]["Method"].str.contains(assay_method)
 
     if peptide_length:
         assert peptide_length > 0

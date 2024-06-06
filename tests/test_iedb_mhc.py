@@ -23,8 +23,8 @@ def test_mhc_hla_a2():
     """
     df_all = iedb.mhc.load_dataframe(nrows=1000)
     df_a2_1 = iedb.mhc.load_dataframe(hla='HLA-A2', nrows=1000)
-    df_a2_2 = iedb.mhc.load_dataframe(hla='HLA-A\*02', nrows=1000)
-    df_a2_combined = iedb.mhc.load_dataframe(hla='HLA-A2|HLA-A\*02', nrows=1000)
+    df_a2_2 = iedb.mhc.load_dataframe(hla=r'HLA-A\*02', nrows=1000)
+    df_a2_combined = iedb.mhc.load_dataframe(hla=r'HLA-A2|HLA-A\*02', nrows=1000)
     assert len(df_a2_1) < len(df_all)
     assert len(df_a2_2) < len(df_all)
     assert len(df_a2_combined) <= len(df_a2_1) + len(df_a2_2), \
