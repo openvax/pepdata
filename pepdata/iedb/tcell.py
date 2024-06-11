@@ -22,6 +22,20 @@ import pandas as pd
 from .alleles import load_alleles_dict
 from .memoize import  memoize
 from .common import  bad_amino_acids, cache
+from .columns import (
+    get_assay_method,
+    get_assay_num_tested,
+    get_assay_response_measured,
+    get_assay_units,
+    get_host_name,
+    get_mhc_allele,
+    get_mhc_assay,
+    get_mhc_class,
+    get_epitope_source_organism,
+    get_epitope_type,
+    get_epitope_name,
+    
+)
 
 TCELL_COMPACT_FILENAME = "tcell_full.csv"
 TCELL_COMPACT_URL = "http://www.iedb.org/downloader.php?file_name=doc/tcell_full_v3.zip"
@@ -52,16 +66,15 @@ def delete():
 
 @memoize
 def load_dataframe(
-        mhc_class=None,  # 1, 2, or None for neither
-        hla=None,
-        exclude_hla=None,
-        human_only=False,
-        peptide_length=None,
-        assay_method=None,
-        assay_group=None,
-        only_standard_amino_acids=True,
-        reduced_alphabet=None,  # 20 letter AA strings -> simpler alphabet
-        nrows=None):
+        mhc_class : str | None = None,  # 1, 2, or None for neither
+        mhc_pattern : str | None  = None,
+        exclude_mhc : str | None  = None,
+        human_only : bool =False,
+        peptide_length : int | None = None,
+        assay_method : str | None = None,
+        only_standard_amino_acids : bool = True,
+        reduced_alphabet : dict | None = None,  # 20 letter AA strings -> simpler alphabet
+        nrows : int | None = None):
     """
     Load IEDB T-cell data without aggregating multiple entries for same epitope
 
@@ -70,11 +83,11 @@ def load_dataframe(
     mhc_class: {None, 1, 2}
         Restrict to MHC Class I or Class II (or None for neither)
 
-    hla: regex pattern, optional
-        Restrict results to specific HLA type used in assay
+    mhc_pattern: regex pattern, optional
+        Restrict results to specific MHC used in assay
 
-    exclude_hla: regex pattern, optional
-        Exclude certain HLA types
+    exclude_mhc: regex pattern, optional
+        Exclude certain MHC allele patterns 
 
     human_only: bool
         Restrict to human samples (default False)
@@ -84,9 +97,6 @@ def load_dataframe(
 
     assay_method string, optional
         Only collect results with assay methods containing the given string
-
-    assay_group: string, optional
-        Only collect results with assay groups containing the given string
 
     only_standard_amino_acids : bool, optional
         Drop sequences which use non-standard amino acids, anything outside
@@ -107,8 +117,13 @@ def load_dataframe(
             low_memory=False,
             on_bad_lines='warn',
             encoding="latin-1")
+    
+    mhc = get_mhc_allele(df)
+    mhc_class = get_mhc_class(df)
+    epitopes = get_epitope_name(df)
+    organism = get_host_name(df)
+    assay_method = get_assay_method(df)
 
-    print(df.head())
 
     # Sometimes the IEDB seems to put in an extra comma in the
     # header line, which creates an unnamed column of NaNs.
@@ -116,13 +131,7 @@ def load_dataframe(
     df = df.dropna(axis=1, how="all")
 
     n = len(df)
-    epitope_column_key = ("Epitope", "Name")
-    mhc_allele_column_key = ("MHC Restriction", "Name")
-    assay_group_column_key = ("Assay", "Assay Group")
-    assay_method_column_key = ("Assay", "Method/Technique")
-
-    epitopes = df[epitope_column_key].str.upper()
-
+    
     null_epitope_seq = epitopes.isnull()
     n_null = null_epitope_seq.sum()
 
@@ -142,16 +151,8 @@ def load_dataframe(
         mask &= ~bad_epitope_seq
 
     if human_only:
-        organism = df['Host Organism Name']
         mask &= organism.str.startswith('Homo sapiens', na=False).astype('bool')
 
-    # Match known alleles such as "HLA-A*02:01",
-    # broader groupings such as "HLA-A2"
-    # and unknown alleles of the MHC-1 listed either as
-    #  "HLA-Class I,allele undetermined"
-    #  or
-    #  "Class I,allele undetermined"
-    mhc = df[mhc_allele_column_key]
 
     if mhc_class is not None:
         # since MHC classes can be specified as either strings ("I") or integers
@@ -169,6 +170,14 @@ def load_dataframe(
             if allele_object and allele_object.mhc_class == mhc_class:
                 mhc_class_mask[i] = True
         mask &= np.array(mhc_class_mask)
+
+    # Match known alleles such as "HLA-A*02:01",
+    # broader groupings such as "HLA-A2"
+    # and unknown alleles of the MHC-1 listed either as
+    #  "HLA-Class I,allele undetermined"
+    #  or
+    #  "Class I,allele undetermined"
+]
 
     if hla:
         mask &= df[mhc_allele_column_key].str.contains(hla, na=False)

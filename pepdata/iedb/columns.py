@@ -54,8 +54,9 @@ def find(df : pd.DataFrame, group_candidates : list[str], column_candidates : li
 MHC_GROUP_CANDIDATES : list[str] = ["MHC", "MHC Restriction"]
 EPITOPE_GROUP_CANDIDATES : list[str] = ["Epitope"] 
 ASSAY_GROUP_CANDIDATES : list[str] = ["Assay"]
+HOST_GROUP_CANDIDATES : list[str] = ["Host"]
 
-def get_mhc_allele_column(
+def get_mhc_allele(
         df : pd.DataFrame, 
         group_candidates : list[str] = MHC_GROUP_CANDIDATES,
         column_candidates : list[str] = ["Allele", "Allele name", "Name"]) -> pd.Series | None:
@@ -116,13 +117,18 @@ def get_epitope_source_molecule_iri(
     return find(df, group_candidates, column_candidates)
 
 
-def get_epitope_source_molecule_iri(
+def get_epitope_source_organism(
         df : pd.DataFrame, 
         group_candidates : list[str] = EPITOPE_GROUP_CANDIDATES, 
-        column_candidates : list[str] = ["Source Molecule IRI"]) -> pd.Series | None:
+        column_candidates : list[str] = ["Source Organism"]) -> pd.Series | None:
     return find(df, group_candidates, column_candidates)
 
 
+def get_epitope_source_organism_iri(
+        df : pd.DataFrame, 
+        group_candidates : list[str] = EPITOPE_GROUP_CANDIDATES, 
+        column_candidates : list[str] = ["Source Organism IRI"]) -> pd.Series | None:
+    return find(df, group_candidates, column_candidates)
 
 def get_assay_method(
         df : pd.DataFrame, 
@@ -162,3 +168,9 @@ def get_assay_num_responded(
         column_candidates : list[str] = ["Number of Subjects Responded"]) -> pd.Series | None:
     return find(df, group_candidates, column_candidates)
 
+
+def get_host_name(
+        df : pd.DataFrame, 
+        group_candidates : list[str] = HOST_GROUP_CANDIDATES, 
+        column_candidates : list[str] = ["Name"]) -> pd.Series | None:
+    return find(df, group_candidates, column_candidates)

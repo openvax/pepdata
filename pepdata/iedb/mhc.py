@@ -49,52 +49,48 @@ def delete():
 
 @memoize
 def load_dataframe(
-        mhc_class=None,  # 1, 2, or None for neither
-        hla=None,
-        exclude_hla=None,
-        human_only=False,
-        peptide_length=None,
-        assay_method=None,
-        assay_group=None,
-        only_standard_amino_acids=True,
-        warn_bad_lines=True,
-        nrows=None):
+        mhc_class : int | None = None,  # 1, 2, or None for neither
+        hla : str | None = None,
+        exclude_hla : str | None = None,
+        human_only : bool  = False,
+        peptide_length : int | None = None,
+        assay_method : str | None = None,
+        only_standard_amino_acids : bool = True,
+        warn_bad_lines : bool  = True,
+        nrows : int | None = None):
     """
     Load IEDB MHC data without aggregating multiple entries for the same epitope
 
     Parameters
     ----------
-    mhc_class : {None, 1, 2}
+    mhc_class 
         Restrict to MHC Class I or Class II (or None for neither)
 
-    hla : regex pattern, optional
-        Restrict results to specific HLA type used in assay
+    hla 
+        Restrict results to specific HLA type used in assay (regex pattern)
 
-    exclude_hla : regex pattern, optional
-        Exclude certain HLA types
+    exclude_hla 
+        Regex pattern to exclude certain HLA types
 
-    human_only : bool
+    human_only
         Restrict to human samples (default False)
 
-    peptide_length: int, optional
+    peptide_length
         Restrict epitopes to amino acid strings of given length
 
-    assay_method : string, optional
+    assay_method 
         Limit to assay methods which contain the given string
 
-    assay_group : string, optional
-        Limit to assay groups which contain the given string
-
-    only_standard_amino_acids : bool, optional
+    only_standard_amino_acids
         Drop sequences which use non-standard amino acids, anything outside
         the core 20, such as X or U (default = True)
 
-    warn_bad_lines : bool, optional
+    warn_bad_lines 
         The full MHC ligand dataset seems to contain several dozen lines with
         too many fields. This currently results in a lot of warning messages
         from Pandas, which you can turn off with this option (default = True)
 
-    nrows : int, optional
+    nrows
         Don't load the full IEDB dataset but instead read only the first nrows
     """
     df = pd.read_csv(
@@ -154,9 +150,6 @@ def load_dataframe(
 
     if exclude_hla:
         mask &= ~(df[mhc_allele_column_key].str.contains(exclude_hla, na=False))
-
-    if assay_group:
-        mask &= df["Assay"]["Assay Group"].str.contains(assay_group)
 
     if assay_method:
         mask &= df["Assay"]["Method"].str.contains(assay_method)
