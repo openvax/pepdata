@@ -115,7 +115,6 @@ def load_dataframe(
     epitope_group_key = "Epitope"
     epitope_column_key = (epitope_group_key, "Name")
 
-    print(df["Epitope"].head())
     mhc_allele_column_key = (mhc_group_key, "Name")
 
     epitopes = df[epitope_column_key] = df[epitope_column_key].str.upper()
