@@ -10,8 +10,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import print_function, division, absolute_import
-
 from os.path import join
 
 from .amino_acid_alphabet import canonical_amino_acid_letters, dict_to_amino_acid_matrix

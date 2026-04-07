@@ -13,7 +13,6 @@
 # limitations under the License.
 
 
-from __future__ import print_function, division, absolute_import
 import os
 import re
 
@@ -60,8 +59,9 @@ if __name__ == '__main__':
             'Programming Language :: Python',
             'Topic :: Scientific/Engineering :: Bio-Informatics',
         ],
+        python_requires='>=3.9',
         install_requires=[
-            'numpy>=1.7',
+            'numpy>=2.0.0,<3.0.0',
             'scipy>=0.9',
             'pandas>=0.17',
             'scikit-learn>=0.14.1',

@@ -11,8 +11,6 @@
 # limitations under the License.
 
 
-from __future__ import print_function, division, absolute_import
-
 from nose.tools import eq_
 
 from pepdata import iedb

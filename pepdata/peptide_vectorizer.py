@@ -13,8 +13,6 @@
 # limitations under the License.
 
 
-from __future__ import print_function, division, absolute_import
-
 import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.preprocessing import normalize
@@ -28,7 +26,7 @@ def make_count_vectorizer(reduced_alphabet, max_ngram):
     return CountVectorizer(
         analyzer='char',
         ngram_range=(1, max_ngram),
-        dtype=np.float,
+        dtype=np.float64,
         preprocessor=preprocessor)
 
 class PeptideVectorizer(object):
