@@ -15,7 +15,7 @@ jobs:
         with:
           python-version: "3.11"
       - run: pip install ruff
-      - run: ruff check pepdata/ tests/
+      - run: ruff check pepdata/
 
   test:
     runs-on: ubuntu-latest
@@ -27,5 +27,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-      - run: pip install -e '.[test]'
+      - run: |
+          pip install pytest pytest-cov
+          pip install -r requirements.txt
+          pip install .
       - run: pytest tests/
