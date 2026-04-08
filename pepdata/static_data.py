@@ -11,7 +11,6 @@
 # limitations under the License.
 
 
-from __future__ import print_function, division, absolute_import
 from os.path import dirname, realpath, join
 
 PACKAGE_DIR = dirname(realpath(__file__))

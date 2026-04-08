@@ -10,8 +10,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import print_function, division, absolute_import
-
 from .amino_acid_alphabet import amino_acid_name_indices
 
 # Chou-Fasman of structural properties from

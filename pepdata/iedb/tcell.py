@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,7 +13,6 @@
 # limitations under the License.
 
 
-from __future__ import print_function, division, absolute_import
 import logging
 import os
 
@@ -24,15 +25,9 @@ from .memoize import  memoize
 from .common import  bad_amino_acids, cache
 from .columns import (
     get_assay_method,
-    get_assay_num_tested,
-    get_assay_response_measured,
-    get_assay_units,
     get_host_name,
     get_mhc_allele,
-    get_mhc_assay,
     get_mhc_class,
-    get_epitope_source_organism,
-    get_epitope_type,
     get_epitope_name,
     
 )
@@ -119,10 +114,10 @@ def load_dataframe(
             encoding="latin-1")
     
     mhc = get_mhc_allele(df)
-    mhc_class = get_mhc_class(df)
+    mhc_class_series = get_mhc_class(df)
     epitopes = get_epitope_name(df)
     organism = get_host_name(df)
-    assay_method = get_assay_method(df)
+    assay_method_series = get_assay_method(df)
 
 
     # Sometimes the IEDB seems to put in an extra comma in the
@@ -177,23 +172,19 @@ def load_dataframe(
     #  "HLA-Class I,allele undetermined"
     #  or
     #  "Class I,allele undetermined"
-]
 
-    if hla:
-        mask &= df[mhc_allele_column_key].str.contains(hla, na=False)
+    if mhc_pattern:
+        mask &= mhc.str.contains(mhc_pattern, na=False)
 
-    if exclude_hla:
-        mask &= ~(df[mhc_allele_column_key].str.contains(exclude_hla, na=False))
+    if exclude_mhc:
+        mask &= ~(mhc.str.contains(exclude_mhc, na=False))
 
-    if assay_group:
-        mask &= df[assay_group_column_key].str.contains(assay_group)
-
-    if assay_method:
-        mask &= df[assay_method_column_key].str.contains(assay_method)
+    if assay_method is not None and assay_method_series is not None:
+        mask &= assay_method_series.str.contains(assay_method, na=False)
 
     if peptide_length:
         assert peptide_length > 0
-        mask &= df[epitope_column_key].str.len() == peptide_length
+        mask &= epitopes.str.len() == peptide_length
 
     df = df[mask]
 

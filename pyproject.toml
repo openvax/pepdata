@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pepdata"
+requires-python = ">=3.9"
+authors = [{name="Alex Rubinsteyn", email="alex.rubinsteyn@mssm.edu"}]
+description = "Immunological peptide datasets and amino acid properties"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+readme = "README.md"
+dynamic = ["version", "dependencies"]
+
+[tool.setuptools.dynamic]
+version = {attr = "pepdata.version.__version__"}
+dependencies = {file = ["requirements.txt"]}
+
+[tool.setuptools.packages.find]
+exclude = ["test", "test.*"]
+
+[project.urls]
+"Homepage" = "https://github.com/openvax/pepdata"
+"Bug Tracker" = "https://github.com/openvax/pepdata/issues"
+
+[tool.ruff.lint]
+select = ["E", "F"]
+ignore = ["F821", "E501", "F841", "E731", "E741", "E722", "E721"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+"test*/*" = ["F401"]

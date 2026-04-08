@@ -15,8 +15,6 @@
 Quantify amino acids by their physical/chemical properties
 """
 
-from __future__ import print_function, division, absolute_import
-
 import numpy as np
 
 from .amino_acid import AminoAcid

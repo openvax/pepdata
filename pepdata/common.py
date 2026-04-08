@@ -13,8 +13,6 @@
 # limitations under the License.
 
 
-from __future__ import print_function, division, absolute_import
-
 import numpy as np
 
 def transform_peptide(peptide, property_dict):

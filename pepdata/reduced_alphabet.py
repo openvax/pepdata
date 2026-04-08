@@ -18,8 +18,6 @@ Amino acid groupings from
 Peterson, Kondev, et al.
 http://www.rpgroup.caltech.edu/publications/Peterson2008.pdf
 """
-from __future__ import print_function, division, absolute_import
-
 def dict_from_list(groups):
     aa_to_group = {}
     for i, group in enumerate(groups):

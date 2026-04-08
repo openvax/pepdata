@@ -10,7 +10,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import print_function, division, absolute_import
 from collections import namedtuple
 import os
 import xml
@@ -63,7 +62,7 @@ def load_alleles():
             continue
         name = name_element.text
 
-        synonyms = set([])
+        synonyms = set()
         for synonym_element in allele.iterfind("Synonyms"):
             for synonym in synonym_element.text.split(","):
                 synonyms.add(synonym.strip())

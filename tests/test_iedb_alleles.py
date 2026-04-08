@@ -11,33 +11,30 @@
 # limitations under the License.
 
 
-from __future__ import print_function, division, absolute_import
-
-from nose.tools import eq_
 
 from pepdata import iedb
 
 def test_iedb_human_class1_allele():
     allele_dict = iedb.alleles.load_alleles_dict()
     allele = allele_dict["HLA-C*07:02"]
-    eq_(allele.mhc_class, "I")
-    eq_(allele.locus, "C")
+    assert allele.mhc_class == "I"
+    assert allele.locus == "C"
 
 def test_iedb_human_class2_allele():
     allele_dict = iedb.alleles.load_alleles_dict()
     allele = allele_dict["HLA-DRA*01:01/DRB1*04:04"]
-    eq_(allele.mhc_class, "II")
-    eq_(allele.locus, "DR")
+    assert allele.mhc_class == "II"
+    assert allele.locus == "DR"
 
 
 def test_iedb_mouse_class1_allele():
     allele_dict = iedb.alleles.load_alleles_dict()
     allele = allele_dict["H-2-Ds"]
-    eq_(allele.mhc_class, "I")
-    eq_(allele.locus, "D")
+    assert allele.mhc_class == "I"
+    assert allele.locus == "D"
 
 def test_iedb_mouse_class2_allele():
     allele_dict = iedb.alleles.load_alleles_dict()
     allele = allele_dict["H-2-IAq"]
-    eq_(allele.mhc_class, "II")
-    eq_(allele.locus, "IA")
+    assert allele.mhc_class == "II"
+    assert allele.locus == "IA"
