@@ -119,6 +119,11 @@ def load_dataframe(
     organism = get_host_name(df)
     assay_method_series = get_assay_method(df)
 
+    if epitopes is None:
+        raise ValueError(
+            "Could not find epitope name column in IEDB T-cell data. "
+            f"Available columns: {list(df.columns)}"
+        )
 
     # Sometimes the IEDB seems to put in an extra comma in the
     # header line, which creates an unnamed column of NaNs.
@@ -126,7 +131,7 @@ def load_dataframe(
     df = df.dropna(axis=1, how="all")
 
     n = len(df)
-    
+
     null_epitope_seq = epitopes.isnull()
     n_null = null_epitope_seq.sum()
 

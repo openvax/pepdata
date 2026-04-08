@@ -47,8 +47,9 @@ def find(df : pd.DataFrame, group_candidates : list[str], column_candidates : li
     
     if len(possible_matches) == 0:
         return None
-    # get the shortest matches
-    
+    # get the shortest match
+    best = min(possible_matches, key=lambda p: len(p[0]) + len(p[1]))
+    return df[best]
 
 
 MHC_GROUP_CANDIDATES : list[str] = ["MHC", "MHC Restriction"]
