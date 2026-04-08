@@ -62,8 +62,8 @@ def delete():
 @memoize
 def load_dataframe(
         mhc_class : str | None = None,  # 1, 2, or None for neither
-        mhc_pattern : str | None  = None,
-        exclude_mhc : str | None  = None,
+        hla : str | None  = None,
+        exclude_hla : str | None  = None,
         human_only : bool =False,
         peptide_length : int | None = None,
         assay_method : str | None = None,
@@ -78,10 +78,10 @@ def load_dataframe(
     mhc_class: {None, 1, 2}
         Restrict to MHC Class I or Class II (or None for neither)
 
-    mhc_pattern: regex pattern, optional
+    hla: regex pattern, optional
         Restrict results to specific MHC used in assay
 
-    exclude_mhc: regex pattern, optional
+    exclude_hla: regex pattern, optional
         Exclude certain MHC allele patterns 
 
     human_only: bool
@@ -178,11 +178,11 @@ def load_dataframe(
     #  or
     #  "Class I,allele undetermined"
 
-    if mhc_pattern:
-        mask &= mhc.str.contains(mhc_pattern, na=False)
+    if hla:
+        mask &= mhc.str.contains(hla, na=False)
 
-    if exclude_mhc:
-        mask &= ~(mhc.str.contains(exclude_mhc, na=False))
+    if exclude_hla:
+        mask &= ~(mhc.str.contains(exclude_hla, na=False))
 
     if assay_method is not None and assay_method_series is not None:
         mask &= assay_method_series.str.contains(assay_method, na=False)

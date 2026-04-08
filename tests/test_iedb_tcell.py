@@ -11,6 +11,7 @@
 # limitations under the License.
 
 from pepdata import iedb
+from pepdata.iedb.columns import get_mhc_allele
 
 def test_tcell_hla_restrict_a24():
     """
@@ -37,13 +38,17 @@ def test_tcell_hla_exclude_a0201():
     that allele
     """
     df_all = iedb.tcell.load_dataframe(nrows=1000)
-    assert (df_all['MHC']['Allele Name'] == "HLA-A*02:01").any()
+    mhc_alleles = get_mhc_allele(df_all)
+    assert mhc_alleles is not None, "Could not find MHC allele column"
+    assert (mhc_alleles == "HLA-A*02:01").any()
 
     df_exclude = iedb.tcell.load_dataframe(
         nrows=1000,
         exclude_hla="HLA-A\*02:01")
 
-    n_A0201_entries = (df_exclude['MHC']['Allele Name'] == "HLA-A*02:01").sum()
+    mhc_alleles_filtered = get_mhc_allele(df_exclude)
+    assert mhc_alleles_filtered is not None
+    n_A0201_entries = (mhc_alleles_filtered == "HLA-A*02:01").sum()
     assert n_A0201_entries == 0, \
         ("Not supposed to contain HLA-A*02:01, "
          " but found %d rows of that allele") % n_A0201_entries
