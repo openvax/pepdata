@@ -1,2 +1,1 @@
 recursive-include pepdata/matrices *
-recursive-include pepdata/data *csv

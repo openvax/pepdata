@@ -1,9 +1,3 @@
-<a href="https://travis-ci.org/openvax/pepdata">
-    <img src="https://travis-ci.org/openvax/pepdata.svg?branch=master" alt="Build Status" />
-</a>
-<a href="https://coveralls.io/github/openvax/pepdata?branch=master">
-    <img src="https://coveralls.io/repos/openvax/pepdata/badge.svg?branch=master&service=github" alt="Coverage Status" />
-</a>
 <a href="https://pypi.python.org/pypi/pepdata/">
     <img src="https://img.shields.io/pypi/v/pepdata.svg?maxAge=1000" alt="PyPI" />
 </a>
