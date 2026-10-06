@@ -17,10 +17,3 @@ def patch_iedb_paths(monkeypatch):
         "pepdata.iedb.mhc.local_path",
         lambda auto_download=True: os.path.join(FIXTURES_DIR, "mhc_test_fixture.csv"),
     )
-    # Clear memoize caches so each test gets fresh data from fixtures
-    from pepdata.iedb.tcell import load_dataframe as tcell_load
-    from pepdata.iedb.mhc import load_dataframe as mhc_load
-    if hasattr(tcell_load, '__wrapped__'):
-        pass  # functools.wraps doesn't expose the cache
-    # The memoize decorator stores in a closure dict — simplest to just
-    # not worry about it since tests use nrows= which varies the cache key

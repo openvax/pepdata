@@ -1,0 +1,8 @@
+Epitope,MHC Restriction,MHC Restriction,Host,Assay
+Name,Name,Class,Name,Method
+ACDEFGHIK,HLA-A2,I,Homo sapiens,synthetic
+ACDEFGHIL,HLA-A*02:01,I,Homo sapiens,synthetic
+ACDEFGHIM,HLA-A24,I,Homo sapiens,synthetic
+ACDEFGHIN,HLA-A*24:02,I,Homo sapiens,synthetic
+ACDEFGHIP,HLA-B*07:02,I,Homo sapiens,synthetic
+ACDEFGHIQ,H2-Kb,I,Mus musculus,synthetic
