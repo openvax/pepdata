@@ -2,7 +2,7 @@
 
 Look up shipped amino-acid properties and pairwise matrices, encode peptide
 sequences, or load peptide assay tables from IEDB. Property lookups work offline;
-IEDB acquisition requires a download and has separate assay filters.
+IEDB tables require a download.
 
 ## Install
 
@@ -42,9 +42,10 @@ letter raises `KeyError`.
 | MHC-binding assay tables | `pepdata.iedb.mhc` |
 | T-cell assay tables | `pepdata.iedb.tcell` |
 
-The property dictionaries are in `amino_acid_properties`, rather than
-`amino_acid`. There is no `StringTransformer` interface in this package.
-
 See [residue and pairwise tables](guides/properties.md), then
 [peptide features and IEDB tables](guides/datasets.md). The
 [API reference](reference.md) follows those same tasks.
+
+Older pepdata documentation placed the property tables in `amino_acid` and
+described a `StringTransformer` interface. The property dictionaries are
+in `amino_acid_properties`, and there is no `StringTransformer` class.
