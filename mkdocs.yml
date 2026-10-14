@@ -1,0 +1,53 @@
+site_name: pepdata
+site_description: Residue properties, peptide features and IEDB assay tables
+site_url: https://openvax.github.io/pepdata/
+repo_url: https://github.com/openvax/pepdata
+repo_name: openvax/pepdata
+edit_uri: edit/master/docs/
+strict: true
+theme:
+  name: material
+  font: false
+  palette:
+    primary: white
+    accent: blue
+  features:
+  - navigation.indexes
+  - navigation.expand
+  - content.code.copy
+validation:
+  links:
+    not_found: warn
+    unrecognized_links: warn
+    anchors: warn
+plugins:
+- search
+- mkdocstrings:
+    handlers:
+      python:
+        paths:
+        - .
+        options:
+          docstring_style: numpy
+          show_root_heading: true
+          show_root_full_path: false
+          show_source: false
+          separate_signature: true
+          heading_level: 2
+          docstring_section_style: list
+          members_order: source
+markdown_extensions:
+- tables
+- toc:
+    permalink: true
+- pymdownx.superfences
+extra_css:
+- stylesheets/docs.css
+nav:
+- Home: index.md
+- Common tasks:
+  - Residue and pairwise tables: guides/properties.md
+  - Peptide features and IEDB tables: guides/datasets.md
+- API reference: reference.md
+- Contributing:
+  - Documentation style: dev/documentation-style.md

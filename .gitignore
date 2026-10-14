@@ -38,3 +38,7 @@ nosetests.xml
 *.csv
 *.fa
 *.faa
+site/
+
+# Small synthetic fixtures required by the offline tests.
+!tests/data/*_test_fixture.csv

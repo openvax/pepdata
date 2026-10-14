@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Synthetic parser fixture, not a downloaded IEDB catalogue. -->
+<MhcAlleleNames>
+  <MhcAlleleName>
+    <DisplayedRestriction>HLA-C*07:02</DisplayedRestriction>
+    <Class>I</Class>
+    <Locus>C</Locus>
+    <Organsim>Homo sapiens</Organsim>
+    <Synonyms>HLA-Cw7</Synonyms>
+  </MhcAlleleName>
+  <MhcAlleleName>
+    <DisplayedRestriction>HLA-DRA*01:01/DRB1*04:04</DisplayedRestriction>
+    <Class>II</Class>
+    <Locus>DR</Locus>
+    <Organsim>Homo sapiens</Organsim>
+  </MhcAlleleName>
+  <MhcAlleleName>
+    <DisplayedRestriction>H-2-Ds</DisplayedRestriction>
+    <Class>I</Class>
+    <Locus>D</Locus>
+    <Organsim>Mus musculus</Organsim>
+  </MhcAlleleName>
+  <MhcAlleleName>
+    <DisplayedRestriction>H-2-IAq</DisplayedRestriction>
+    <Class>II</Class>
+    <Locus>IA</Locus>
+    <Organsim>Mus musculus</Organsim>
+  </MhcAlleleName>
+</MhcAlleleNames>

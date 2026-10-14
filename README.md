@@ -1,51 +1,54 @@
-<a href="https://travis-ci.org/openvax/pepdata">
-    <img src="https://travis-ci.org/openvax/pepdata.svg?branch=master" alt="Build Status" />
-</a>
-<a href="https://coveralls.io/github/openvax/pepdata?branch=master">
-    <img src="https://coveralls.io/repos/openvax/pepdata/badge.svg?branch=master&service=github" alt="Coverage Status" />
-</a>
-<a href="https://pypi.python.org/pypi/pepdata/">
-    <img src="https://img.shields.io/pypi/v/pepdata.svg?maxAge=1000" alt="PyPI" />
-</a>
+# PepData
 
-PepData
-=======
+Look up shipped amino-acid properties and pairwise matrices, encode peptide
+sequences, or load peptide assay tables from IEDB. Property lookups work offline;
+IEDB acquisition requires a download and has separate assay filters.
 
-Formerly a repository for diverse peptide datasets, now only contains the [Immune Epitope Database](http://www.iedb.org) and a variety of amino acid property matrices. This package
-will probably be eventually split and the IEDB portions placed into something
-named `pyiedb`.
+## Install
 
-**Amino Acid Properties**
+```sh
+python -m pip install pepdata
+```
 
-The `amino_acid` module contains a variety of physical/chemical properties for both single amino residues and interactions between pairs of residues.
+Python 3.9 or later is required.
 
-Single residue feature tables are parsed into `StringTransformer` objects, which can be treated as dictionaries or will vectorize a string when you call their method `transform_string`.
+## Look up a peptide's residue properties
 
-Examples of single residue features:
-- `hydropathy`
-- `volume`
-- `polarity`
-- `pK_side_chain`
-- `prct_exposed_residues`
-- `hydrophilicity`
-- `accessible_surface_area`
-- `refractivity`
-- `local_flexibility`
-- `accessible_surface_area_folded`
-- `alpha_helix_score` (Chou-Fasman)
-- `beta_sheet_score` (Chou-Fasman)
-- `turn_score` (Chou-Fasman)
+```python
+from pepdata.amino_acid_properties import hydropathy
 
-Pairwise interaction tables are parsed into nested dictionaries, so that the interaction between amino acids `x` and `y` can be determined from `d[x][y]`.
+peptide = "ACD"
+print([hydropathy[residue] for residue in peptide])
+```
 
-Pairwise interaction dictionaries:
-- `strand_vs_coil` (and its transpose `coil_vs_strand`)
-- `helix_vs_strand` (and its transpose `strand_vs_helix`)
-- `helix_vs_coil` (and its transpose `coil_vs_helix`)
-- `blosum30`
-- `blosum50`
-- `blosum62`
+```text
+[1.8, 2.5, -3.5]
+```
 
-There is also a function to parse the coefficients of the [PMBEC similarity matrix](http://www.biomedcentral.com/1471-2105/10/394), though this currently lives in the separate `pmbec` module.
+The values come from the shipped residue-property table. The dictionary maps
+single-letter residues to numeric values; it does not predict MHC binding or
+clinical immunogenicity. Use uppercase canonical residue letters. A missing
+letter raises `KeyError`.
 
+## Find the interface you need
 
+| Task | Module or object |
+| --- | --- |
+| Single-residue properties | `pepdata.amino_acid_properties` |
+| BLOSUM substitution matrices | `pepdata.blosum` |
+| PMBEC and contact tables | `pepdata.pmbec`, `pepdata.residue_contact_energies` |
+| Residue alphabets | `pepdata.amino_acid_alphabet`, `pepdata.reduced_alphabet` |
+| N-gram features | `pepdata.PeptideVectorizer` |
+| MHC-binding assay tables | `pepdata.iedb.mhc` |
+| T-cell assay tables | `pepdata.iedb.tcell` |
+
+The property dictionaries are in `amino_acid_properties`, rather than
+`amino_acid`. There is no `StringTransformer` interface in this package.
+
+See [residue and pairwise tables](docs/guides/properties.md), then
+[peptide features and IEDB tables](docs/guides/datasets.md). The
+[API reference](docs/reference.md) follows those same tasks.
+
+## Documentation development
+
+Install `requirements-docs.txt`, run `./docs.sh`, then `python scripts/check_docs_examples.py`.
