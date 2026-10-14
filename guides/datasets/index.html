@@ -628,21 +628,24 @@ sequences using that vocabulary. <code>max_ngram</code> controls the largest n-g
 These are sequence features, not binding predictions.</p>
 <h2 id="load-assay-data">Load assay data<a class="headerlink" href="#load-assay-data" title="Permanent link">&para;</a></h2>
 <p>These templates require network access on the first use and can download large
-IEDB exports. Review the loader's actual filters before interpreting a subset:</p>
+IEDB exports:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pepdata.iedb</span><span class="w"> </span><span class="kn">import</span> <span class="n">mhc</span><span class="p">,</span> <span class="n">tcell</span>
 
 <span class="n">binding_assays</span> <span class="o">=</span> <span class="n">mhc</span><span class="o">.</span><span class="n">load_dataframe</span><span class="p">()</span>
 <span class="n">tcell_assays</span> <span class="o">=</span> <span class="n">tcell</span><span class="o">.</span><span class="n">load_dataframe</span><span class="p">()</span>
 </code></pre></div>
+<p>By default, both loaders keep only peptides made of the 20 standard amino
+acids (<code>only_standard_amino_acids=True</code>). The
+<a href="../../reference/#assay-tables">loader reference</a> lists the other filtering
+arguments, such as <code>mhc_class</code>, <code>hla</code> and <code>human_only</code>.</p>
 <p>The MHC-binding and T-cell tables represent different assays. A positive
 binding measurement is not automatically a positive T-cell response. Preserve
 assay, species and allele metadata when selecting records; the
 <a href="https://www.iedb.org/">IEDB</a> is the upstream data source.</p>
 <p>Each module exposes <code>download(force=False)</code> and <code>local_path(auto_download=True)</code>.
-Use those explicit acquisition interfaces when preparing an environment before
-loading a table. <code>force=True</code> requests a refresh; a cached export is a snapshot
-and does not by itself identify a pinned IEDB release.</p>
-<p>See the <a href="../../reference/#assay-tables">loader reference</a> for filtering arguments.</p>
+Call <code>download()</code> to fetch the export before loading a table, for example when
+preparing an environment. <code>force=True</code> requests a refresh; a cached export is a
+snapshot and does not by itself identify a pinned IEDB release.</p>
 
 
 
