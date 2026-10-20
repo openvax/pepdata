@@ -10,7 +10,7 @@ IEDB tables require a download.
 python -m pip install pepdata
 ```
 
-Python 3.9 or later is required.
+Python 3.11 or later is required.
 
 ## Look up a peptide's residue properties
 
