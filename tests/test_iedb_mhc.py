@@ -12,7 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import pytest
+
 from pepdata import iedb
+
+# Bound at import, before conftest's autouse fixture replaces it with a fixture path.
+original_mhc_local_path = iedb.mhc.local_path
 
 def test_mhc_hla_a2():
     """
@@ -28,3 +33,17 @@ def test_mhc_hla_a2():
     assert len(df_a2_combined) <= len(df_a2_1) + len(df_a2_2), \
         "Expected %d <= %d + %d" % \
         (len(df_a2_combined), len(df_a2_1), len(df_a2_2))
+
+
+def test_mhc_load_dataframe_prints_nothing(capsys):
+    # nrows=999 avoids the memoized results of the other tests.
+    df = iedb.mhc.load_dataframe(nrows=999)
+    assert len(df) > 0
+    assert capsys.readouterr().out == ""
+
+
+def test_mhc_missing_file_error_names_the_download_function(monkeypatch, tmp_path):
+    monkeypatch.setattr(
+        iedb.mhc.cache, "local_path", lambda **kwargs: str(tmp_path / "missing.csv"))
+    with pytest.raises(ValueError, match=r"pepdata\.iedb\.mhc\.download\(\)"):
+        original_mhc_local_path(auto_download=False)
