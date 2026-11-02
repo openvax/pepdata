@@ -1,11 +1,35 @@
 # Peptide features and IEDB tables
 
+This guide covers turning peptides into n-gram count vectors and loading the
+IEDB's MHC-binding and T-cell assay tables, which need a download.
+
 ## N-gram features
 
+```python
+from pepdata import PeptideVectorizer
+
+vectorizer = PeptideVectorizer(max_ngram=2, normalize_row=False)
+counts = vectorizer.fit_transform(["SIINFEKL", "SIINFEKV"])
+print(counts.shape)
+print(vectorizer.transform(["SIINFEKA"]).sum())
+```
+
+```text
+(2, 16)
+13.0
+```
+
 `PeptideVectorizer` fits a vocabulary of residue n-grams, then transforms new
-sequences using that vocabulary. `max_ngram` controls the largest n-gram;
-`normalize_row` selects count normalization. Fit before calling `transform()`.
-These are sequence features, not binding predictions.
+sequences using that vocabulary. `max_ngram` controls the largest n-gram, so
+the two 8-mers above give 16 distinct 1- and 2-grams. `transform()` counts only
+n-grams seen during fitting: `SIINFEKA` has 15, but `A` and `KA` are new.
+Fit before calling `transform()`. These are sequence features, not binding
+predictions.
+
+`normalize_row=True`, the default, divides each row by its total so the
+features are frequencies. On current scikit-learn releases (checked with 1.9)
+that path raises `TypeError: np.matrix is not supported`; pass
+`normalize_row=False` and normalize the counts yourself until it is fixed.
 
 ## Load assay data
 

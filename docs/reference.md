@@ -1,5 +1,8 @@
 # API reference
 
+The modules the guides use, in the same order: residue tables, pairwise
+matrices, peptide features, then the IEDB assay loaders.
+
 ## Residue properties and alphabets
 
 ::: pepdata.amino_acid_properties
