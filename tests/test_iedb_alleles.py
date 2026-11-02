@@ -10,9 +10,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
+import os
+import subprocess
+import sys
 
 from pepdata import iedb
+
+ALLELE_FIXTURE = os.path.join(os.path.dirname(__file__), "data", "alleles_test_fixture.xml")
+
+
+def test_load_alleles_in_a_fresh_interpreter():
+    # pytest itself imports xml.etree, which hid a bare "import xml" in
+    # pepdata.iedb.alleles. Parse in a new interpreter so only pepdata's own
+    # imports are loaded.
+    script = (
+        "import pepdata.iedb.alleles as alleles\n"
+        "alleles.local_path = lambda force_download=False: %r\n"
+        "print(len(alleles.load_alleles()))\n" % ALLELE_FIXTURE
+    )
+    result = subprocess.run(
+        [sys.executable, "-c", script], capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    assert int(result.stdout) > 0
 
 def test_iedb_human_class1_allele():
     allele_dict = iedb.alleles.load_alleles_dict()
