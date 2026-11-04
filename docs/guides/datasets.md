@@ -27,9 +27,8 @@ Fit before calling `transform()`. These are sequence features, not binding
 predictions.
 
 `normalize_row=True`, the default, divides each row by its total so the
-features are frequencies. On current scikit-learn releases (checked with 1.9)
-that path raises `TypeError: np.matrix is not supported`; pass
-`normalize_row=False` and normalize the counts yourself until it is fixed.
+features are frequencies; the example passes `normalize_row=False` to show raw
+counts. Both settings return a NumPy array with one row per sequence.
 
 ## Load assay data
 
