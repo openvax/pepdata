@@ -1,8 +1,16 @@
-# PepData
+[![Tests](https://github.com/openvax/pepdata/actions/workflows/tests.yml/badge.svg?branch=master)](https://github.com/openvax/pepdata/actions/workflows/tests.yml)
+[![Documentation](https://github.com/openvax/pepdata/actions/workflows/documentation.yml/badge.svg?branch=master)](https://openvax.github.io/pepdata/)
+[![PyPI](https://img.shields.io/pypi/v/pepdata.svg)](https://pypi.org/project/pepdata/)
 
-Look up shipped amino-acid properties and pairwise matrices, encode peptide
-sequences, or load peptide assay tables from IEDB. Property lookups work offline;
-IEDB tables require a download.
+# pepdata
+
+pepdata ships amino-acid property tables and pairwise residue matrices
+(BLOSUM, PMBEC, contact energies), turns peptide sequences into n-gram feature
+vectors, and loads MHC-binding and T-cell assay tables from the
+[IEDB](https://www.iedb.org/). It is the [OpenVax](https://github.com/openvax)
+library for peptide-level reference data. It does not predict MHC binding; for
+that, see [mhctools](https://github.com/openvax/mhctools) and
+[mhcflurry](https://github.com/openvax/mhcflurry).
 
 ## Install
 
@@ -10,9 +18,11 @@ IEDB tables require a download.
 python -m pip install pepdata
 ```
 
-Python 3.11 or later is required.
+pepdata needs Python 3.11 or later. Property tables and matrices ship with the
+package and work offline. The IEDB tables are downloaded on first use and
+cached by [datacache](https://github.com/openvax/datacache).
 
-## Look up a peptide's residue properties
+## Quick start
 
 ```python
 from pepdata.amino_acid_properties import hydropathy
@@ -25,12 +35,19 @@ print([hydropathy[residue] for residue in peptide])
 [1.8, 2.5, -3.5]
 ```
 
-The values come from the shipped residue-property table. The dictionary maps
-single-letter residues to numeric values; it does not predict MHC binding or
-clinical immunogenicity. Use uppercase canonical residue letters. A missing
-letter raises `KeyError`.
+Each property table is a dictionary from single-letter residue to value. Use
+uppercase canonical residue letters; a missing letter raises `KeyError`.
 
-## Find the interface you need
+## Documentation
+
+The [documentation](https://openvax.github.io/pepdata/) has two guides and an
+API reference:
+
+1. [Residue and pairwise tables](https://openvax.github.io/pepdata/guides/properties/):
+   property dictionaries, BLOSUM and other matrices, alphabets.
+2. [Peptide features and IEDB tables](https://openvax.github.io/pepdata/guides/datasets/):
+   n-gram vectors and the MHC-binding and T-cell assay loaders.
+3. [API reference](https://openvax.github.io/pepdata/reference/).
 
 | Task | Module or object |
 | --- | --- |
@@ -42,14 +59,17 @@ letter raises `KeyError`.
 | MHC-binding assay tables | `pepdata.iedb.mhc` |
 | T-cell assay tables | `pepdata.iedb.tcell` |
 
-See [residue and pairwise tables](docs/guides/properties.md), then
-[peptide features and IEDB tables](docs/guides/datasets.md). The
-[API reference](docs/reference.md) follows those same tasks.
+## Development
 
-Older pepdata documentation placed the property tables in `amino_acid` and
-described a `StringTransformer` interface. The property dictionaries are
-in `amino_acid_properties`, and there is no `StringTransformer` class.
+```sh
+python -m pip install -e . pytest pytest-cov ruff
+./lint.sh   # ruff check
+./test.sh   # pytest with coverage
+python -m pip install -r requirements-docs.txt
+./docs.sh   # mkdocs build --strict, then a rendered-link check
+python scripts/check_docs_examples.py   # run docs examples, compare output
+```
 
-## Documentation development
+## License
 
-Install `requirements-docs.txt`, run `./docs.sh`, then `python scripts/check_docs_examples.py`.
+Apache 2.0; see [LICENSE.txt](https://github.com/openvax/pepdata/blob/master/LICENSE.txt).
