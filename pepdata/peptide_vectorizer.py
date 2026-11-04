@@ -55,16 +55,31 @@ class PeptideVectorizer(object):
         }
 
     def fit_transform(self, amino_acid_strings):
+        """
+        Learn the n-gram vocabulary of the given sequences and vectorize them.
+
+        Parameters
+        ----------
+        amino_acid_strings : list of str
+            Peptide or protein sequences.
+
+        Returns
+        -------
+        numpy.ndarray
+            Array of shape (len(amino_acid_strings), number of distinct
+            n-grams) with n-gram counts, or per-row frequencies (each row
+            divided by its total) when normalize_row is True.
+        """
         self.count_vectorizer = \
             make_count_vectorizer(self.reduced_alphabet, self.max_ngram)
 
         if self.training_already_reduced:
             c = make_count_vectorizer(None, self.max_ngram)
-            X = c.fit_transform(amino_acid_strings).todense()
+            X = c.fit_transform(amino_acid_strings).toarray()
             self.count_vectorizer.vocabulary_ = c.vocabulary_
         else:
             c = self.count_vectorizer
-            X = c.fit_transform(amino_acid_strings).todense()
+            X = c.fit_transform(amino_acid_strings).toarray()
 
         if self.normalize_row:
             X = normalize(X, norm='l1')
@@ -74,8 +89,24 @@ class PeptideVectorizer(object):
         self.fit_transform(amino_acid_strings)
 
     def transform(self, amino_acid_strings):
+        """
+        Vectorize sequences with the vocabulary learned by fit.
+
+        n-grams that weren't seen during fitting are not counted.
+
+        Parameters
+        ----------
+        amino_acid_strings : list of str
+            Peptide or protein sequences.
+
+        Returns
+        -------
+        numpy.ndarray
+            Array of shape (len(amino_acid_strings), size of the fitted
+            vocabulary), normalized per row as in fit_transform.
+        """
         assert self.count_vectorizer, "Must call 'fit' before 'transform'"
-        X = self.count_vectorizer.transform(amino_acid_strings).todense()
+        X = self.count_vectorizer.transform(amino_acid_strings).toarray()
         if self.normalize_row:
             X = normalize(X, norm='l1')
         return X
