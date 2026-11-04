@@ -42,7 +42,7 @@ def local_path(auto_download=True):
             return download()
         raise ValueError(
             ("MHC data file %s does not exist locally,"
-             " call pepdata.mhc.download() to get a copy from IEDB") % path)
+             " call pepdata.iedb.mhc.download() to get a copy from IEDB") % path)
     return path
 
 def delete():
@@ -107,8 +107,6 @@ def load_dataframe(
     # header line, which creates an unnamed column of NaNs.
     # To deal with this, drop any columns which are all NaN
     df = df.dropna(axis=1, how="all")
-
-    print(df.head())
 
     n = len(df)
 
