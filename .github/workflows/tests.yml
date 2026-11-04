@@ -15,7 +15,7 @@ jobs:
         with:
           python-version: "3.11"
       - run: pip install ruff
-      - run: ruff check pepdata/
+      - run: ./lint.sh
 
   test:
     runs-on: ubuntu-latest
