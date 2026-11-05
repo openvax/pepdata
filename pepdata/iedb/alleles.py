@@ -12,7 +12,7 @@
 
 from collections import namedtuple
 import os
-import xml
+import xml.etree.ElementTree
 
 from .common import cache
 from .memoize import memoize
