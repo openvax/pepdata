@@ -599,6 +599,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="PeptideVectorizer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pepdata.PeptideVectorizer.fit_transform" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fit_transform
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pepdata.PeptideVectorizer.transform" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        transform
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -954,6 +982,34 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="PeptideVectorizer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pepdata.PeptideVectorizer.fit_transform" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fit_transform
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pepdata.PeptideVectorizer.transform" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        transform
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1433,6 +1489,100 @@ H   0.66    0.19    0.15</p>
 
 
 
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="pepdata.PeptideVectorizer.fit_transform" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">fit_transform</span>
+
+
+<a href="#pepdata.PeptideVectorizer.fit_transform" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">fit_transform</span><span class="p">(</span><span class="n">amino_acid_strings</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Learn the n-gram vocabulary of the given sequences and vectorize them.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>amino_acid_strings</code></b>
+              (<code>list of str</code>)
+          –
+          <div class="doc-md-description">
+            <p>Peptide or protein sequences.</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Returns:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+              <code><span title="numpy.ndarray">ndarray</span></code>
+          –
+          <div class="doc-md-description">
+            <p>Array of shape (len(amino_acid_strings), number of distinct
+n-grams) with n-gram counts, or per-row frequencies (each row
+divided by its total) when normalize_row is True.</p>
+          </div>
+        </li>
+    </ul>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="pepdata.PeptideVectorizer.transform" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">transform</span>
+
+
+<a href="#pepdata.PeptideVectorizer.transform" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">transform</span><span class="p">(</span><span class="n">amino_acid_strings</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Vectorize sequences with the vocabulary learned by fit.</p>
+<p>n-grams that weren't seen during fitting are not counted.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>amino_acid_strings</code></b>
+              (<code>list of str</code>)
+          –
+          <div class="doc-md-description">
+            <p>Peptide or protein sequences.</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Returns:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+              <code><span title="numpy.ndarray">ndarray</span></code>
+          –
+          <div class="doc-md-description">
+            <p>Array of shape (len(amino_acid_strings), size of the fitted
+vocabulary), normalized per row as in fit_transform.</p>
+          </div>
+        </li>
+    </ul>
+
+
+    </div>
+
+</div>
 
 
 
