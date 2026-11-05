@@ -621,11 +621,28 @@
 
 
 <h1 id="peptide-features-and-iedb-tables">Peptide features and IEDB tables<a class="headerlink" href="#peptide-features-and-iedb-tables" title="Permanent link">&para;</a></h1>
+<p>This guide covers turning peptides into n-gram count vectors and loading the
+IEDB's MHC-binding and T-cell assay tables, which need a download.</p>
 <h2 id="n-gram-features">N-gram features<a class="headerlink" href="#n-gram-features" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pepdata</span><span class="w"> </span><span class="kn">import</span> <span class="n">PeptideVectorizer</span>
+
+<span class="n">vectorizer</span> <span class="o">=</span> <span class="n">PeptideVectorizer</span><span class="p">(</span><span class="n">max_ngram</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">normalize_row</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">counts</span> <span class="o">=</span> <span class="n">vectorizer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">([</span><span class="s2">"SIINFEKL"</span><span class="p">,</span> <span class="s2">"SIINFEKV"</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">counts</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">vectorizer</span><span class="o">.</span><span class="n">transform</span><span class="p">([</span><span class="s2">"SIINFEKA"</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>(2, 16)
+13.0
+</code></pre></div>
 <p><code>PeptideVectorizer</code> fits a vocabulary of residue n-grams, then transforms new
-sequences using that vocabulary. <code>max_ngram</code> controls the largest n-gram;
-<code>normalize_row</code> selects count normalization. Fit before calling <code>transform()</code>.
-These are sequence features, not binding predictions.</p>
+sequences using that vocabulary. <code>max_ngram</code> controls the largest n-gram, so
+the two 8-mers above give 16 distinct 1- and 2-grams. <code>transform()</code> counts only
+n-grams seen during fitting: <code>SIINFEKA</code> has 15, but <code>A</code> and <code>KA</code> are new.
+Fit before calling <code>transform()</code>. These are sequence features, not binding
+predictions.</p>
+<p><code>normalize_row=True</code>, the default, divides each row by its total so the
+features are frequencies; the example passes <code>normalize_row=False</code> to show raw
+counts. Both settings return a NumPy array with one row per sequence.</p>
 <h2 id="load-assay-data">Load assay data<a class="headerlink" href="#load-assay-data" title="Permanent link">&para;</a></h2>
 <p>These templates require network access on the first use and can download large
 IEDB exports:</p>
