@@ -1,5 +1,9 @@
 # Residue and pairwise tables
 
+This guide shows how to read the property tables and pairwise matrices that
+ship with pepdata, and how to choose a residue alphabet. All of it works
+offline.
+
 ## Read a single-residue property
 
 ```python
