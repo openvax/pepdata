@@ -28,7 +28,7 @@ version = {attr = "pepdata.version.__version__"}
 dependencies = {file = ["requirements.txt"]}
 
 [tool.setuptools.packages.find]
-exclude = ["test", "test.*"]
+include = ["pepdata", "pepdata.*"]
 
 [project.urls]
 "Homepage" = "https://github.com/openvax/pepdata"
