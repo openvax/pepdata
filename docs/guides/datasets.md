@@ -56,3 +56,12 @@ Each module exposes `download(force=False)` and `local_path(auto_download=True)`
 Call `download()` to fetch the export before loading a table, for example when
 preparing an environment. `force=True` requests a refresh; a cached export is a
 snapshot and does not by itself identify a pinned IEDB release.
+
+Each `load_dataframe()` call reads the current local export and returns an
+independent DataFrame. Editing a returned frame does not affect later calls.
+After `download(force=True)`, the next load reads the refreshed file.
+`mhc.delete()` and `tcell.delete()` remove their local exports without network
+access; deleting an absent export is a no-op. A later load downloads it again.
+
+The allele catalogue loaders likewise return fresh lists, dictionaries and
+synonym sets on each call. Network reuse is handled by the on-disk cache.

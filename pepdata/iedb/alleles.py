@@ -11,11 +11,10 @@
 # limitations under the License.
 
 from collections import namedtuple
-import os
+from pathlib import Path
 import xml.etree.ElementTree
 
 from .common import cache
-from .memoize import memoize
 
 ALLELE_XML_FILENAME = "MhcAlleleNames.xml"
 ALLELE_XML_URL = "http://www.iedb.org/doc/MhcAlleleNameList.zip"
@@ -30,12 +29,12 @@ def local_path(force_download=False):
         force=force_download)
 
 def delete():
-    """Deletes local XML file"""
+    """Remove the local XML export; missing files are ignored."""
     path = cache.local_path(
         filename=ALLELE_XML_FILENAME,
         url=ALLELE_XML_URL,
         decompress=ALLELE_XML_DECOMPRESS)
-    os.remove(path)
+    Path(path).unlink(missing_ok=True)
 
 Allele = namedtuple("Allele", [
     "name",
@@ -45,7 +44,6 @@ Allele = namedtuple("Allele", [
     "synonyms"
 ])
 
-@memoize
 def load_alleles():
     """Parses the IEDB MhcAlleleName XML file and returns a list of Allele
     namedtuple objects containing information about that each allele's HLA
@@ -89,7 +87,6 @@ def load_alleles():
         result.append(allele_object)
     return result
 
-@memoize
 def load_alleles_dict():
     """Create a dictionary mapping each unique allele name to a namedtuple
     containing information about that alleles class, locus, species, &c.
