@@ -149,7 +149,7 @@ def peptide_to_short_amino_acid_names(xs):
     return [letter_to_short_name(x) for x in xs]
 
 def dict_to_amino_acid_matrix(d, alphabet=canonical_amino_acids):
-    n_aa = len(d)
+    n_aa = len(alphabet)
     result_matrix = np.zeros((n_aa, n_aa), dtype="float32")
     for i, aa_row in enumerate(alphabet):
         d_row = d[aa_row.letter]

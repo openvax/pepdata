@@ -34,7 +34,9 @@ print(blosum62_dict["A"]["A"])
 4
 ```
 
-The first and second keys select the two residue letters. BLOSUM tables and
+The first and second keys select the two residue letters. The exported NumPy
+matrices are 20 by 20 in `canonical_amino_acid_letters` order; extra symbols in
+the source dictionaries do not add empty rows or columns. BLOSUM tables and
 the other pairwise matrices describe different quantities; consult the
 shipped matrix and its original source before interpreting coefficients.
 

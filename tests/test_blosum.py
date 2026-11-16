@@ -66,3 +66,18 @@ def test_blosum_matrix_matches_dict_in_canonical_order(number):
     for i, x in enumerate(canonical_amino_acid_letters):
         for j, y in enumerate(canonical_amino_acid_letters):
             assert matrix[i, j] == table[x][y]
+
+
+@pytest.mark.parametrize("number", sorted(BLOSUM_TABLES))
+def test_blosum_matrix_has_only_the_requested_alphabet(number):
+    _, matrix = BLOSUM_TABLES[number]
+    assert matrix.shape == (len(canonical_amino_acid_letters),) * 2
+
+
+def test_dict_to_matrix_respects_a_subset_and_its_order():
+    from pepdata.amino_acid import AminoAcid
+    from pepdata.amino_acid_alphabet import dict_to_amino_acid_matrix
+
+    alphabet = [AminoAcid("Cysteine", "Cys", "C"), AminoAcid("Alanine", "Ala", "A")]
+    matrix = dict_to_amino_acid_matrix(blosum62_dict, alphabet=alphabet)
+    assert matrix.tolist() == [[9, 0], [0, 4]]
