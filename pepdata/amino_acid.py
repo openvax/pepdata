@@ -25,7 +25,7 @@ class AminoAcid(object):
         return (
             ("AminoAcid(full_name='%s', short_name='%s', letter='%s', "
              "contains=%s)") % (
-            self.letter, self.full_name, self.short_name, self.contains))
+            self.full_name, self.short_name, self.letter, self.contains))
 
     def __repr__(self):
         return str(self)

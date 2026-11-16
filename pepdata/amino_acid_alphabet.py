@@ -106,9 +106,9 @@ amino_acid_letter_indices = {
 
 
 amino_acid_letter_pairs = [
-    "%s%s" % (x, y)
-    for y in extended_amino_acids
-    for x in extended_amino_acids
+    x + y
+    for y in extended_amino_acid_letters
+    for x in extended_amino_acid_letters
 ]
 
 
@@ -128,7 +128,8 @@ def index_to_short_name(idx):
     return extended_amino_acids[idx].short_name
 
 def index_to_letter(idx):
-    return extended_amino_acids[idx]
+    """Return the one-letter code at an index in the extended alphabet."""
+    return extended_amino_acids[idx].letter
 
 def letter_to_index(x):
     """
@@ -144,7 +145,8 @@ def letter_to_short_name(x):
     return index_to_short_name(letter_to_index(x))
 
 def peptide_to_short_amino_acid_names(xs):
-    return [amino_acid_letter_indices[x] for x in xs]
+    """Return three-letter names in sequence order; unknown letters raise KeyError."""
+    return [letter_to_short_name(x) for x in xs]
 
 def dict_to_amino_acid_matrix(d, alphabet=canonical_amino_acids):
     n_aa = len(d)
