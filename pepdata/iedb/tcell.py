@@ -15,13 +15,13 @@ from __future__ import annotations
 
 import logging
 import os
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
 
 from .alleles import load_alleles_dict
-from .memoize import  memoize
 from .common import  bad_amino_acids, cache
 from .columns import (
     get_assay_method,
@@ -57,9 +57,13 @@ def local_path(auto_download=True):
     return path
 
 def delete():
-    os.remove(local_path())
+    """Remove the local assay export without downloading; missing files are ignored."""
+    path = cache.local_path(
+        filename=TCELL_COMPACT_FILENAME,
+        url=TCELL_COMPACT_URL,
+        decompress=TCELL_COMPACT_DECOMPRESS)
+    Path(path).unlink(missing_ok=True)
 
-@memoize
 def load_dataframe(
         mhc_class : str | None = None,  # 1, 2, or None for neither
         hla : str | None  = None,

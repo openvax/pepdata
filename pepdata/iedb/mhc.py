@@ -14,10 +14,10 @@ from __future__ import annotations
 
 import logging
 import os
+from pathlib import Path
 
 import pandas as pd
 
-from .memoize import  memoize
 from .common import bad_amino_acids, cache
 
 
@@ -46,9 +46,13 @@ def local_path(auto_download=True):
     return path
 
 def delete():
-    os.remove(local_path())
+    """Remove the local assay export without downloading; missing files are ignored."""
+    path = cache.local_path(
+        filename=MHC_LOCAL_FILENAME,
+        url=MHC_URL,
+        decompress=MHC_DECOMPRESS)
+    Path(path).unlink(missing_ok=True)
 
-@memoize
 def load_dataframe(
         mhc_class : int | None = None,  # 1, 2, or None for neither
         hla : str | None = None,
