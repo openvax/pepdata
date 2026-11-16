@@ -665,7 +665,9 @@ interchangeable measurements.</p>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>4
 </code></pre></div>
-<p>The first and second keys select the two residue letters. BLOSUM tables and
+<p>The first and second keys select the two residue letters. The exported NumPy
+matrices are 20 by 20 in <code>canonical_amino_acid_letters</code> order; extra symbols in
+the source dictionaries do not add empty rows or columns. BLOSUM tables and
 the other pairwise matrices describe different quantities; consult the
 shipped matrix and its original source before interpreting coefficients.</p>
 <h2 id="use-alphabets-explicitly">Use alphabets explicitly<a class="headerlink" href="#use-alphabets-explicitly" title="Permanent link">&para;</a></h2>

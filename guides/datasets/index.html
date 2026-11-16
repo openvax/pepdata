@@ -663,6 +663,13 @@ assay, species and allele metadata when selecting records; the
 Call <code>download()</code> to fetch the export before loading a table, for example when
 preparing an environment. <code>force=True</code> requests a refresh; a cached export is a
 snapshot and does not by itself identify a pinned IEDB release.</p>
+<p>Each <code>load_dataframe()</code> call reads the current local export and returns an
+independent DataFrame. Editing a returned frame does not affect later calls.
+After <code>download(force=True)</code>, the next load reads the refreshed file.
+<code>mhc.delete()</code> and <code>tcell.delete()</code> remove their local exports without network
+access; deleting an absent export is a no-op. A later load downloads it again.</p>
+<p>The allele catalogue loaders likewise return fresh lists, dictionaries and
+synonym sets on each call. Network reuse is handled by the on-disk cache.</p>
 
 
 
