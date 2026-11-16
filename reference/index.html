@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
     
     
       
@@ -486,10 +486,32 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#pepdata.amino_acid_alphabet.index_to_letter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        index_to_letter
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#pepdata.amino_acid_alphabet.letter_to_index" class="md-nav__link">
     <span class="md-ellipsis">
       
         letter_to_index
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pepdata.amino_acid_alphabet.peptide_to_short_amino_acid_names" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        peptide_to_short_amino_acid_names
       
     </span>
   </a>
@@ -870,10 +892,32 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#pepdata.amino_acid_alphabet.index_to_letter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        index_to_letter
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#pepdata.amino_acid_alphabet.letter_to_index" class="md-nav__link">
     <span class="md-ellipsis">
       
         letter_to_index
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pepdata.amino_acid_alphabet.peptide_to_short_amino_acid_names" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        peptide_to_short_amino_acid_names
       
     </span>
   </a>
@@ -1228,6 +1272,26 @@ H   0.66    0.19    0.15</p>
 <div class="doc doc-object doc-function">
 
 
+<h3 id="pepdata.amino_acid_alphabet.index_to_letter" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">index_to_letter</span>
+
+
+<a href="#pepdata.amino_acid_alphabet.index_to_letter" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">index_to_letter</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Return the one-letter code at an index in the extended alphabet.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
 <h3 id="pepdata.amino_acid_alphabet.letter_to_index" class="doc doc-heading">
             <span class="doc doc-object-name doc-function-name">letter_to_index</span>
 
@@ -1239,6 +1303,26 @@ H   0.66    0.19    0.15</p>
     <div class="doc doc-contents ">
 
         <p>Convert from an amino acid's letter code to its position index</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="pepdata.amino_acid_alphabet.peptide_to_short_amino_acid_names" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">peptide_to_short_amino_acid_names</span>
+
+
+<a href="#pepdata.amino_acid_alphabet.peptide_to_short_amino_acid_names" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">peptide_to_short_amino_acid_names</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Return three-letter names in sequence order; unknown letters raise KeyError.</p>
 
 
     </div>
@@ -1524,7 +1608,7 @@ H   0.66    0.19    0.15</p>
 <p><span class="doc-section-title">Returns:</span></p>
     <ul>
         <li class="doc-section-item field-body">
-              <code><span title="numpy.ndarray">ndarray</span></code>
+              <code>ndarray</code>
           –
           <div class="doc-md-description">
             <p>Array of shape (len(amino_acid_strings), number of distinct
@@ -1572,7 +1656,7 @@ divided by its total) when normalize_row is True.</p>
 <p><span class="doc-section-title">Returns:</span></p>
     <ul>
         <li class="doc-section-item field-body">
-              <code><span title="numpy.ndarray">ndarray</span></code>
+              <code>ndarray</code>
           –
           <div class="doc-md-description">
             <p>Array of shape (len(amino_acid_strings), size of the fitted
@@ -1960,7 +2044,7 @@ the core 20, such as X or U (default = True)</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.indexes", "navigation.expand", "content.code.copy"], "search": "../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.c21346df.min.js"></script>
+      <script src="../assets/javascripts/bundle.a5f9d56c.min.js"></script>
       
     
   </body>
