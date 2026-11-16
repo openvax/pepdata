@@ -70,6 +70,10 @@ python -m pip install -r requirements-docs.txt
 python scripts/check_docs_examples.py   # run docs examples, compare output
 ```
 
+The development installer uses `python` from the active environment. Set
+`PYTHON=/path/to/python ./develop.sh` to select an interpreter explicitly;
+additional arguments are passed to pip.
+
 ## License
 
 Apache 2.0; see [LICENSE.txt](https://github.com/openvax/pepdata/blob/master/LICENSE.txt).
