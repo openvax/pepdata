@@ -1681,7 +1681,9 @@ divided by its total) when normalize_row is True.</p>
     <div class="doc doc-contents ">
 
         <p>Vectorize sequences with the vocabulary learned by fit.</p>
-<p>n-grams that weren't seen during fitting are not counted.</p>
+<p>n-grams that weren't seen during fitting are not counted.
+Input sequences are unreduced, even when training_already_reduced was
+used during fitting.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
