@@ -12,3 +12,11 @@ without downloading the full assay tables.
 parser tests, covering human and mouse class I and II labels. It retains the
 parser's historical `Organsim` field spelling. It is not an IEDB download and
 does not validate the current live catalogue or its availability.
+
+## BLOSUM50 reference
+
+`ncbi_BLOSUM50.txt` is the NCBI BLAST reference matrix downloaded from
+https://ftp.ncbi.nih.gov/blast/matrices/BLOSUM50 on 2026-11-17.
+SHA-256: `a152e30b8afcab42281ff8604bc51358be98253155fde62ae20707805a0d3d67`.
+Tests compare all 400 canonical-residue entries against this independent
+reference; ambiguity symbols are outside this regression.
