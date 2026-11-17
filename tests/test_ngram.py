@@ -18,6 +18,7 @@ import numpy as np
 import pytest
 
 from pepdata import PeptideVectorizer
+from pepdata.peptide_vectorizer import make_count_vectorizer
 from pepdata.reduced_alphabet import hp2
 
 # isoforms of two different proteins a, b
@@ -117,3 +118,37 @@ def test_pickled_vectorizer_transforms_identically():
     vectorizer.fit(A)
     restored = pickle.loads(pickle.dumps(vectorizer))
     np.testing.assert_allclose(restored.transform(B), vectorizer.transform(B))
+
+
+@pytest.mark.parametrize("max_ngram", [1, 2])
+@pytest.mark.parametrize("normalize_row", [False, True])
+def test_already_reduced_training_matches_raw_transform(max_ngram, normalize_row):
+    sequences = ["SIINFEKL", "GILGFVFTL"]
+    reduced = ["".join(hp2[r] for r in sequence) for sequence in sequences]
+    vectorizer = PeptideVectorizer(
+        max_ngram=max_ngram, reduced_alphabet=hp2,
+        training_already_reduced=True, normalize_row=normalize_row)
+    expected = vectorizer.fit_transform(reduced)
+    assert expected.sum() > 0
+    vocabulary = dict(vectorizer.count_vectorizer.vocabulary_)
+    np.testing.assert_allclose(vectorizer.transform(sequences), expected)
+    restored = pickle.loads(pickle.dumps(vectorizer))
+    np.testing.assert_allclose(restored.transform(sequences), expected)
+    assert restored.count_vectorizer.vocabulary_ == vocabulary
+
+
+def test_legacy_reduced_vectorizer_preserves_lowercase_feature_columns():
+    sequences = ["SIINFEKL", "GILGFVFTL"]
+    reduced = ["".join(hp2[r] for r in sequence) for sequence in sequences]
+    fitted = make_count_vectorizer(None, 2)
+    expected = fitted.fit_transform(reduced).toarray()
+    legacy = PeptideVectorizer(
+        max_ngram=2, reduced_alphabet=hp2,
+        training_already_reduced=True, normalize_row=False)
+    legacy.count_vectorizer = make_count_vectorizer(hp2, 2)
+    legacy.count_vectorizer.vocabulary_ = fitted.vocabulary_
+    original_preprocessor = legacy.count_vectorizer.preprocessor
+    vocabulary = dict(fitted.vocabulary_)
+    np.testing.assert_array_equal(legacy.transform(sequences), expected)
+    assert legacy.count_vectorizer.preprocessor is original_preprocessor
+    assert legacy.count_vectorizer.vocabulary_ == vocabulary

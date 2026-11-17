@@ -13,6 +13,8 @@
 # limitations under the License.
 
 
+from copy import copy
+
 import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.preprocessing import normalize
@@ -70,16 +72,12 @@ class PeptideVectorizer(object):
             n-grams) with n-gram counts, or per-row frequencies (each row
             divided by its total) when normalize_row is True.
         """
-        self.count_vectorizer = \
-            make_count_vectorizer(self.reduced_alphabet, self.max_ngram)
-
-        if self.training_already_reduced:
-            c = make_count_vectorizer(None, self.max_ngram)
-            X = c.fit_transform(amino_acid_strings).toarray()
-            self.count_vectorizer.vocabulary_ = c.vocabulary_
-        else:
-            c = self.count_vectorizer
-            X = c.fit_transform(amino_acid_strings).toarray()
+        # Already-reduced training must use the same tokenization later used
+        # for reduced transform input. Keep its existing lowercase vocabulary
+        # and feature-column order, including in saved vectorizers.
+        alphabet = None if self.training_already_reduced else self.reduced_alphabet
+        self.count_vectorizer = make_count_vectorizer(alphabet, self.max_ngram)
+        X = self.count_vectorizer.fit_transform(amino_acid_strings).toarray()
 
         if self.normalize_row:
             X = normalize(X, norm='l1')
@@ -93,6 +91,8 @@ class PeptideVectorizer(object):
         Vectorize sequences with the vocabulary learned by fit.
 
         n-grams that weren't seen during fitting are not counted.
+        Input sequences are unreduced, even when training_already_reduced was
+        used during fitting.
 
         Parameters
         ----------
@@ -106,7 +106,20 @@ class PeptideVectorizer(object):
             vocabulary), normalized per row as in fit_transform.
         """
         assert self.count_vectorizer, "Must call 'fit' before 'transform'"
-        X = self.count_vectorizer.transform(amino_acid_strings).toarray()
+        vectorizer = self.count_vectorizer
+        if self.training_already_reduced:
+            if self.reduced_alphabet is not None:
+                amino_acid_strings = [
+                    "".join(self.reduced_alphabet[residue] for residue in sequence)
+                    for sequence in amino_acid_strings
+                ]
+            # Older saved models attached the raw-sequence preprocessor to a
+            # lowercase vocabulary fitted by a different CountVectorizer.
+            # Preserve that vocabulary without reducing twice or mutating it.
+            if vectorizer.preprocessor is not None:
+                vectorizer = copy(vectorizer)
+                vectorizer.preprocessor = None
+        X = vectorizer.transform(amino_acid_strings).toarray()
         if self.normalize_row:
             X = normalize(X, norm='l1')
         return X
