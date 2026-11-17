@@ -17,6 +17,8 @@ does not validate the current live catalogue or its availability.
 
 `ncbi_BLOSUM50.txt` is the NCBI BLAST reference matrix downloaded from
 https://ftp.ncbi.nih.gov/blast/matrices/BLOSUM50 on 2026-11-17.
-SHA-256: `a152e30b8afcab42281ff8604bc51358be98253155fde62ae20707805a0d3d67`.
+Upstream SHA-256: `a152e30b8afcab42281ff8604bc51358be98253155fde62ae20707805a0d3d67`.
+The stored fixture removes trailing whitespace only; its SHA-256 is
+`3b704698f758c1c1a435a4fb0fb5e28090abe829c0c2095897dc81047ac8b001`.
 Tests compare all 400 canonical-residue entries against this independent
 reference; ambiguity symbols are outside this regression.
