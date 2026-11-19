@@ -14,3 +14,13 @@ is accepted and ignored.
 
 No table value changes: every public dictionary and matrix is compared with a
 snapshot captured from 1.3.7.
+
+The deprecated wrappers read every shipped file exactly as before, but they
+are stricter than 1.3.7 on inputs no shipped file has. They now raise
+`ValueError` for a header with a multi-character token, for repeated row or
+column labels (the last one used to win), for a header-only table (formerly
+`{}`), and for an `amino_acid_order` longer than 20 letters or with a repeated
+letter. An unknown `key_type` and empty input also raise `ValueError` rather
+than `AssertionError` or `IndexError`. Tab-delimited tables and indented `#`
+comments are now accepted. `rekey_pairwise_table` exists only to support the
+deprecated `key_type` argument and will be removed with the wrappers.
