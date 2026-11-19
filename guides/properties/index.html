@@ -394,6 +394,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#read-a-pairwise-table-from-a-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Read a pairwise table from a file
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#use-alphabets-explicitly" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -612,6 +623,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#read-a-pairwise-table-from-a-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Read a pairwise table from a file
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#use-alphabets-explicitly" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -670,6 +692,32 @@ matrices are 20 by 20 in <code>canonical_amino_acid_letters</code> order; extra 
 the source dictionaries do not add empty rows or columns. BLOSUM tables and
 the other pairwise matrices describe different quantities; consult the
 shipped matrix and its original source before interpreting coefficients.</p>
+<h2 id="read-a-pairwise-table-from-a-file">Read a pairwise table from a file<a class="headerlink" href="#read-a-pairwise-table-from-a-file" title="Permanent link">&para;</a></h2>
+<p><code>read_pairwise_table</code> is the parser behind every shipped pairwise matrix. A
+table with a header line of column labels and a label at the start of each row
+needs only its path:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">os.path</span><span class="w"> </span><span class="kn">import</span> <span class="n">join</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pepdata.pairwise_table</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_pairwise_table</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pepdata.static_data</span><span class="w"> </span><span class="kn">import</span> <span class="n">MATRIX_DIR</span>
+
+<span class="n">blosum62</span> <span class="o">=</span> <span class="n">read_pairwise_table</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">MATRIX_DIR</span><span class="p">,</span> <span class="s2">"BLOSUM62"</span><span class="p">),</span> <span class="n">coeff_type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">blosum62</span><span class="p">[</span><span class="s2">"W"</span><span class="p">][</span><span class="s2">"W"</span><span class="p">])</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>11
+</code></pre></div>
+<p>The residue contact energy tables have neither a header nor row labels, so
+pass the residue order as <code>column_order</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="n">contact</span> <span class="o">=</span> <span class="n">read_pairwise_table</span><span class="p">(</span>
+    <span class="n">join</span><span class="p">(</span><span class="n">MATRIX_DIR</span><span class="p">,</span> <span class="s2">"helix_vs_coil.txt"</span><span class="p">),</span>
+    <span class="n">column_order</span><span class="o">=</span><span class="s2">"ARNDCQEGHILKMFPSTWYV"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">contact</span><span class="p">[</span><span class="s2">"A"</span><span class="p">][</span><span class="s2">"R"</span><span class="p">])</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>1.17
+</code></pre></div>
+<p>Malformed tables raise <code>ValueError</code>. The older <code>parse_blosum_table</code>,
+<code>read_pmbec_coefficients</code> and <code>parse_interaction_table</code> still work but emit a
+<code>DeprecationWarning</code> and will be removed in a future release.</p>
 <h2 id="use-alphabets-explicitly">Use alphabets explicitly<a class="headerlink" href="#use-alphabets-explicitly" title="Permanent link">&para;</a></h2>
 <p><code>canonical_amino_acid_letters</code> describes the standard residue alphabet.
 Extended and reduced alphabets are separate interfaces: do not assume every

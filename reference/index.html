@@ -535,6 +535,56 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#pepdata.pairwise_table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pairwise_table
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="pairwise_table">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pepdata.pairwise_table.parse_pairwise_table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        parse_pairwise_table
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pepdata.pairwise_table.read_pairwise_table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read_pairwise_table
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pepdata.pairwise_table.rekey_pairwise_table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        rekey_pairwise_table
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#pepdata.blosum" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -598,6 +648,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="residue_contact_energies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pepdata.residue_contact_energies.parse_interaction_table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        parse_interaction_table
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -963,6 +1030,56 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#pepdata.pairwise_table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pairwise_table
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="pairwise_table">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pepdata.pairwise_table.parse_pairwise_table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        parse_pairwise_table
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pepdata.pairwise_table.read_pairwise_table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read_pairwise_table
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pepdata.pairwise_table.rekey_pairwise_table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        rekey_pairwise_table
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#pepdata.blosum" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1026,6 +1143,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="residue_contact_energies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pepdata.residue_contact_energies.parse_interaction_table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        parse_interaction_table
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1386,6 +1520,284 @@ H   0.66    0.19    0.15</p>
 
 
 
+<h2 id="pepdata.pairwise_table" class="doc doc-heading">
+            <span class="doc doc-object-name doc-module-name">pairwise_table</span>
+
+
+<a href="#pepdata.pairwise_table" class="headerlink" title="Permanent link">&para;</a></h2>
+
+    <div class="doc doc-contents first">
+
+        <p>Read whitespace-delimited tables of amino-acid pair coefficients.</p>
+<p>One parser serves the BLOSUM substitution matrices, the PMBEC matrix and the
+residue contact energy tables that ship in <code>pepdata/matrices</code>.</p>
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="pepdata.pairwise_table.parse_pairwise_table" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">parse_pairwise_table</span>
+
+
+<a href="#pepdata.pairwise_table.parse_pairwise_table" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">parse_pairwise_table</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">column_order</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">coeff_type</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Parse the text of a table of pairwise amino-acid coefficients.</p>
+<p>Blank lines and lines starting with <code>#</code> are ignored.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>text</code></b>
+              (<code><span title="str">str</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>Contents of the table.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>column_order</code></b>
+              (<code>sequence of str</code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>Residue labels of a table that has no header line and no row labels,
+such as the residue contact energy tables. The same labels name the
+rows and the columns, so the table must be square. When omitted, the
+first line holds the column labels and every later line starts with
+its row label.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>coeff_type</code></b>
+              (<code><span title="callable">callable</span></code>, default:
+                  <code>float</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>Converts each coefficient string to a number, e.g. <code>int</code> for
+BLOSUM scores.</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Returns:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+              <code>dict of str to dict of str to number</code>
+          –
+          <div class="doc-md-description">
+            <p>Coefficients accessed like <code>table[row_label][column_label]</code>.</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+              <code><span title="ValueError">ValueError</span></code>
+            –
+          <div class="doc-md-description">
+            <p>If the table is empty, a label is repeated, a row has the wrong
+number of fields, or a coefficient is not a number.</p>
+          </div>
+        </li>
+    </ul>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="pepdata.pairwise_table.read_pairwise_table" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">read_pairwise_table</span>
+
+
+<a href="#pepdata.pairwise_table.read_pairwise_table" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">read_pairwise_table</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">column_order</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">coeff_type</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Read a file holding a table of pairwise amino-acid coefficients.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>path</code></b>
+              (<code><span title="str">str</span> or path - like</code>)
+          –
+          <div class="doc-md-description">
+            <p>Location of the table.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>column_order</code></b>
+              (<code>sequence of str</code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>Residue labels of a table without a header line or row labels; see
+<code>parse_pairwise_table</code>.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>coeff_type</code></b>
+              (<code><span title="callable">callable</span></code>, default:
+                  <code>float</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>Converts each coefficient string to a number.</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Returns:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+              <code>dict of str to dict of str to number</code>
+          –
+          <div class="doc-md-description">
+            <p>Coefficients accessed like <code>table[row_label][column_label]</code>.</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+              <code><span title="ValueError">ValueError</span></code>
+            –
+          <div class="doc-md-description">
+            <p>If the table is malformed; see <code>parse_pairwise_table</code>.</p>
+          </div>
+        </li>
+    </ul>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="pepdata.pairwise_table.rekey_pairwise_table" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">rekey_pairwise_table</span>
+
+
+<a href="#pepdata.pairwise_table.rekey_pairwise_table" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">rekey_pairwise_table</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">key_type</span><span class="o">=</span><span class="s1">'row'</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Convert a nested pairwise table to one of the legacy key layouts.</p>
+<p>Exists to support the deprecated <code>key_type</code> argument of
+<code>pepdata.blosum.parse_blosum_table</code> and
+<code>pepdata.pmbec.read_pmbec_coefficients</code>.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>table</code></b>
+              (<code>dict of str to dict of str to number</code>)
+          –
+          <div class="doc-md-description">
+            <p>Coefficients accessed like <code>table[row_label][column_label]</code>.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>key_type</code></b>
+              (<code>(row, pair, pair_string)</code>, default:
+                  <code>&#39;row&#39;</code>
+)
+          –
+          <div class="doc-md-description">
+            <p><code>'row'</code> returns the nested layout unchanged, <code>'pair'</code> keys each
+coefficient by a <code>(row_label, column_label)</code> tuple and
+<code>'pair_string'</code> by the two labels joined into one string.</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Returns:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+              <code><span title="dict">dict</span></code>
+          –
+          <div class="doc-md-description">
+            <p>The coefficients in the requested layout.</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+              <code><span title="ValueError">ValueError</span></code>
+            –
+          <div class="doc-md-description">
+            <p>If <code>key_type</code> is not one of the three layouts.</p>
+          </div>
+        </li>
+    </ul>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
 <h2 id="pepdata.blosum" class="doc doc-heading">
             <span class="doc doc-object-name doc-module-name">blosum</span>
 
@@ -1428,6 +1840,69 @@ H   0.66    0.19    0.15</p>
     <div class="doc doc-contents ">
 
         <p>Parse a table of pairwise amino acid coefficient (e.g. BLOSUM50)</p>
+<p>Deprecated since 1.3.8: use
+<code>pepdata.pairwise_table.parse_pairwise_table</code> or
+<code>pepdata.pairwise_table.read_pairwise_table</code>. This wrapper will be
+removed in a future release.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>table</code></b>
+              (<code><span title="str">str</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>Contents of a table with a header line of column labels.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>coeff_type</code></b>
+              (<code><span title="callable">callable</span></code>, default:
+                  <code>int</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>Converts each coefficient string to a number.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>key_type</code></b>
+              (<code>(row, pair, pair_string)</code>, default:
+                  <code>&#39;row&#39;</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>Layout of the returned dictionary; see
+<code>pepdata.pairwise_table.rekey_pairwise_table</code>.</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Returns:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+              <code><span title="dict">dict</span></code>
+          –
+          <div class="doc-md-description">
+            <p>Coefficients in the requested layout.</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+              <code><span title="ValueError">ValueError</span></code>
+            –
+          <div class="doc-md-description">
+            <p>If the table is malformed, has fewer than 20 column labels, or
+<code>key_type</code> is unknown.</p>
+          </div>
+        </li>
+    </ul>
 
 
     </div>
@@ -1482,25 +1957,19 @@ H   0.66    0.19    0.15</p>
 
 
 <a href="#pepdata.pmbec.read_pmbec_coefficients" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">read_pmbec_coefficients</span><span class="p">(</span><span class="n">key_type</span><span class="o">=</span><span class="s1">'row'</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">join</span><span class="p">(</span><span class="n">MATRIX_DIR</span><span class="p">,</span> <span class="s1">'pmbec.mat'</span><span class="p">))</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">read_pmbec_coefficients</span><span class="p">(</span><span class="n">key_type</span><span class="o">=</span><span class="s1">'row'</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">PMBEC_PATH</span><span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
+        <p>Read the PMBEC coefficient matrix.</p>
+<p>Deprecated since 1.3.8: use
+<code>pepdata.pairwise_table.read_pairwise_table</code>. This wrapper will be
+removed in a future release.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
     <ul>
-        <li class="doc-section-item field-body">
-            <b><code>filename</code></b>
-              (<code><span title="str">str</span></code>, default:
-                  <code><span title="os.path.join">join</span>(<span title="pepdata.static_data.MATRIX_DIR">MATRIX_DIR</span>, &#39;pmbec.mat&#39;)</code>
-)
-          –
-          <div class="doc-md-description">
-            <p>Location of PMBEC coefficient matrix</p>
-          </div>
-        </li>
         <li class="doc-section-item field-body">
             <b><code>key_type</code></b>
               (<code><span title="str">str</span></code>, default:
@@ -1517,11 +1986,47 @@ H   0.66    0.19    0.15</p>
         <li class="doc-section-item field-body">
             <b><code>verbose</code></b>
               (<code><span title="bool">bool</span></code>, default:
-                  <code>True</code>
+                  <code>False</code>
 )
           –
           <div class="doc-md-description">
-            <p>Print rows of matrix as we read them</p>
+            <p>Ignored. Earlier releases printed the header and residue list to
+stdout by default; nothing is printed any more.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>filename</code></b>
+              (<code><span title="str">str</span></code>, default:
+                  <code><span title="pepdata.pmbec.PMBEC_PATH">PMBEC_PATH</span></code>
+)
+          –
+          <div class="doc-md-description">
+            <p>Location of PMBEC coefficient matrix</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Returns:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+              <code><span title="dict">dict</span></code>
+          –
+          <div class="doc-md-description">
+            <p>Coefficients in the requested layout.</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+              <code><span title="ValueError">ValueError</span></code>
+            –
+          <div class="doc-md-description">
+            <p>If the table is malformed, does not have exactly 20 columns, or
+<code>key_type</code> is unknown.</p>
           </div>
         </li>
     </ul>
@@ -1570,6 +2075,77 @@ H   0.66    0.19    0.15</p>
 
 
 
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="pepdata.residue_contact_energies.parse_interaction_table" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">parse_interaction_table</span>
+
+
+<a href="#pepdata.residue_contact_energies.parse_interaction_table" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">parse_interaction_table</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">amino_acid_order</span><span class="o">=</span><span class="n">CONTACT_TABLE_AMINO_ACID_ORDER</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Parse a headerless 20x20 table of residue contact energies.</p>
+<p>Deprecated since 1.3.8: use
+<code>pepdata.pairwise_table.parse_pairwise_table</code> with its <code>column_order</code>
+argument. This wrapper will be removed in a future release.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>table</code></b>
+              (<code><span title="str">str</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>Contents of a table with one row of coefficients per residue.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>amino_acid_order</code></b>
+              (<code><span title="str">str</span></code>, default:
+                  <code><span title="pepdata.residue_contact_energies.CONTACT_TABLE_AMINO_ACID_ORDER">CONTACT_TABLE_AMINO_ACID_ORDER</span></code>
+)
+          –
+          <div class="doc-md-description">
+            <p>Residue letters naming both the rows and the columns.</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Returns:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+              <code>dict of str to dict of str to float</code>
+          –
+          <div class="doc-md-description">
+            <p>Coefficients accessed like <code>d[row_letter][column_letter]</code>.</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+              <code><span title="ValueError">ValueError</span></code>
+            –
+          <div class="doc-md-description">
+            <p>If the table does not have one row per residue or a row has the
+wrong number of coefficients.</p>
+          </div>
+        </li>
+    </ul>
+
+
+    </div>
+
+</div>
 
 
 
