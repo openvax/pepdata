@@ -22,6 +22,29 @@ Each table is a dictionary. Keep the scale and source context with the values
 when using them as features; the numbers from different properties are not
 interchangeable measurements.
 
+These named tables are read from `pepdata/matrices/amino_acid_properties.txt`,
+a copy of the CRASP amino-acid property page that gives a literature citation
+for each of its 36 tables. `crasp_properties` holds all of them, keyed by the
+numbered header in that file:
+
+```python
+from pepdata.amino_acid_properties import crasp_properties
+
+print(len(crasp_properties))
+print(crasp_properties["34. Isoelectric point (Zimmerman et al., 1968)"]["K"])
+print(hydropathy == crasp_properties["19. Hydropathy (Kyte and Doolittle 1982)"])
+```
+
+```text
+36
+9.74
+True
+```
+
+List the available headers with `list(crasp_properties)`, and open the file
+for the citation of each table. The values are transcribed from the CRASP
+page, not checked against the original publications.
+
 ## Read a pairwise coefficient
 
 ```python
