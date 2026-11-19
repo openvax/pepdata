@@ -680,6 +680,23 @@ offline.</p>
 <p>Each table is a dictionary. Keep the scale and source context with the values
 when using them as features; the numbers from different properties are not
 interchangeable measurements.</p>
+<p>These named tables are read from <code>pepdata/matrices/amino_acid_properties.txt</code>,
+a copy of the CRASP amino-acid property page that gives a literature citation
+for each of its 36 tables. <code>crasp_properties</code> holds all of them, keyed by the
+numbered header in that file:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pepdata.amino_acid_properties</span><span class="w"> </span><span class="kn">import</span> <span class="n">crasp_properties</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">crasp_properties</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">crasp_properties</span><span class="p">[</span><span class="s2">"34. Isoelectric point (Zimmerman et al., 1968)"</span><span class="p">][</span><span class="s2">"K"</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">hydropathy</span> <span class="o">==</span> <span class="n">crasp_properties</span><span class="p">[</span><span class="s2">"19. Hydropathy (Kyte and Doolittle 1982)"</span><span class="p">])</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>36
+9.74
+True
+</code></pre></div>
+<p>List the available headers with <code>list(crasp_properties)</code>, and open the file
+for the citation of each table. The values are transcribed from the CRASP
+page, not checked against the original publications.</p>
 <h2 id="read-a-pairwise-coefficient">Read a pairwise coefficient<a class="headerlink" href="#read-a-pairwise-coefficient" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pepdata.blosum</span><span class="w"> </span><span class="kn">import</span> <span class="n">blosum62_dict</span>
 

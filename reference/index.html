@@ -468,6 +468,28 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#pepdata.amino_acid_properties.parse_property_table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        parse_property_table
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pepdata.amino_acid_properties.read_crasp_properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read_crasp_properties
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -963,6 +985,28 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#pepdata.amino_acid_properties.parse_property_table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        parse_property_table
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pepdata.amino_acid_properties.read_crasp_properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        read_crasp_properties
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1340,6 +1384,8 @@ matrices, peptide features, then the IEDB assay loaders.</p>
 
     <div class="doc doc-contents first">
 
+        <p>Quantify amino acids by their physical/chemical properties</p>
+
 
 
 
@@ -1370,7 +1416,7 @@ matrices, peptide features, then the IEDB assay loaders.</p>
   </span>
 
 <a href="#pepdata.amino_acid_properties.mass" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="n">mass</span> <span class="o">=</span> <span class="n">parse_property_table</span><span class="p">(</span><span class="s1">'</span><span class="se">\n</span><span class="s1">70.079 A ALA</span><span class="se">\n</span><span class="s1">156.188 R ARG</span><span class="se">\n</span><span class="s1">114.104 N ASN</span><span class="se">\n</span><span class="s1">115.089 D ASP</span><span class="se">\n</span><span class="s1">103.144 C CYS</span><span class="se">\n</span><span class="s1">128.131 Q GLN</span><span class="se">\n</span><span class="s1">129.116 E GLU</span><span class="se">\n</span><span class="s1">57.052 G GLY</span><span class="se">\n</span><span class="s1">137.142 H HIS</span><span class="se">\n</span><span class="s1">113.160 I ILE</span><span class="se">\n</span><span class="s1">113.160 L LEU</span><span class="se">\n</span><span class="s1">128.174 K LYS</span><span class="se">\n</span><span class="s1">131.198 M MET</span><span class="se">\n</span><span class="s1">147.177 F PHE</span><span class="se">\n</span><span class="s1">97.177 P PRO</span><span class="se">\n</span><span class="s1">87.078 S SER</span><span class="se">\n</span><span class="s1">101.105 T THR</span><span class="se">\n</span><span class="s1">186.213 W TRP</span><span class="se">\n</span><span class="s1">163.170 Y TYR</span><span class="se">\n</span><span class="s1">99.133 V VAL</span><span class="se">\n</span><span class="s1">'</span><span class="p">)</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">mass</span> <span class="o">=</span> <span class="n">crasp_properties</span><span class="p">[</span><span class="s1">'33. Average isotopic mass (Biemann, 1990)'</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -1404,6 +1450,132 @@ H   0.66    0.19    0.15</p>
 
 
 
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="pepdata.amino_acid_properties.parse_property_table" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">parse_property_table</span>
+
+
+<a href="#pepdata.amino_acid_properties.parse_property_table" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">parse_property_table</span><span class="p">(</span><span class="n">table_string</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Parse lines like <code>1.80000 A ALA</code> into a residue property dictionary.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>table_string</code></b>
+              (<code><span title="str">str</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>One line per residue: the value, the one-letter code and, optionally,
+further fields that are ignored. Blank lines are skipped.</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Returns:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+              <code>dict of str to float</code>
+          –
+          <div class="doc-md-description">
+            <p>Property value for each one-letter residue code, in line order.</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+              <code><span title="ValueError">ValueError</span></code>
+            –
+          <div class="doc-md-description">
+            <p>If a line has fewer than two fields, a value is not a number, or a
+residue is repeated.</p>
+          </div>
+        </li>
+    </ul>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="pepdata.amino_acid_properties.read_crasp_properties" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">read_crasp_properties</span>
+
+
+<a href="#pepdata.amino_acid_properties.read_crasp_properties" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">read_crasp_properties</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">CRASP_PROPERTIES_PATH</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Read every table of the CRASP amino-acid property file.</p>
+<p>The file is a sequence of blocks separated by blank lines. Each block is
+a numbered header such as <code>19. Hydropathy (Kyte and Doolittle 1982)</code>, a
+line with the literature citation, and one <code>value letter code</code> line per
+canonical residue. Blocks without a numbered header, such as the source
+URL on the first line, are skipped.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>path</code></b>
+              (<code><span title="str">str</span> or path - like</code>, default:
+                  <code><span title="pepdata.amino_acid_properties.CRASP_PROPERTIES_PATH">CRASP_PROPERTIES_PATH</span></code>
+)
+          –
+          <div class="doc-md-description">
+            <p>Location of the property file; defaults to the copy shipped with
+pepdata.</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Returns:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+              <code>dict of str to dict of str to float</code>
+          –
+          <div class="doc-md-description">
+            <p>Residue property dictionaries keyed by their header, written as
+<code>"&lt;number&gt;. &lt;title&gt;"</code> with a single space after the period.</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+              <code><span title="ValueError">ValueError</span></code>
+            –
+          <div class="doc-md-description">
+            <p>If a header is repeated, a table is malformed, or a table does not
+cover exactly the 20 canonical residues.</p>
+          </div>
+        </li>
+    </ul>
+
+
+    </div>
+
+</div>
 
 
 
