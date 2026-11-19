@@ -10,11 +10,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .amino_acid_alphabet import letter_to_index
-
 """
 Quantify amino acids by their physical/chemical properties
 """
+
+import re
+from os.path import join
+
+from .amino_acid_alphabet import canonical_amino_acid_letters, letter_to_index
+from .static_data import MATRIX_DIR
+
+# Copy of the CRASP amino-acid property page,
+# http://www.sgi.sscc.ru/mgs/programs/crasp/texts/AA_Properties.htm
+CRASP_PROPERTIES_PATH = join(MATRIX_DIR, "amino_acid_properties.txt")
 
 
 def aa_dict_to_positional_list(aa_property_dict):
@@ -28,278 +36,131 @@ def aa_dict_to_positional_list(aa_property_dict):
         "Missing amino acids in:\n%s" % aa_property_dict.keys()
     return value_list
 
+
 def parse_property_table(table_string):
+    """
+    Parse lines like `1.80000 A ALA` into a residue property dictionary.
+
+    Parameters
+    ----------
+    table_string : str
+        One line per residue: the value, the one-letter code and, optionally,
+        further fields that are ignored. Blank lines are skipped.
+
+    Returns
+    -------
+    dict of str to float
+        Property value for each one-letter residue code, in line order.
+
+    Raises
+    ------
+    ValueError
+        If a line has fewer than two fields, a value is not a number, or a
+        residue is repeated.
+    """
     value_dict = {}
     for line in table_string.splitlines():
-        line = line.strip()
-        if not line:
+        fields = line.split()
+        if not fields:
             continue
-        fields = line.split(" ")
-        fields = [f for f in fields if len(f.strip()) > 0]
-        assert len(fields) >= 2
+        if len(fields) < 2:
+            raise ValueError("Expected a value and a residue in '%s'" % line)
         value, letter = fields[:2]
-        assert letter not in value_dict, "Repeated amino acid " + line
+        if letter in value_dict:
+            raise ValueError("Repeated amino acid in '%s'" % line)
         value_dict[letter] = float(value)
     return value_dict
 
 
-"""
-Amino acids property tables copied from CRASP website
-"""
+def read_crasp_properties(path=CRASP_PROPERTIES_PATH):
+    """
+    Read every table of the CRASP amino-acid property file.
 
-hydropathy = parse_property_table("""
-1.80000 A ALA
--4.5000 R ARG
--3.5000 N ASN
--3.5000 D ASP
-2.50000 C CYS
--3.5000 Q GLN
--3.5000 E GLU
--0.4000 G GLY
--3.2000 H HIS
-4.50000 I ILE
-3.80000 L LEU
--3.9000 K LYS
-1.90000 M MET
-2.80000 F PHE
--1.6000 P PRO
--0.8000 S SER
--0.7000 T THR
--0.9000 W TRP
--1.3000 Y TYR
-4.20000 V VAL
-""")
+    The file is a sequence of blocks separated by blank lines. Each block is
+    a numbered header such as `19. Hydropathy (Kyte and Doolittle 1982)`, a
+    line with the literature citation, and one `value letter code` line per
+    canonical residue. Blocks without a numbered header, such as the source
+    URL on the first line, are skipped.
 
-volume = parse_property_table("""
-91.5000 A ALA
-202.0000 R ARG
-135.2000 N ASN
-124.5000 D ASP
-118.0000 C CYS
-161.1000 Q GLN
-155.1000 E GLU
-66.40000 G GLY
-167.3000 H HIS
-168.8000 I ILE
-167.9000 L LEU
-171.3000 K LYS
-170.8000 M MET
-203.4000 F PHE
-129.3000 P PRO
-99.10000 S SER
-122.1000 T THR
-237.6000 W TRP
-203.6000 Y TYR
-141.7000 V VAL
-""")
+    Parameters
+    ----------
+    path : str or path-like
+        Location of the property file; defaults to the copy shipped with
+        pepdata.
 
-polarity = parse_property_table("""
-0.0000 A ALA
-52.000 R ARG
-3.3800 N ASN
-40.700 D ASP
-1.4800 C CYS
-3.5300 Q GLN
-49.910 E GLU
-0.0000 G GLY
-51.600 H HIS
-0.1500 I ILE
-0.4500 L LEU
-49.500 K LYS
-1.4300 M MET
-0.3500 F PHE
-1.5800 P PRO
-1.6700 S SER
-1.6600 T THR
-2.1000 W TRP
-1.6100 Y TYR
-0.1300 V VAL
-""")
+    Returns
+    -------
+    dict of str to dict of str to float
+        Residue property dictionaries keyed by their header, written as
+        `"<number>. <title>"` with a single space after the period.
 
-pK_side_chain = parse_property_table("""
-0.0000 A ALA
-12.480 R ARG
-0.0000 N ASN
-3.6500 D ASP
-8.1800 C CYS
-0.0000 Q GLN
-4.2500 E GLU
-0.0000 G GLY
-6.0000 H HIS
-0.0000 I ILE
-0.0000 L LEU
-10.530 K LYS
-0.0000 M MET
-0.0000 F PHE
-0.0000 P PRO
-0.0000 S SER
-0.0000 T THR
-0.0000 W TRP
-10.700 Y TYR
-0.0000 V VAL
-""")
-
-prct_exposed_residues = parse_property_table("""
-15.0000 A ALA
-67.0000 R ARG
-49.0000 N ASN
-50.0000 D ASP
-5.00000 C CYS
-56.0000 Q GLN
-55.0000 E GLU
-10.0000 G GLY
-34.0000 H HIS
-13.0000 I ILE
-16.0000 L LEU
-85.0000 K LYS
-20.0000 M MET
-10.0000 F PHE
-45.0000 P PRO
-32.0000 S SER
-32.0000 T THR
-17.0000 W TRP
-41.0000 Y TYR
-14.0000 V VAL
-""")
-
-hydrophilicity = parse_property_table("""
--0.5000 A ALA
-3.00000 R ARG
-0.20000 N ASN
-3.00000 D ASP
--1.0000 C CYS
-0.20000 Q GLN
-3.00000 E GLU
-0.00000 G GLY
--0.5000 H HIS
--1.8000 I ILE
--1.8000 L LEU
-3.00000 K LYS
--1.3000 M MET
--2.5000 F PHE
-0.00000 P PRO
-0.30000 S SER
--0.4000 T THR
--3.4000 W TRP
--2.3000 Y TYR
--1.5000 V VAL
-""")
-
-accessible_surface_area = parse_property_table("""
-27.8000 A ALA
-94.7000 R ARG
-60.1000 N ASN
-60.6000 D ASP
-15.5000 C CYS
-68.7000 Q GLN
-68.2000 E GLU
-24.5000 G GLY
-50.7000 H HIS
-22.8000 I ILE
-27.6000 L LEU
-103.000 K LYS
-33.5000 M MET
-25.5000 F PHE
-51.5000 P PRO
-42.0000 S SER
-45.0000 T THR
-34.7000 W TRP
-55.2000 Y TYR
-23.7000 V VAL
-""")
-
-local_flexibility = parse_property_table("""
-705.42000 A ALA
-1484.2800 R ARG
-513.46010 N ASN
-34.960000 D ASP
-2412.5601 C CYS
-1087.8300 Q GLN
-1158.6600 E GLU
-33.180000 G GLY
-1637.1300 H HIS
-5979.3701 I ILE
-4985.7300 L LEU
-699.69000 K LYS
-4491.6602 M MET
-5203.8599 F PHE
-431.96000 P PRO
-174.76000 S SER
-601.88000 T THR
-6374.0698 W TRP
-4291.1001 Y TYR
-4474.4199 V VAL
-""")
-
-accessible_surface_area_folded = parse_property_table("""
-31.5000 A ALA
-93.8000 R ARG
-62.2000 N ASN
-60.9000 D ASP
-13.9000 C CYS
-74.0000 Q GLN
-72.3000 E GLU
-25.2000 G GLY
-46.7000 H HIS
-23.0000 I ILE
-29.0000 L LEU
-110.300 K LYS
-30.5000 M MET
-28.7000 F PHE
-53.7000 P PRO
-44.2000 S SER
-46.0000 T THR
-41.7000 W TRP
-59.1000 Y TYR
-23.5000 V VAL
-""")
-
-refractivity = parse_property_table("""
-4.34000 A ALA
-26.6600 R ARG
-13.2800 N ASN
-12.0000 D ASP
-35.7700 C CYS
-17.5600 Q GLN
-17.2600 E GLU
-0.00000 G GLY
-21.8100 H HIS
-19.0600 I ILE
-18.7800 L LEU
-21.2900 K LYS
-21.6400 M MET
-29.4000 F PHE
-10.9300 P PRO
-6.35000 S SER
-11.0100 T THR
-42.5300 W TRP
-31.5300 Y TYR
-13.9200 V VAL
-""")
+    Raises
+    ------
+    ValueError
+        If a header is repeated, a table is malformed, or a table does not
+        cover exactly the 20 canonical residues.
+    """
+    with open(path, "r") as f:
+        blocks = re.split(r"\n\s*\n", f.read())
+    properties = {}
+    for block in blocks:
+        lines = block.strip().splitlines()
+        header = re.fullmatch(r"(\d+)\.\s*(.+)", lines[0].strip()) if lines else None
+        if header is None:
+            continue
+        name = "%s. %s" % (header.group(1), header.group(2))
+        if name in properties:
+            raise ValueError("Repeated property table '%s'" % name)
+        table = parse_property_table("\n".join(lines[2:]))
+        if sorted(table) != sorted(canonical_amino_acid_letters):
+            raise ValueError(
+                "Property table '%s' does not cover the 20 canonical "
+                "amino acids: %s" % (name, "".join(table)))
+        properties[name] = table
+    return properties
 
 
-mass = parse_property_table("""
-70.079 A ALA
-156.188 R ARG
-114.104 N ASN
-115.089 D ASP
-103.144 C CYS
-128.131 Q GLN
-129.116 E GLU
-57.052 G GLY
-137.142 H HIS
-113.160 I ILE
-113.160 L LEU
-128.174 K LYS
-131.198 M MET
-147.177 F PHE
-97.177 P PRO
-87.078 S SER
-101.105 T THR
-186.213 W TRP
-163.170 Y TYR
-99.133 V VAL
-""")
+# All 36 tables of the CRASP property file, keyed by their numbered header
+crasp_properties = read_crasp_properties()
+
+# The names below are the CRASP tables this module has always exported.
+# Each comment gives the literature citation as written in the CRASP file.
+
+# Kyte and Doolittle, J. Mol. Biol. (1982) 157 105-132
+hydropathy = crasp_properties["19. Hydropathy (Kyte and Doolittle 1982)"]
+
+# Chothia, Annu. Rev. Biochem. (1984) 53 537-572
+volume = crasp_properties["7. Volume (Chothia 1984)"]
+
+# Ponnuswamy et al., Biochim.Biophys.Acta(1980) 623 301-316
+polarity = crasp_properties["32. Polarity (Ponnuswamy et al. 1980)"]
+
+# White A,Handler P,Smith EL,Hill RL,Lehman IR;Principles of Biochemistry;1978
+pK_side_chain = crasp_properties["35. pK of side chain (White et al., 1978)"]
+
+# Janin et al., J. Mol. Biol. (1978) 125 357-386
+prct_exposed_residues = crasp_properties[
+    "27. Percentage of exposed residues (Janin et al. 1978)"]
+
+# Hopp and Woods, Proc. Natl. Acad. Sci. USA (1981) 78 3824-3828
+hydrophilicity = crasp_properties["18. Hydrophilicity (Hopp and Woods 1981)"]
+
+# Janin et al., J. Mol. Biol. (1978) 125 357-386
+accessible_surface_area = crasp_properties[
+    "12. Average accessibility surface area (Janin et al. 1978)"]
+
+# Ragone et al., Prot. Engineering(1989) 2 497-504
+local_flexibility = crasp_properties["8. Local flexibility (Ragone et al. 1989)"]
+
+# Rose et al., Science (1975) 229 834-838
+accessible_surface_area_folded = crasp_properties[
+    "16. Average accessible surface area in folded proteins (Rose et al. 1985)"]
+
+# Jones, J.theor.Biol.(1975) 50 167-183
+refractivity = crasp_properties["22. Refractivity (Jones 1975)"]
+
+# Biemann, Meth.Enzimol. (1990) v.193, p.888
+mass = crasp_properties["33. Average isotopic mass (Biemann, 1990)"]
 
 ###
 # Values copied from:
