@@ -11,6 +11,8 @@ matrices, peptide features, then the IEDB assay loaders.
 
 ## Pairwise tables
 
+::: pepdata.pairwise_table
+
 ::: pepdata.blosum
 
 ::: pepdata.pmbec

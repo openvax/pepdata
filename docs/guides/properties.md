@@ -40,6 +40,44 @@ the source dictionaries do not add empty rows or columns. BLOSUM tables and
 the other pairwise matrices describe different quantities; consult the
 shipped matrix and its original source before interpreting coefficients.
 
+## Read a pairwise table from a file
+
+`read_pairwise_table` is the parser behind every shipped pairwise matrix. A
+table with a header line of column labels and a label at the start of each row
+needs only its path:
+
+```python
+from os.path import join
+
+from pepdata.pairwise_table import read_pairwise_table
+from pepdata.static_data import MATRIX_DIR
+
+blosum62 = read_pairwise_table(join(MATRIX_DIR, "BLOSUM62"), coeff_type=int)
+print(blosum62["W"]["W"])
+```
+
+```text
+11
+```
+
+The residue contact energy tables have neither a header nor row labels, so
+pass the residue order as `column_order`:
+
+```python
+contact = read_pairwise_table(
+    join(MATRIX_DIR, "helix_vs_coil.txt"),
+    column_order="ARNDCQEGHILKMFPSTWYV")
+print(contact["A"]["R"])
+```
+
+```text
+1.17
+```
+
+Malformed tables raise `ValueError`. The older `parse_blosum_table`,
+`read_pmbec_coefficients` and `parse_interaction_table` still work but emit a
+`DeprecationWarning` and will be removed in a future release.
+
 ## Use alphabets explicitly
 
 `canonical_amino_acid_letters` describes the standard residue alphabet.
