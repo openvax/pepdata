@@ -72,7 +72,7 @@ def get_mhc_class(
 
 
 def get_mhc_assay(
-        df : pd.Series, 
+        df : pd.DataFrame, 
         group_candidates : list[str] = ASSAY_GROUP_CANDIDATES, 
         column_candidates : list[str] =["method"]) -> pd.Series | None:
     return find(df, group_candidates, column_candidates)

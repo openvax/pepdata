@@ -17,7 +17,7 @@ import xml.etree.ElementTree
 from .common import cache
 
 ALLELE_XML_FILENAME = "MhcAlleleNames.xml"
-ALLELE_XML_URL = "http://www.iedb.org/doc/MhcAlleleNameList.zip"
+ALLELE_XML_URL = "https://www.iedb.org/doc/MhcAlleleNameList.zip"
 ALLELE_XML_DECOMPRESS = True
 
 def local_path(force_download=False):

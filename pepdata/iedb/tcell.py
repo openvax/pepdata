@@ -27,13 +27,11 @@ from .columns import (
     get_assay_method,
     get_host_name,
     get_mhc_allele,
-    get_mhc_class,
     get_epitope_name,
-    
 )
 
 TCELL_COMPACT_FILENAME = "tcell_full.csv"
-TCELL_COMPACT_URL = "http://www.iedb.org/downloader.php?file_name=doc/tcell_full_v3.zip"
+TCELL_COMPACT_URL = "https://www.iedb.org/downloader.php?file_name=doc/tcell_full_v3.zip"
 TCELL_COMPACT_DECOMPRESS = True
 
 def download(force=False):
@@ -118,7 +116,6 @@ def load_dataframe(
             encoding="latin-1")
     
     mhc = get_mhc_allele(df)
-    mhc_class_series = get_mhc_class(df)
     epitopes = get_epitope_name(df)
     organism = get_host_name(df)
     assay_method_series = get_assay_method(df)
