@@ -23,7 +23,8 @@ def make_count_vectorizer(reduced_alphabet, max_ngram):
     if reduced_alphabet is None:
         preprocessor = None
     else:
-        preprocessor = lambda s: "".join([reduced_alphabet[si] for si in s])
+        def preprocessor(s):
+            return "".join([reduced_alphabet[si] for si in s])
 
     return CountVectorizer(
         analyzer='char',

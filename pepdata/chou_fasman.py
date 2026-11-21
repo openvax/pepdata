@@ -10,7 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .amino_acid_alphabet import amino_acid_name_indices
+from .amino_acid_alphabet import amino_acid_name_indices, index_to_letter
 
 # Chou-Fasman of structural properties from
 # http://prowl.rockefeller.edu/aainfo/chou.htm
@@ -55,7 +55,7 @@ def parse_chou_fasman(table):
             name = fields[0]
 
         assert name in amino_acid_name_indices, "Invalid amino acid name %s" % name
-        letter = amino_acid_name_indices[name]
+        letter = index_to_letter(amino_acid_name_indices[name])
         alpha = int(fields[1])
         beta = int(fields[2])
         turn = int(fields[3])
