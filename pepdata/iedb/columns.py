@@ -71,17 +71,10 @@ def get_mhc_class(
     return find(df, group_candidates, column_candidates)
 
 
-def get_mhc_assay(
-        df : pd.DataFrame, 
-        group_candidates : list[str] = ASSAY_GROUP_CANDIDATES, 
-        column_candidates : list[str] =["method"]) -> pd.Series | None:
-    return find(df, group_candidates, column_candidates)
-
-
 def get_epitope_name(
         df : pd.DataFrame, 
         group_candidates : list[str] = EPITOPE_GROUP_CANDIDATES, 
-        column_candidates : list[str] =["name"]) -> pd.Series | None:
+        column_candidates : list[str] = ["Name", "Description"]) -> pd.Series | None:
     return find(df, group_candidates, column_candidates)
 
 

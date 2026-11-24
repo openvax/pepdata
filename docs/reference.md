@@ -25,6 +25,8 @@ matrices, peptide features, then the IEDB assay loaders.
 
 ## Assay tables
 
+::: pepdata.iedb.common
+
 ::: pepdata.iedb.mhc
 
 ::: pepdata.iedb.tcell
