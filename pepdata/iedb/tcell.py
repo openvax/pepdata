@@ -12,187 +12,114 @@ from __future__ import annotations
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-import logging
-import os
-from pathlib import Path
-
-import numpy as np
 import pandas as pd
 
-
-from .alleles import load_alleles_dict
-from .common import  bad_amino_acids, cache
-from .columns import (
-    get_assay_method,
-    get_host_name,
-    get_mhc_allele,
-    get_epitope_name,
+from .common import (
+    cache,
+    delete_export,
+    download_export,
+    filter_assay_table,
+    local_export_path,
+    read_assay_csv,
 )
 
 TCELL_COMPACT_FILENAME = "tcell_full.csv"
 TCELL_COMPACT_URL = "https://www.iedb.org/downloader.php?file_name=doc/tcell_full_v3.zip"
 TCELL_COMPACT_DECOMPRESS = True
 
-def download(force=False):
-    return cache.fetch(
+
+def download(force: bool = False) -> str:
+    return download_export(
         filename=TCELL_COMPACT_FILENAME,
         url=TCELL_COMPACT_URL,
         decompress=TCELL_COMPACT_DECOMPRESS,
-        force=force)
+        force=force,
+        data_cache=cache,
+    )
 
-def local_path(auto_download=True):
-    path = cache.local_path(
+
+def local_path(auto_download: bool = True) -> str:
+    return local_export_path(
         filename=TCELL_COMPACT_FILENAME,
         url=TCELL_COMPACT_URL,
-        decompress=TCELL_COMPACT_DECOMPRESS)
-    if not os.path.exists(path):
-        if auto_download:
-            return download()
-        raise ValueError(
-            ("Local file %s does not exist, call"
-            " pepdata.iedb.tcell.download()") % path)
-    return path
+        decompress=TCELL_COMPACT_DECOMPRESS,
+        auto_download=auto_download,
+        download_instruction="pepdata.iedb.tcell.download()",
+        data_cache=cache,
+    )
 
-def delete():
+
+def delete() -> None:
     """Remove the local assay export without downloading; missing files are ignored."""
-    path = cache.local_path(
+    delete_export(
         filename=TCELL_COMPACT_FILENAME,
         url=TCELL_COMPACT_URL,
-        decompress=TCELL_COMPACT_DECOMPRESS)
-    Path(path).unlink(missing_ok=True)
+        decompress=TCELL_COMPACT_DECOMPRESS,
+        data_cache=cache,
+    )
+
 
 def load_dataframe(
-        mhc_class : str | None = None,  # 1, 2, or None for neither
-        hla : str | None  = None,
-        exclude_hla : str | None  = None,
-        human_only : bool =False,
-        peptide_length : int | None = None,
-        assay_method : str | None = None,
-        only_standard_amino_acids : bool = True,
-        reduced_alphabet : dict | None = None,  # 20 letter AA strings -> simpler alphabet
-        nrows : int | None = None):
+        mhc_class: int | str | None = None,
+        hla: str | None = None,
+        exclude_hla: str | None = None,
+        human_only: bool = False,
+        peptide_length: int | None = None,
+        assay_method: str | None = None,
+        only_standard_amino_acids: bool = True,
+        reduced_alphabet: dict | None = None,
+        nrows: int | None = None,
+        warn_bad_lines: bool = True) -> pd.DataFrame:
     """
-    Load IEDB T-cell data without aggregating multiple entries for same epitope
+    Load IEDB T-cell data without aggregating multiple entries for the same epitope.
 
     Parameters
     ----------
-    mhc_class: {None, 1, 2}
-        Restrict to MHC Class I or Class II (or None for neither)
+    mhc_class : {1, 2, "I", "II", None}, optional
+        Restrict to MHC Class I or Class II using the table's MHC class column.
 
-    hla: regex pattern, optional
-        Restrict results to specific MHC used in assay
+    hla : str, optional
+        Restrict results to specific MHC alleles matching this regex pattern.
 
-    exclude_hla: regex pattern, optional
-        Exclude certain MHC allele patterns 
+    exclude_hla : str, optional
+        Regex pattern to exclude matching MHC alleles.
 
-    human_only: bool
-        Restrict to human samples (default False)
+    human_only : bool, default False
+        Restrict to rows whose host organism starts with ``"Homo sapiens"``.
 
-    peptide_length: int, optional
-        Restrict epitopes to amino acid strings of given length
+    peptide_length : int, optional
+        Restrict epitopes to amino acid strings of given positive length.
 
-    assay_method string, optional
-        Only collect results with assay methods containing the given string
+    assay_method : str, optional
+        Regex pattern limiting results to matching assay methods (null values
+        do not match).
 
-    only_standard_amino_acids : bool, optional
+    only_standard_amino_acids : bool, default True
         Drop sequences which use non-standard amino acids, anything outside
-        the core 20, such as X or U (default = True)
+        the core 20, such as X or U.
 
-    reduced_alphabet: dictionary, optional
-        Remap amino acid letters to some other alphabet
+    reduced_alphabet : dict, optional
+        Retained for backwards signature compatibility (currently unused).
 
-    nrows: int, optional
-        Don't load the full IEDB dataset but instead read only the first nrows
+    nrows : int, optional
+        Don't load the full IEDB dataset but instead read only the first nrows.
+
+    warn_bad_lines : bool, default True
+        When True, emit warnings from pandas on malformed CSV lines; when False,
+        skip them silently.
     """
-    path = local_path()
-    df = pd.read_csv(
-            path,
-            header=[0, 1],
-            skipinitialspace=True,
-            nrows=nrows,
-            low_memory=False,
-            on_bad_lines='warn',
-            encoding="latin-1")
-    
-    mhc = get_mhc_allele(df)
-    epitopes = get_epitope_name(df)
-    organism = get_host_name(df)
-    assay_method_series = get_assay_method(df)
-
-    if epitopes is None:
-        raise ValueError(
-            "Could not find epitope name column in IEDB T-cell data. "
-            f"Available columns: {list(df.columns)}"
-        )
-
-    # Sometimes the IEDB seems to put in an extra comma in the
-    # header line, which creates an unnamed column of NaNs.
-    # To deal with this, drop any columns which are all NaN
-    df = df.dropna(axis=1, how="all")
-
-    n = len(df)
-
-    null_epitope_seq = epitopes.isnull()
-    n_null = null_epitope_seq.sum()
-
-    if n_null > 0:
-        logging.info("Dropping %d null sequences", n_null)
-
-    mask = ~null_epitope_seq
-
-    if only_standard_amino_acids:
-        # if have rare or unknown amino acids, drop the sequence
-        bad_epitope_seq = \
-            epitopes.str.contains(bad_amino_acids, na=False).astype("bool")
-        n_bad = bad_epitope_seq.sum()
-        if n_bad > 0:
-            logging.info("Dropping %d bad sequences", n_bad)
-
-        mask &= ~bad_epitope_seq
-
-    if human_only:
-        mask &= organism.str.startswith('Homo sapiens', na=False).astype('bool')
-
-
-    if mhc_class is not None:
-        # since MHC classes can be specified as either strings ("I") or integers
-        # standard them to be strings
-        if mhc_class == 1:
-            mhc_class = "I"
-        elif mhc_class == 2:
-            mhc_class = "II"
-        if mhc_class not in {"I", "II"}:
-            raise ValueError("Invalid MHC class: %s" % mhc_class)
-        allele_dict = load_alleles_dict()
-        mhc_class_mask = [False] * len(df)
-        for i, allele_name in enumerate(mhc):
-            allele_object = allele_dict.get(allele_name)
-            if allele_object and allele_object.mhc_class == mhc_class:
-                mhc_class_mask[i] = True
-        mask &= np.array(mhc_class_mask)
-
-    # Match known alleles such as "HLA-A*02:01",
-    # broader groupings such as "HLA-A2"
-    # and unknown alleles of the MHC-1 listed either as
-    #  "HLA-Class I,allele undetermined"
-    #  or
-    #  "Class I,allele undetermined"
-
-    if hla:
-        mask &= mhc.str.contains(hla, na=False)
-
-    if exclude_hla:
-        mask &= ~(mhc.str.contains(exclude_hla, na=False))
-
-    if assay_method is not None and assay_method_series is not None:
-        mask &= assay_method_series.str.contains(assay_method, na=False)
-
-    if peptide_length:
-        assert peptide_length > 0
-        mask &= epitopes.str.len() == peptide_length
-
-    df = df[mask]
-
-    logging.info("Returning %d / %d entries after filtering", len(df), n)
-    return df
+    df = read_assay_csv(
+        local_path(),
+        nrows=nrows,
+        warn_bad_lines=warn_bad_lines,
+    )
+    return filter_assay_table(
+        df,
+        mhc_class=mhc_class,
+        hla=hla,
+        exclude_hla=exclude_hla,
+        human_only=human_only,
+        peptide_length=peptide_length,
+        assay_method=assay_method,
+        only_standard_amino_acids=only_standard_amino_acids,
+    )

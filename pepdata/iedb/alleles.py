@@ -11,10 +11,9 @@
 # limitations under the License.
 
 from collections import namedtuple
-from pathlib import Path
 import xml.etree.ElementTree
 
-from .common import cache
+from .common import cache, delete_export, download_export
 
 ALLELE_XML_FILENAME = "MhcAlleleNames.xml"
 ALLELE_XML_URL = "https://www.iedb.org/doc/MhcAlleleNameList.zip"
@@ -22,19 +21,22 @@ ALLELE_XML_DECOMPRESS = True
 
 def local_path(force_download=False):
     """Downloads allele database from IEDB, returns local path to XML file."""
-    return cache.fetch(
+    return download_export(
         filename=ALLELE_XML_FILENAME,
         url=ALLELE_XML_URL,
         decompress=ALLELE_XML_DECOMPRESS,
-        force=force_download)
+        force=force_download,
+        data_cache=cache,
+    )
 
 def delete():
     """Remove the local XML export; missing files are ignored."""
-    path = cache.local_path(
+    delete_export(
         filename=ALLELE_XML_FILENAME,
         url=ALLELE_XML_URL,
-        decompress=ALLELE_XML_DECOMPRESS)
-    Path(path).unlink(missing_ok=True)
+        decompress=ALLELE_XML_DECOMPRESS,
+        data_cache=cache,
+    )
 
 Allele = namedtuple("Allele", [
     "name",

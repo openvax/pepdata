@@ -12,156 +12,111 @@ from __future__ import annotations
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
-import os
-from pathlib import Path
-
 import pandas as pd
 
-from .common import bad_amino_acids, cache
+from .common import (
+    cache,
+    delete_export,
+    download_export,
+    filter_assay_table,
+    local_export_path,
+    read_assay_csv,
+)
 
 
 MHC_URL = "https://www.iedb.org/downloader.php?file_name=doc/mhc_ligand_full_single_file.zip"
 MHC_LOCAL_FILENAME = "mhc_ligand_full.csv"
 MHC_DECOMPRESS = True
 
-def download(force=False):
-    return cache.fetch(
+
+def download(force: bool = False) -> str:
+    return download_export(
         filename=MHC_LOCAL_FILENAME,
         url=MHC_URL,
         decompress=MHC_DECOMPRESS,
-        force=force)
+        force=force,
+        data_cache=cache,
+    )
 
-def local_path(auto_download=True):
-    path = cache.local_path(
+
+def local_path(auto_download: bool = True) -> str:
+    return local_export_path(
         filename=MHC_LOCAL_FILENAME,
         url=MHC_URL,
-        decompress=MHC_DECOMPRESS)
-    if not os.path.exists(path):
-        if auto_download:
-            return download()
-        raise ValueError(
-            ("MHC data file %s does not exist locally,"
-             " call pepdata.iedb.mhc.download() to get a copy from IEDB") % path)
-    return path
+        decompress=MHC_DECOMPRESS,
+        auto_download=auto_download,
+        download_instruction="pepdata.iedb.mhc.download()",
+        data_cache=cache,
+    )
 
-def delete():
+
+def delete() -> None:
     """Remove the local assay export without downloading; missing files are ignored."""
-    path = cache.local_path(
+    delete_export(
         filename=MHC_LOCAL_FILENAME,
         url=MHC_URL,
-        decompress=MHC_DECOMPRESS)
-    Path(path).unlink(missing_ok=True)
+        decompress=MHC_DECOMPRESS,
+        data_cache=cache,
+    )
+
 
 def load_dataframe(
-        mhc_class : int | None = None,  # 1, 2, or None for neither
-        hla : str | None = None,
-        exclude_hla : str | None = None,
-        human_only : bool  = False,
-        peptide_length : int | None = None,
-        assay_method : str | None = None,
-        only_standard_amino_acids : bool = True,
-        warn_bad_lines : bool  = True,
-        nrows : int | None = None):
+        mhc_class: int | str | None = None,
+        hla: str | None = None,
+        exclude_hla: str | None = None,
+        human_only: bool = False,
+        peptide_length: int | None = None,
+        assay_method: str | None = None,
+        only_standard_amino_acids: bool = True,
+        warn_bad_lines: bool = True,
+        nrows: int | None = None) -> pd.DataFrame:
     """
-    Load IEDB MHC data without aggregating multiple entries for the same epitope
+    Load IEDB MHC data without aggregating multiple entries for the same epitope.
 
     Parameters
     ----------
-    mhc_class 
-        Restrict to MHC Class I or Class II (or None for neither)
+    mhc_class : {1, 2, "I", "II", None}, optional
+        Restrict to MHC Class I or Class II using the table's MHC class column.
 
-    hla 
-        Restrict results to specific HLA type used in assay (regex pattern)
+    hla : str, optional
+        Restrict results to specific MHC alleles matching this regex pattern.
 
-    exclude_hla 
-        Regex pattern to exclude certain HLA types
+    exclude_hla : str, optional
+        Regex pattern to exclude matching MHC alleles.
 
-    human_only
-        Restrict to human samples (default False)
+    human_only : bool, default False
+        Restrict to rows whose host organism starts with ``"Homo sapiens"``.
 
-    peptide_length
-        Restrict epitopes to amino acid strings of given length
+    peptide_length : int, optional
+        Restrict epitopes to amino acid strings of given positive length.
 
-    assay_method 
-        Limit to assay methods which contain the given string
+    assay_method : str, optional
+        Regex pattern limiting results to matching assay methods (null values
+        do not match).
 
-    only_standard_amino_acids
+    only_standard_amino_acids : bool, default True
         Drop sequences which use non-standard amino acids, anything outside
-        the core 20, such as X or U (default = True)
+        the core 20, such as X or U.
 
-    warn_bad_lines 
-        The full MHC ligand dataset seems to contain several dozen lines with
-        too many fields. This currently results in a lot of warning messages
-        from Pandas, which you can turn off with this option (default = True)
+    warn_bad_lines : bool, default True
+        The full MHC ligand dataset can contain lines with too many fields.
+        When True, emit warnings from pandas; when False, skip them silently.
 
-    nrows
-        Don't load the full IEDB dataset but instead read only the first nrows
+    nrows : int, optional
+        Don't load the full IEDB dataset but instead read only the first nrows.
     """
-    df = pd.read_csv(
-            local_path(),
-            header=[0, 1],
-            skipinitialspace=True,
-            nrows=nrows,
-            low_memory=False,
-            on_bad_lines='warn' if warn_bad_lines else 'skip',
-            encoding="latin-1")
-
-    # Sometimes the IEDB seems to put in an extra comma in the
-    # header line, which creates an unnamed column of NaNs.
-    # To deal with this, drop any columns which are all NaN
-    df = df.dropna(axis=1, how="all")
-
-    n = len(df)
-
-    mhc_group_key = "MHC Restriction"
-    epitope_group_key = "Epitope"
-    epitope_column_key = (epitope_group_key, "Name")
-
-    mhc_allele_column_key = (mhc_group_key, "Name")
-
-    epitopes = df[epitope_column_key] = df[epitope_column_key].str.upper()
-
-    null_epitope_seq = epitopes.isnull()
-    n_null = null_epitope_seq.sum()
-    if n_null > 0:
-        logging.info("Dropping %d null sequences", n_null)
-
-    mask = ~null_epitope_seq
-
-    if only_standard_amino_acids:
-        # if have rare or unknown amino acids, drop the sequence
-        bad_epitope_seq = \
-            epitopes.str.contains(bad_amino_acids, na=False).astype("bool")
-        n_bad = bad_epitope_seq.sum()
-        if n_bad > 0:
-            logging.info("Dropping %d bad sequences", n_bad)
-
-        mask &= ~bad_epitope_seq
-
-    if human_only:
-        mask &= df[mhc_allele_column_key].str.startswith("HLA").astype("bool")
-
-    if mhc_class == 1:
-        mask &= df[mhc_group_key]["Class"] == "I"
-    elif mhc_class == 2:
-        mask &= df[mhc_group_key]["Class"] == "II"
-
-    if hla:
-        mask &= df[mhc_allele_column_key].str.contains(hla, na=False)
-
-    if exclude_hla:
-        mask &= ~(df[mhc_allele_column_key].str.contains(exclude_hla, na=False))
-
-    if assay_method:
-        mask &= df["Assay"]["Method"].str.contains(assay_method)
-
-    if peptide_length:
-        assert peptide_length > 0
-        mask &= df[epitope_column_key].str.len() == peptide_length
-
-    df = df[mask].copy()
-
-    logging.info("Returning %d / %d entries after filtering", len(df), n)
-
-    return df
+    df = read_assay_csv(
+        local_path(),
+        nrows=nrows,
+        warn_bad_lines=warn_bad_lines,
+    )
+    return filter_assay_table(
+        df,
+        mhc_class=mhc_class,
+        hla=hla,
+        exclude_hla=exclude_hla,
+        human_only=human_only,
+        peptide_length=peptide_length,
+        assay_method=assay_method,
+        only_standard_amino_acids=only_standard_amino_acids,
+    )
