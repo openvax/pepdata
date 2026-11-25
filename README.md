@@ -8,8 +8,10 @@ pepdata ships amino-acid property tables and pairwise residue matrices
 (BLOSUM, PMBEC, contact energies), turns peptide sequences into n-gram feature
 vectors, and loads MHC-binding and T-cell assay tables from the
 [IEDB](https://www.iedb.org/). It is the [OpenVax](https://github.com/openvax)
-library for peptide-level reference data. It does not predict MHC binding; for
-that, see [mhctools](https://github.com/openvax/mhctools) and
+library for peptide-level reference data and is the upstream source of amino
+acid tables and substitution matrices for [weirdo](https://github.com/pirl-unc/weirdo).
+It does not predict MHC binding; for that, see
+[mhctools](https://github.com/openvax/mhctools) and
 [mhcflurry](https://github.com/openvax/mhcflurry).
 
 ## Install
