@@ -44,8 +44,17 @@ http://bio.math-inf.uni-greifswald.de/viscose/html/alphabets.html
 # hydrophilic vs. hydrophobic
 hp2 = dict_from_list(["AGTSNQDEHRKP", "CMFILVWY"])
 
+# Murphy reduced alphabets (groupings derived from murphy10 splits/merges)
+murphy8 = dict_from_list([
+    "LVIM", "C", "AG", "STP", "FYW", "EDNQ", "KR", "H"
+])
+
 murphy10 = dict_from_list([
     "LVIM", "C", "A", "G", "ST", "P", "FYW", "EDNQ", "KR", "H"
+])
+
+murphy15 = dict_from_list([
+    "LIV", "M", "C", "A", "G", "S", "T", "P", "FY", "W", "ED", "NQ", "K", "R", "H"
 ])
 
 alex6 = dict_from_list(["C", "G", "P", "FYW", "AVILM", "STNQRHKDE"])
@@ -53,3 +62,16 @@ alex6 = dict_from_list(["C", "G", "P", "FYW", "AVILM", "STNQRHKDE"])
 aromatic2 = dict_from_list(["FHWY", "ADKERNTSQLIVMCGP"])
 
 hp_vs_aromatic = dict_from_list(["H", "CMILV", "FWY", "ADKERNTSQGP"])
+
+ALPHABETS = {
+    "gbmr4": gbmr4,
+    "sdm12": sdm12,
+    "hsdm17": hsdm17,
+    "hp2": hp2,
+    "murphy8": murphy8,
+    "murphy10": murphy10,
+    "murphy15": murphy15,
+    "alex6": alex6,
+    "aromatic2": aromatic2,
+    "hp_vs_aromatic": hp_vs_aromatic,
+}
